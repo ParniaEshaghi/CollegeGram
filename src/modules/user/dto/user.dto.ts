@@ -1,0 +1,9 @@
+import { z } from "zod";
+
+export const singUpDto = z.object({
+    username: z.string().min(1),
+    email: z.string().email(),
+    password: z.string().min(1),
+});
+
+export type SignUpDto = z.infer<typeof singUpDto>;
