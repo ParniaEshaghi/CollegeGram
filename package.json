@@ -4,7 +4,9 @@
   "description": "git test",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node ./src/main.ts",
+    "test": "jest --testMatch **/tests/unit/**/*.spec.ts",
+    "test:e2e": "jest --testMatch **/tests/e2e/**/*.spec.ts"
   },
   "keywords": [],
   "author": "",
