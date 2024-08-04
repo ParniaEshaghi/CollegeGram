@@ -49,13 +49,7 @@ export class UserEntity {
     following_count!: number;
 
     @Column()
-    post_count!: number;
-
-    @CreateDateColumn()
-    createdAt!: Date;
-
-    @UpdateDateColumn()
-    updatedAt!: Date;
+    tokens!: string[];
 
     @BeforeInsert()
     addId() {
