@@ -6,9 +6,6 @@ export interface User {
     firstName: string;
     lastName: string;
     profileStatus: "public" | "private";
-    follower_count: number;
-    following_count: number;
-    posts_count: number;
     bio: string;
     follower_count: number;
     following_count: number;
