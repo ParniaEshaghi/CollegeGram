@@ -7,5 +7,8 @@ export interface User {
     lastName: string;
     profileStatus: "public" | "private";
     bio: string;
+    follower_count: number;
+    following_count: number;
+    post_count: number;
     tokens: string[];
 }
