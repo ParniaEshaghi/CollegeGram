@@ -49,8 +49,8 @@ export class UserEntity {
     following_count!: number;
 
     @Column()
-    posts_count!: number;
+    post_count!: number;
 
-    @Column()
+    @Column("varchar", { array: true })
     tokens!: string[];
 }
