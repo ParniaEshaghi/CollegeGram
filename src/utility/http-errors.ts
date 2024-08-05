@@ -6,12 +6,12 @@ export class HttpError extends Error {
 
 export class ForbiddenError extends HttpError {
     constructor() {
-        super(403, 'Forbidden');
+        super(403, "Forbidden");
     }
 }
 
 export class NotFoundError extends HttpError {
     constructor() {
-        super(404, 'Not Found');
+        super(404, "Not Found");
     }
 }

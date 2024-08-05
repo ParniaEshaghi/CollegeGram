@@ -9,10 +9,6 @@ export class UserRepository {
         this.userRepo = appDataSource.getRepository(UserEntity);
     }
 
-    public create(user: User): Promise<User> {
-        return this.userRepo.save(user);
-    }
-
     public findByUsername(username: string): Promise<User | null> {
         return this.userRepo.findOne({
             where: { username }
@@ -23,5 +19,16 @@ export class UserRepository {
         return this.userRepo.findOne({
             where: { email }
         });
+    }
+
+    public create(user: User): Promise<User> {
+        return this.userRepo.save(user);
+    }
+
+    public async update(user: User) {
+        await this.userRepo.update(
+            { username: user.username },
+            { tokens: user.tokens }
+        );
     }
 }
