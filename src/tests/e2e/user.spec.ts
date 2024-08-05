@@ -19,16 +19,45 @@ describe('User route test suite', () => {
 
     describe('Signing up', () => {
         it("should create a user in database upon signup", async () => {
-            const user = await request(app).post("/user/signup").send({ username: "test", email: "test@gmail.com", password: "test" }).expect(200);
-            console.log(user)
+            await request(app).post("/user/signup").send({ username: "test", email: "test@gmail.com", password: "test" }).expect(200);
         });
 
         it("should fail if username or password are already in use", async () => {
-            const user = await request(app).post("/user/signup").send({ username: "test", email: "test@gmail.com", password: "test" }).expect(403);
+            await request(app).post("/user/signup").send({ username: "test", email: "test@gmail.com", password: "test" }).expect(403);
         });
 
         it("should fail if a field is not provided", async () => {
-            const user = await request(app).post("/user/signup").send({ username: "", email: "test@gmail.com", password: "test" }).expect(400);
+            await request(app).post("/user/signup").send({ username: "", email: "test@gmail.com", password: "test" }).expect(400);
+        });
+    });
+
+    describe('Signing in', () => {
+        it("should sign in with valid username", async () => {
+            const response = await request(app).post("/user/signin").send({credential: "test", password: "test" }).expect(200);
+            const cookies = response.headers['set-cookie'];
+            expect(cookies).toBeDefined();
+        });
+
+        it("should sign in with valid email", async () => {
+            const response = await request(app).post("/user/signin").send({credential: "test@gmail.com", password: "test" }).expect(200);
+            const cookies = response.headers['set-cookie'];
+            expect(cookies).toBeDefined();
+        });
+
+        it("should fail to login if username is not valid", async () => {
+            await request(app).post("/user/signin").send({credential: "testwrong", password: "test" }).expect(401);
+        });
+
+        it("should fail to login if email is not valid", async () => {
+            await request(app).post("/user/signin").send({credential: "testwrong@gmail.com", password: "test" }).expect(401);
+        });
+
+        it("should fail to login if password is not valid", async () => {
+            await request(app).post("/user/signin").send({credential: "test", password: "testwrong" }).expect(401);
+        });
+
+        it("should fail if username or password in empty", async () => {
+            await request(app).post("/user/signin").send({credential: "", password: "test" }).expect(400);
         });
     });
 });
