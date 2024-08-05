@@ -12,7 +12,7 @@ import { v4 } from "uuid";
 
 @Entity("users")
 export class UserEntity {
-    @PrimaryColumn("uuid")
+    @PrimaryGeneratedColumn("uuid")
     id!: string;
 
     @Column({ unique: true })
@@ -51,14 +51,6 @@ export class UserEntity {
     @Column()
     post_count!: number;
 
-    @CreateDateColumn()
-    createdAt!: Date;
-
-    @UpdateDateColumn()
-    updatedAt!: Date;
-
-    @BeforeInsert()
-    addId() {
-        this.id = v4();
-    }
+    @Column("varchar", { array: true })
+    tokens!: string[];
 }

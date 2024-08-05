@@ -10,4 +10,5 @@ export interface User {
     follower_count: number;
     following_count: number;
     post_count: number;
+    tokens: string[];
 }
