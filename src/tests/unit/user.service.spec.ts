@@ -13,78 +13,54 @@ describe("User service test suite", () => {
         const dataSource = await AppDataSource.initialize();
         userRepo = new UserRepository(dataSource);
         userService = new UserService(userRepo);
-
+        userService.createUser({ username: "mahdi", email: "mahdi@gmail.com", password: "1234mm" })
     });
-    // afterEach(async () => {
-    //     await AppDataSource.destroy();
-    //     await AppDataSource.dropDatabase();
-    // });
+    afterAll(async () => {
+        await AppDataSource.dropDatabase();
+        await AppDataSource.destroy();
+    });
+
+    describe("Signup test", () => {
+        it("should sign up a user", async () => {
+            const user = await userService.createUser({ username: "test", email: "test@gmail.com", password: "test" });
+            expect(user.email).toBe("test@gmail.com");
+            expect(user.username).toBe("test");
+            expect(await bcrypt.compare("test", await hashGenerator("test"))).toBe(true)
+        })
+
+        it("should fail to sign up if email or username is already in use", () => {
+            expect(userService.createUser({ username: "test", email: "test@gmail.com", password: "test" })).rejects.toThrow(HttpError);
+        })
+    })
 
     describe("login test", () => {
         it("should login with valid username", async () => {
-            const result = await userService.login("mahdi", "1234mm");
-            expect(result.message).toBe("Login successfull");
+            const response = await userService.login("mahdi", "1234mm");
+            expect(response.message).toBe("Login successfull");
         });
 
-        it("sould login with valid email", async () => {
-            const result = await userService.login("test@gmail.com", "1234mm");
-            expect(result.message).toBe("Login successfull");
+        it("should login with valid email", async () => {
+            const response = await userService.login("mahdi@gmail.com", "1234mm");
+            expect(response.message).toBe("Login successfull");
         });
+
         it("should fail if password is not valid", async () => {
-            try {
-                await userService.login("test@gmail.com", "111111");
-            } catch (e) {
-                expect(e).toHaveProperty(
-                    "message",
-                    "Invalid credential or password"
-                );
-                expect(e).toHaveProperty("status", 401);
-            }
+            expect(userService.login("test@gmail.com", "11111")).rejects.toThrow(new HttpError(401, "Invalid credential or password"))
         });
+
         it("should fail if username is not valid", async () => {
-            try {
-                await userService.login("testwrongusername", "111111");
-            } catch (e) {
-                expect(e).toHaveProperty(
-                    "message",
-                    "Invalid credential or password"
-                );
-                expect(e).toHaveProperty("status", 401);
-            }
+            expect(userService.login("testwrongusername", "11111")).rejects.toThrow(new HttpError(401, "Invalid credential or password"))
         });
+
         it("should fail if email is not valid", async () => {
-            try {
-                await userService.login("testwrong@gmail.com", "111111");
-            } catch (e) {
-                expect(e).toHaveProperty(
-                    "message",
-                    "Invalid credential or password"
-                );
-                expect(e).toHaveProperty("status", 401);
-            }
+            expect(userService.login("testwrong@gmail.com", "11111")).rejects.toThrow(new HttpError(401, "Invalid credential or password"))
         });
 
         it("should fail if username or password in empty", async () => {
-            try {
-                await userService.login("", "");
-            } catch (e) {
-                expect(e).toHaveProperty(
-                    "message",
-                    "Credential and password are required"
-                );
-                expect(e).toHaveProperty("status", 400);
-            }
+            expect(userService.login("", "")).rejects.toThrow(new HttpError(400, "Credential and password are required"))
+
         });
     });
-    it("should sign up a user", async () => {
-        const user = await userService.createUser({ username: "test", email: "test@gmail.com", password: "test" });
-        expect(user.email).toBe("test@gmail.com");
-        expect(user.username).toBe("test");
-        expect(await bcrypt.compare("test", await hashGenerator("test"))).toBe(true)
-    })
 
-    it("should fail to sign up if email or username is already in use", () => {
-        expect(userService.createUser({ username: "test", email: "test@gmail.com", password: "test" })).rejects.toThrow(HttpError);
-    })
 });
 

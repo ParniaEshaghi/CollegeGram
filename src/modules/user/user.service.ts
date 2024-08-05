@@ -6,7 +6,6 @@ import { UserRepository } from "./user.repository";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { hashGenerator } from "../../utility/hash-generator";
 
 export class UserService {
     constructor(private userRepo: UserRepository) {}
@@ -53,8 +52,6 @@ export class UserService {
             throw new HttpError(401, "Invalid credential or password");
         }
 
-        const hashedPassword = await hashGenerator(password);
-
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
             throw new HttpError(401, "Invalid credential or password");
@@ -70,16 +67,16 @@ export class UserService {
         );
 
         user.tokens = user.tokens.concat(token);
-        this.userRepo.updateUser(user);
+        this.userRepo.update(user);
 
         return { message: "Login successfull", token: token };
     }
 
     public async getUserByUsername(username: string) {
-        return await this.userRepo.getUserByUsername(username);
+        return await this.userRepo.findByUsername(username);
     }
 
     public async getUserByEmail(credential: string) {
-        return await this.userRepo.getUserByEmail(credential);
+        return await this.userRepo.findByEmail(credential);
     }
 }
