@@ -46,7 +46,9 @@ export class UserService {
     public async login(dto: LoginDto) {
         const { success, error } = z.string().email().safeParse(dto.credential);
 
-        const user = success ? await this.getUserByEmail(dto.credential) : await this.getUserByUsername(dto.credential);
+        const user = success
+            ? await this.getUserByEmail(dto.credential)
+            : await this.getUserByUsername(dto.credential);
 
         // if (success) {
         //     const user = await this.getUserByEmail(dto.credential);
@@ -63,13 +65,11 @@ export class UserService {
             throw new HttpError(401, "Invalid credential or password");
         }
 
-        const expiry = dto.keepMeSignedIn ? '7d' : '8h';
+        const expiry = dto.keepMeSignedIn ? "7d" : "8h";
 
-        const token = jwt.sign(
-            { username: user.username },
-            "10",
-            { expiresIn: expiry }
-        );
+        const token = jwt.sign({ username: user.username }, "10", {
+            expiresIn: expiry,
+        });
 
         return { message: "Login successfull", token: token };
     }
@@ -172,5 +172,22 @@ export class UserService {
         this.userRepo.updatePassword(user, password_hash);
 
         return { message: "New password set" };
+    }
+
+    public getEditProfile(user: User) {
+        if (!user) {
+            throw new HttpError(401, "Unauthorized");
+        }
+
+        const response = {
+            firstname: user.firstName,
+            lastname: user.lastName,
+            email: user.email,
+            profileStatus: user.profileStatus,
+            bio: user.bio,
+            profilePicture: user.profilePicture,
+        };
+
+        return response;
     }
 }

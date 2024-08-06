@@ -144,4 +144,59 @@ describe("User route test suite", () => {
                 .send({ newPass: "newPass", token: "wrong token" })
         });
     });
+
+    describe("get edit profile", () => {
+        it("should login and get edit progile page", async () => {
+            let cookie;
+            const response = await request(app)
+                .post("/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            cookie = cookies[0];
+            expect(cookies).toBeDefined();
+
+            const response_getEdit_profile = await request(app)
+                .get("/user/geteditprofile")
+                .set("Cookie", [cookie]);
+            expect(response_getEdit_profile.status).toBe(200);
+
+            expect(response_getEdit_profile.body).toHaveProperty("firstname");
+        });
+
+        it("should fail if token is not specified", async () => {
+            let cookie;
+            const response = await request(app)
+                .post("/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            cookie = cookies[0];
+            expect(cookies).toBeDefined();
+
+            const response_getEdit_profile = await request(app).get(
+                "/user/geteditprofile"
+            );
+            expect(response_getEdit_profile.status).toBe(401);
+        });
+
+        it("should fail if token is not valid", async () => {
+            let cookie;
+            const response = await request(app)
+                .post("/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            cookie = cookies[0];
+            expect(cookies).toBeDefined();
+
+            const response_getEdit_profile = await request(app)
+                .get("/user/geteditprofile")
+                .set("Cookie", [
+                    "token=yyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.              eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE3MjI5NzQ3MTEsImV4cCI6MTcyMzAwMzUxMX0.1oB7dtlTun4wRnvh9U-RqBc3q_7QvECZt7QM1zFRYZQ; Path=/; HttpOnly",
+                ]);
+
+            expect(response_getEdit_profile.status).toBe(401);
+        });
+    });
 });
