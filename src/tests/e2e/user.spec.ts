@@ -33,31 +33,31 @@ describe('User route test suite', () => {
 
     describe('Signing in', () => {
         it("should sign in with valid username", async () => {
-            const response = await request(app).post("/user/signin").send({credential: "test", password: "test" }).expect(200);
+            const response = await request(app).post("/user/signin").send({ credential: "test", password: "test" }).expect(200);
             const cookies = response.headers['set-cookie'];
             expect(cookies).toBeDefined();
         });
 
         it("should sign in with valid email", async () => {
-            const response = await request(app).post("/user/signin").send({credential: "test@gmail.com", password: "test" }).expect(200);
+            const response = await request(app).post("/user/signin").send({ credential: "test@gmail.com", password: "test" }).expect(200);
             const cookies = response.headers['set-cookie'];
             expect(cookies).toBeDefined();
         });
 
         it("should fail to login if username is not valid", async () => {
-            await request(app).post("/user/signin").send({credential: "testwrong", password: "test" }).expect(401);
+            await request(app).post("/user/signin").send({ credential: "testwrong", password: "test" }).expect(401);
         });
 
         it("should fail to login if email is not valid", async () => {
-            await request(app).post("/user/signin").send({credential: "testwrong@gmail.com", password: "test" }).expect(401);
+            await request(app).post("/user/signin").send({ credential: "testwrong@gmail.com", password: "test" }).expect(401);
         });
 
         it("should fail to login if password is not valid", async () => {
-            await request(app).post("/user/signin").send({credential: "test", password: "testwrong" }).expect(401);
+            await request(app).post("/user/signin").send({ credential: "test", password: "testwrong" }).expect(401);
         });
 
         it("should fail if username or password in empty", async () => {
-            await request(app).post("/user/signin").send({credential: "", password: "test" }).expect(400);
+            await request(app).post("/user/signin").send({ credential: "", password: "test" }).expect(400);
         });
     });
 });
