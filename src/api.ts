@@ -15,7 +15,7 @@ export const makeApp = (dataSource: DataSource) => {
   const userService = new UserService(userRepository);
 
   app.use("/user", makeUserRouter(userService));
-
+  
   app.use(errorHandler);
 
   return app;

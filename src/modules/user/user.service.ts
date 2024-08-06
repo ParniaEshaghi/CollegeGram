@@ -1,14 +1,15 @@
 import { HttpError, NotFoundError } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
-import { SignUpDto } from "./dto/user.dto";
+import { SignUpDto } from "./dto/signup.dto";
 import { User } from "./model/user.model";
 import { UserRepository } from "./user.repository";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { LoginDto } from "./dto/login.dto";
 
 export class UserService {
-    constructor(private userRepo: UserRepository) {}
+    constructor(private userRepo: UserRepository) { }
 
     async createUser(dto: SignUpDto): Promise<User> {
         if (await this.userRepo.findByEmail(dto.email) || await this.userRepo.findByUsername(dto.username)) {
@@ -29,45 +30,36 @@ export class UserService {
             follower_count: 0,
             following_count: 0,
             post_count: 0,
-            tokens: [],
         })
     }
 
-    public async login(credential: string, password: string) {
-        if (!credential || !password) {
-            throw new HttpError(400, "Credential and password are required");
-        }
+    public async login(dto: LoginDto) {
+        const { success, error } = z.string().email().safeParse(dto.credential);
 
-        const { success, error } = z.string().email().safeParse(credential);
+        const user = success ? await this.getUserByEmail(dto.credential) : await this.getUserByUsername(dto.credential);
 
-        let user;
-
-        if (success) {
-            user = await this.getUserByEmail(credential);
-        } else {
-            user = await this.getUserByUsername(credential);
-        }
+        // if (success) {
+        //     const user = await this.getUserByEmail(dto.credential);
+        // } else {
+        //     const user = await this.getUserByUsername(dto.credential);
+        // }
 
         if (!user) {
             throw new HttpError(401, "Invalid credential or password");
         }
 
-        const match = await bcrypt.compare(password, user.password);
-        if (!match) {
+        const match = await bcrypt.compare(dto.password, user.password);
+        if (!user || !match) {
             throw new HttpError(401, "Invalid credential or password");
         }
+
+        const expiry = dto.keepMeSignedIn ? '7d' : '8h';
 
         const token = jwt.sign(
             { username: user.username },
             "10",
-            { expiresIn: 1800 }
-
-            // process.env.JWT_SECRET as string,
-            // { expiresIn: process.env.JWT_EXPIRATION }
+            { expiresIn: expiry }
         );
-
-        user.tokens = user.tokens.concat(token);
-        this.userRepo.update(user);
 
         return { message: "Login successfull", token: token };
     }

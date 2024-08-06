@@ -25,10 +25,10 @@ export class UserRepository {
         return this.userRepo.save(user);
     }
 
-    public async update(user: User) {
-        await this.userRepo.update(
-            { username: user.username },
-            { tokens: user.tokens }
-        );
-    }
+    // public async addToken(user: User) {
+    //     await this.userRepo.update(
+    //         { username: user.username },
+    //         { tokens: user.tokens }
+    //     );
+    // }
 }

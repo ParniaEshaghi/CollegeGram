@@ -35,30 +35,25 @@ describe("User service test suite", () => {
 
     describe("login test", () => {
         it("should login with valid username", async () => {
-            const response = await userService.login("mahdi", "1234mm");
+            const response = await userService.login({ credential: "mahdi", password: "1234mm" });
             expect(response.message).toBe("Login successfull");
         });
 
         it("should login with valid email", async () => {
-            const response = await userService.login("mahdi@gmail.com", "1234mm");
+            const response = await userService.login({ credential: "mahdi@gmail.com", password: "1234mm" });
             expect(response.message).toBe("Login successfull");
         });
 
         it("should fail if password is not valid", async () => {
-            expect(userService.login("test@gmail.com", "11111")).rejects.toThrow(new HttpError(401, "Invalid credential or password"))
+            expect(userService.login({ credential: "test@gmail.com", password: "11111" })).rejects.toThrow(new HttpError(401, "Invalid credential or password"))
         });
 
         it("should fail if username is not valid", async () => {
-            expect(userService.login("testwrongusername", "11111")).rejects.toThrow(new HttpError(401, "Invalid credential or password"))
+            expect(userService.login({ credential: "testwrongusername", password: "11111" })).rejects.toThrow(new HttpError(401, "Invalid credential or password"))
         });
 
         it("should fail if email is not valid", async () => {
-            expect(userService.login("testwrong@gmail.com", "11111")).rejects.toThrow(new HttpError(401, "Invalid credential or password"))
-        });
-
-        it("should fail if username or password in empty", async () => {
-            expect(userService.login("", "")).rejects.toThrow(new HttpError(400, "Credential and password are required"))
-
+            expect(userService.login({ credential: "testwrong@gmail.com", password: "11111" })).rejects.toThrow(new HttpError(401, "Invalid credential or password"))
         });
     });
 
