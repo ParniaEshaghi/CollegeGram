@@ -1,4 +1,4 @@
-import { HttpError, NotFoundError } from "../../utility/http-errors";
+import { ForbiddenError, HttpError, NotFoundError } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
 import { SignUpDto } from "./dto/signup.dto";
 import { User } from "./model/user.model";
@@ -10,12 +10,13 @@ import { LoginDto } from "./dto/login.dto";
 import nodemailer from "nodemailer";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { ForgetPassword } from "./model/forgetPassword.model";
+import { DecodedToken } from "../../middlewares/auth.middleware";
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
         private passwordResetTokenRepo: PasswordResetTokenRepository
-    ) {}
+    ) { }
 
     async createUser(dto: SignUpDto): Promise<User> {
         if (
@@ -126,7 +127,7 @@ export class UserService {
             from: "Cgram App",
             to: user.email,
             subject: "Password Reset",
-            text: `Click on the following link to reset your password: http://localhost:3000/reset-password/${token}`,
+            text: `Click on the following link to reset your password: http://37.32.6.230:3000/reset-password/${token}`,
         };
 
         try {
@@ -137,5 +138,39 @@ export class UserService {
         } catch (error) {
             throw new HttpError(500, "Error sending email");
         }
+    }
+
+    public async resetPassword(newPass: string, token: string) {
+        let user;
+        try {
+            const decoded = jwt.verify(token, "10") as DecodedToken;
+            user = await this.getUserByUsername(decoded.username);
+
+            const dbtoken = await this.passwordResetTokenRepo.findByToken(token)
+
+            if(!dbtoken) {
+                throw new NotFoundError;
+            }
+
+            if (dbtoken.username !== user?.username) {
+                throw new ForbiddenError;
+            }
+
+            if (dbtoken.expiration.getTime() < new Date().getTime()) {
+                throw new ForbiddenError;
+            }
+
+            if (!user) {
+                throw new NotFoundError;
+            }
+        } catch (error) {
+            throw new HttpError(401, "Authentication failed.");
+        }
+
+        const password_hash = await hashGenerator(newPass);
+
+        this.userRepo.updatePassword(user, password_hash);
+
+        return { message: "New password set" };
     }
 }

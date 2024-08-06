@@ -25,6 +25,13 @@ export class UserRepository {
         return this.userRepo.save(user);
     }
 
+    public async updatePassword(user: User, newPass: string): Promise<void> {
+        await this.userRepo.update(
+            { username: user.username },
+            { password: newPass }
+        );
+    }
+
     // public async addToken(user: User) {
     //     await this.userRepo.update(
     //         { username: user.username },

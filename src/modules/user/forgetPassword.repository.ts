@@ -14,4 +14,10 @@ export class PasswordResetTokenRepository {
     public create(forgetPassword: ForgetPassword): Promise<ForgetPassword> {
         return this.passwordResetTokenRepo.save(forgetPassword);
     }
+
+    public findByToken(token: string): Promise<ForgetPassword | null> {
+        return this.passwordResetTokenRepo.findOne({
+            where: { token }
+        });
+    }
 }
