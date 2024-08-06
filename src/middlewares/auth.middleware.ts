@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserService } from "../modules/user/user.service";
 
-interface DecodedToken {
+export interface DecodedToken {
     username: string;
 }
 

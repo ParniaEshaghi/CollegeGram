@@ -19,7 +19,7 @@ export const makeUserRouter = (userService: UserService) => {
         try {
             const dto = loginDto.parse(req.body);
             const { message, token } = await userService.login(dto);
-            res.cookie("token", token, {httpOnly: true});
+            res.cookie("token", token, { httpOnly: true });
             res.status(200).send(message);
         } catch (error) {
             if (error instanceof HttpError) {
@@ -29,14 +29,30 @@ export const makeUserRouter = (userService: UserService) => {
             if (error instanceof ZodError) {
                 res.status(400).send({ message: error.message });
                 return;
-            }    
+            }
             res.status(500).send();
         }
     });
+
     app.post("/forgetpassword", async (req, res) => {
         const { credential } = req.body;
         try {
             const { message } = await userService.forgetPassword(credential);
+            res.status(200).send(message);
+            return;
+        } catch (error) {
+            if (error instanceof HttpError) {
+                res.status(error.status).send(error.message);
+                return;
+            }
+            res.status(500).send();
+        }
+    });
+
+    app.post("/resetpassword", async (req, res) => {
+        const { newPass, token } = req.body;
+        try {
+            const { message } = await userService.resetPassword(newPass, token);
             res.status(200).send(message);
             return;
         } catch (error) {
