@@ -4,34 +4,54 @@ import { UserService } from "../../modules/user/user.service";
 import bcrypt from "bcrypt";
 import { HttpError } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
+import { PasswordResetTokenRepository } from "../../modules/user/forgetPassword.repository";
 
 describe("User service test suite", () => {
     let userRepo: UserRepository;
+    let passwordResetTokenRepo: PasswordResetTokenRepository;
     let userService: UserService;
 
     beforeAll(async () => {
         const dataSource = await AppDataSource.initialize();
         userRepo = new UserRepository(dataSource);
-        userService = new UserService(userRepo);
-        userService.createUser({ username: "mahdi", email: "mahdi@gmail.com", password: "1234mm" })
+        passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
+
+        userService = new UserService(userRepo, passwordResetTokenRepo);
+        userService.createUser({
+            username: "mahdi",
+            email: "mrmahdifardi@gmail.com",
+            password: "1234mm",
+        });
     });
     afterAll(async () => {
-        await AppDataSource.dropDatabase();
+        // await AppDataSource.dropDatabase();
         await AppDataSource.destroy();
     });
 
     describe("Signup test", () => {
         it("should sign up a user", async () => {
-            const user = await userService.createUser({ username: "test", email: "test@gmail.com", password: "test" });
+            const user = await userService.createUser({
+                username: "test",
+                email: "test@gmail.com",
+                password: "test",
+            });
             expect(user.email).toBe("test@gmail.com");
             expect(user.username).toBe("test");
-            expect(await bcrypt.compare("test", await hashGenerator("test"))).toBe(true)
-        })
+            expect(
+                await bcrypt.compare("test", await hashGenerator("test"))
+            ).toBe(true);
+        });
 
         it("should fail to sign up if email or username is already in use", () => {
-            expect(userService.createUser({ username: "test", email: "test@gmail.com", password: "test" })).rejects.toThrow(HttpError);
-        })
-    })
+            expect(
+                userService.createUser({
+                    username: "test",
+                    email: "test@gmail.com",
+                    password: "test",
+                })
+            ).rejects.toThrow(HttpError);
+        });
+    });
 
     describe("login test", () => {
         it("should login with valid username", async () => {
@@ -57,5 +77,25 @@ describe("User service test suite", () => {
         });
     });
 
+    describe("Reset password", () => {
+        it("should send reset password email", async () => {
+            const response = await userService.forgetPassword(
+                "mrmahdifardi@gmail.com"
+            );
+            console.log(response);
+            expect(response.message).toBe(
+                "Password reset link sent to your email account"
+            );
+        });
+        it("should fail if credential is  empty", async () => {
+            expect(userService.forgetPassword("")).rejects.toThrow(
+                new HttpError(400, "Credential is  required")
+            );
+        });
+        it("should fail if credential is not valid", async () => {
+            expect(userService.forgetPassword("notvalid")).rejects.toThrow(
+                new HttpError(401, "Invalid credential or password")
+            );
+        });
+    });
 });
-
