@@ -33,6 +33,20 @@ export const makeUserRouter = (userService: UserService) => {
             res.status(500).send();
         }
     });
+    app.post("/forgetpassword", async (req, res) => {
+        const { credential } = req.body;
+        try {
+            const { message } = await userService.forgetPassword(credential);
+            res.status(200).send(message);
+            return;
+        } catch (error) {
+            if (error instanceof HttpError) {
+                res.status(error.status).send(error.message);
+                return;
+            }
+            res.status(500).send();
+        }
+    });
 
     return app;
-}
+};
