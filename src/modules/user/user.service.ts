@@ -14,7 +14,9 @@ import { LoginDto } from "./dto/login.dto";
 import nodemailer from "nodemailer";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { ForgetPassword } from "./model/forgetPassword.model";
+import { EditProfileDto } from "./dto/edit-profile.dto";
 import { DecodedToken } from "../../middlewares/auth.middleware";
+import { error } from "console";
 
 export class UserService {
     constructor(
@@ -195,6 +197,26 @@ export class UserService {
         };
 
         return response;
+    }
+
+    public async editProfile(username: string, password: string, picturePath: string, dto: EditProfileDto): Promise<User> {
+        const password_hash = dto.password ? await hashGenerator(dto.password) : password;
+
+        await this.userRepo.updateProfile(username, {
+            password: password_hash,
+            email: dto.email,
+            profilePicture: picturePath,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            profileStatus: dto.profileStatus,
+            bio: dto.bio,
+        });
+
+        const user = await this.getUserByUsername(username);
+        if(!user) {
+            throw new NotFoundError;
+        }
+        return user
     }
 
     public getProfileInfo(user: User) {
