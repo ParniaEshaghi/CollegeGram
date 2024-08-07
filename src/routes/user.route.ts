@@ -51,10 +51,12 @@ export const makeUserRouter = (userService: UserService) => {
         }
     });
 
-    app.get("/geteditprofile", auth(userService), (req, res) => {
+    app.post("/resetpassword", async (req, res) => {
+        const { newPass, token } = req.body;
         try {
-            const response = userService.getEditProfile(req.user);
-            res.status(200).json(response);
+            const { message } = await userService.resetPassword(newPass, token);
+            res.status(200).send(message);
+            return;
         } catch (error) {
             if (error instanceof HttpError) {
                 res.status(error.status).send(error.message);
@@ -63,6 +65,7 @@ export const makeUserRouter = (userService: UserService) => {
             res.status(500).send();
         }
     });
+
 
     app.get("/geteditprofile", auth(userService), (req, res) => {
         try {
