@@ -12,6 +12,7 @@ export const auth =
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const token = req.cookies.token;
+            const token = req.cookies.token;
             if (!token) {
                 throw new Error("Authentication failed. Token missing.");
             }
@@ -28,6 +29,7 @@ export const auth =
             next();
         } catch (error) {
             res.status(401).send({ error: "Authentication failed." });
+            next();
             next();
         }
     };

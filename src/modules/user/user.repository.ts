@@ -36,6 +36,7 @@ export class UserRepository {
     }
 
     public async updatePassword(user: User, newPass: string): Promise<void> {
+    public async updatePassword(user: User, newPass: string): Promise<void> {
         await this.userRepo.update(
             { username: user.username },
             { password: newPass }

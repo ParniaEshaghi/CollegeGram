@@ -21,7 +21,11 @@ export const makeUserRouter = (userService: UserService) => {
 
     app.post("/signin", async (req, res) => {
         //TODO: needs to be refactored for readability and to use the error-handler middleware and handle-express
+        //TODO: needs to be refactored for readability and to use the error-handler middleware and handle-express
         try {
+            const dto = loginDto.parse(req.body);
+            const { message, token } = await userService.login(dto);
+            res.cookie("token", token, { httpOnly: true });
             const dto = loginDto.parse(req.body);
             const { message, token } = await userService.login(dto);
             res.cookie("token", token, { httpOnly: true });
@@ -115,9 +119,74 @@ export const makeUserRouter = (userService: UserService) => {
                 res.status(error.status).send(error.message);
                 return;
             }
+            if (error instanceof ZodError) {
+                res.status(400).send({ message: error.message });
+                return;
+            }
+            res.status(500).send();
+        }
+    });
+
+    app.post("/forgetpassword", async (req, res) => {
+        const { credential } = req.body;
+        try {
+            const { message } = await userService.forgetPassword(credential);
+            res.status(200).send(message);
+            return;
+        } catch (error) {
+            if (error instanceof HttpError) {
+                res.status(error.status).send(error.message);
+                return;
+            }
+            res.status(500).send();
+        }
+    });
+
+    app.post("/resetpassword", async (req, res) => {
+        const { newPass, token } = req.body;
+        try {
+            const { message } = await userService.resetPassword(newPass, token);
+            res.status(200).send(message);
+            return;
+        } catch (error) {
+            if (error instanceof HttpError) {
+                res.status(error.status).send(error.message);
+                return;
+            }
+            res.status(500).send();
+        }
+    });
+
+
+    app.get("/geteditprofile", auth(userService), (req, res) => {
+        try {
+            const response = userService.getEditProfile(req.user);
+            res.status(200).json(response);
+            return;
+        } catch (error) {
+            if (error instanceof HttpError) {
+                res.status(error.status).send(error.message);
+                return;
+            }
+            res.status(500).send();
+        }
+    });
+
+    app.get("/profileInfo", auth(userService), (req, res) => {
+        try {
+            const response = userService.getProfileInfo(req.user);
+            res.status(200).json(response);
+            return;
+        } catch (error) {
+            if (error instanceof HttpError) {
+                res.status(error.status).send(error.message);
+                return;
+            }
             res.status(500).send();
         }
     });
 
     return app;
+};
+
 };
