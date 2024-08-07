@@ -5,6 +5,8 @@ import { handleExpress } from "../utility/handle-express";
 import { HttpError } from "../utility/http-errors";
 import { loginDto } from "../modules/user/dto/login.dto";
 import { ZodError } from "zod";
+import { auth } from "../middlewares/auth.middleware";
+import cookieParser from "cookie-parser";
 
 export const makeUserRouter = (userService: UserService) => {
     const app = Router();
@@ -19,7 +21,7 @@ export const makeUserRouter = (userService: UserService) => {
         try {
             const dto = loginDto.parse(req.body);
             const { message, token } = await userService.login(dto);
-            res.cookie("token", token, {httpOnly: true});
+            res.cookie("token", token, { httpOnly: true });
             res.status(200).send(message);
         } catch (error) {
             if (error instanceof HttpError) {
@@ -29,15 +31,44 @@ export const makeUserRouter = (userService: UserService) => {
             if (error instanceof ZodError) {
                 res.status(400).send({ message: error.message });
                 return;
-            }    
+            }
             res.status(500).send();
         }
     });
+
     app.post("/forgetpassword", async (req, res) => {
         const { credential } = req.body;
         try {
             const { message } = await userService.forgetPassword(credential);
             res.status(200).send(message);
+            return;
+        } catch (error) {
+            if (error instanceof HttpError) {
+                res.status(error.status).send(error.message);
+                return;
+            }
+            res.status(500).send();
+        }
+    });
+
+    app.get("/geteditprofile", auth(userService), (req, res) => {
+        try {
+            const response = userService.getEditProfile(req.user);
+            res.status(200).json(response);
+
+        } catch (error) {
+            if (error instanceof HttpError) {
+                res.status(error.status).send(error.message);
+                return;
+            }
+            res.status(500).send();
+        }
+    });
+
+    app.get("/geteditprofile", auth(userService), (req, res) => {
+        try {
+            const response = userService.getEditProfile(req.user);
+            res.status(200).json(response);
             return;
         } catch (error) {
             if (error instanceof HttpError) {

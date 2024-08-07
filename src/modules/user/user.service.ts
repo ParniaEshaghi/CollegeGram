@@ -1,4 +1,4 @@
-import { HttpError, NotFoundError } from "../../utility/http-errors";
+import { ForbiddenError, HttpError, NotFoundError } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
 import { SignUpDto } from "./dto/signup.dto";
 import { User } from "./model/user.model";
@@ -10,12 +10,13 @@ import { LoginDto } from "./dto/login.dto";
 import nodemailer from "nodemailer";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { ForgetPassword } from "./model/forgetPassword.model";
+import { DecodedToken } from "../../middlewares/auth.middleware";
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
         private passwordResetTokenRepo: PasswordResetTokenRepository
-    ) {}
+    ) { }
 
     async createUser(dto: SignUpDto): Promise<User> {
         if (
@@ -45,7 +46,9 @@ export class UserService {
     public async login(dto: LoginDto) {
         const { success, error } = z.string().email().safeParse(dto.credential);
 
-        const user = success ? await this.getUserByEmail(dto.credential) : await this.getUserByUsername(dto.credential);
+        const user = success
+            ? await this.getUserByEmail(dto.credential)
+            : await this.getUserByUsername(dto.credential);
 
         // if (success) {
         //     const user = await this.getUserByEmail(dto.credential);
@@ -62,13 +65,11 @@ export class UserService {
             throw new HttpError(401, "Invalid credential or password");
         }
 
-        const expiry = dto.keepMeSignedIn ? '7d' : '8h';
+        const expiry = dto.keepMeSignedIn ? "7d" : "8h";
 
-        const token = jwt.sign(
-            { username: user.username },
-            "10",
-            { expiresIn: expiry }
-        );
+        const token = jwt.sign({ username: user.username }, "10", {
+            expiresIn: expiry,
+        });
 
         return { message: "Login successfull", token: token };
     }
@@ -126,7 +127,7 @@ export class UserService {
             from: "Cgram App",
             to: user.email,
             subject: "Password Reset",
-            text: `Click on the following link to reset your password: http://localhost:3000/reset-password/${token}`,
+            text: `Click on the following link to reset your password: http://37.32.6.230:3000/reset-password/${token}`,
         };
 
         try {
@@ -137,5 +138,56 @@ export class UserService {
         } catch (error) {
             throw new HttpError(500, "Error sending email");
         }
+    }
+
+    public async resetPassword(newPass: string, token: string) {
+        let user;
+        try {
+            const decoded = jwt.verify(token, "10") as DecodedToken;
+            user = await this.getUserByUsername(decoded.username);
+
+            const dbtoken = await this.passwordResetTokenRepo.findByToken(token)
+
+            if(!dbtoken) {
+                throw new NotFoundError;
+            }
+
+            if (dbtoken.username !== user?.username) {
+                throw new ForbiddenError;
+            }
+
+            if (dbtoken.expiration.getTime() < new Date().getTime()) {
+                throw new ForbiddenError;
+            }
+
+            if (!user) {
+                throw new NotFoundError;
+            }
+        } catch (error) {
+            throw new HttpError(401, "Authentication failed.");
+        }
+
+        const password_hash = await hashGenerator(newPass);
+
+        this.userRepo.updatePassword(user, password_hash);
+
+        return { message: "New password set" };
+    }
+
+    public getEditProfile(user: User) {
+        if (!user) {
+            throw new HttpError(401, "Unauthorized");
+        }
+
+        const response = {
+            firstname: user.firstName,
+            lastname: user.lastName,
+            email: user.email,
+            profileStatus: user.profileStatus,
+            bio: user.bio,
+            profilePicture: user.profilePicture,
+        };
+
+        return response;
     }
 }
