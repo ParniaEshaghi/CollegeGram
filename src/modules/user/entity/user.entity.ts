@@ -8,8 +8,6 @@ import {
     UpdateDateColumn,
 } from "typeorm";
 
-import { v4 } from "uuid";
-
 @Entity("users")
 export class UserEntity {
     @PrimaryGeneratedColumn("uuid")
@@ -50,7 +48,4 @@ export class UserEntity {
 
     @Column()
     post_count!: number;
-
-    @Column("varchar", { array: true })
-    tokens!: string[];
 }
