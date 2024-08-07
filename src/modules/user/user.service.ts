@@ -1,4 +1,8 @@
-import { ForbiddenError, HttpError, NotFoundError } from "../../utility/http-errors";
+import {
+    ForbiddenError,
+    HttpError,
+    NotFoundError,
+} from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
 import { SignUpDto } from "./dto/signup.dto";
 import { User } from "./model/user.model";
@@ -10,13 +14,15 @@ import { LoginDto } from "./dto/login.dto";
 import nodemailer from "nodemailer";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { ForgetPassword } from "./model/forgetPassword.model";
+import { EditProfileDto } from "./dto/edit-profile.dto";
 import { DecodedToken } from "../../middlewares/auth.middleware";
+import { error } from "console";
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
         private passwordResetTokenRepo: PasswordResetTokenRepository
-    ) { }
+    ) {}
 
     async createUser(dto: SignUpDto): Promise<User> {
         if (
@@ -146,22 +152,24 @@ export class UserService {
             const decoded = jwt.verify(token, "10") as DecodedToken;
             user = await this.getUserByUsername(decoded.username);
 
-            const dbtoken = await this.passwordResetTokenRepo.findByToken(token)
+            const dbtoken = await this.passwordResetTokenRepo.findByToken(
+                token
+            );
 
-            if(!dbtoken) {
-                throw new NotFoundError;
+            if (!dbtoken) {
+                throw new NotFoundError();
             }
 
             if (dbtoken.username !== user?.username) {
-                throw new ForbiddenError;
+                throw new ForbiddenError();
             }
 
             if (dbtoken.expiration.getTime() < new Date().getTime()) {
-                throw new ForbiddenError;
+                throw new ForbiddenError();
             }
 
             if (!user) {
-                throw new NotFoundError;
+                throw new NotFoundError();
             }
         } catch (error) {
             throw new HttpError(401, "Authentication failed.");
@@ -186,6 +194,46 @@ export class UserService {
             profileStatus: user.profileStatus,
             bio: user.bio,
             profilePicture: user.profilePicture,
+        };
+
+        return response;
+    }
+
+    public async editProfile(username: string, password: string, picturePath: string, dto: EditProfileDto): Promise<User> {
+        const password_hash = dto.password ? await hashGenerator(dto.password) : password;
+
+        await this.userRepo.updateProfile(username, {
+            password: password_hash,
+            email: dto.email,
+            profilePicture: picturePath,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            profileStatus: dto.profileStatus,
+            bio: dto.bio,
+        });
+
+        const user = await this.getUserByUsername(username);
+        if(!user) {
+            throw new NotFoundError;
+        }
+        return user
+    }
+
+    public getProfileInfo(user: User) {
+        if (!user) {
+            throw new HttpError(401, "Unauthorized");
+        }
+
+        const response = {
+            username: user.username,
+            firstname: user.firstName,
+            lastname: user.lastName,
+            bio: user.bio,
+            profilePicture: user.profilePicture,
+            posts: [],
+            post_count: 0,
+            follower_count: user.follower_count,
+            following_count: user.following_count,
         };
 
         return response;

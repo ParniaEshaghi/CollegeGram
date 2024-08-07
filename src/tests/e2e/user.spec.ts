@@ -2,6 +2,8 @@ import { makeApp } from "../../api";
 import { AppDataSource } from "../../data-source";
 import { Express } from "express";
 import request from "supertest";
+import { hashGenerator } from "../../utility/hash-generator";
+import bcrypt from "bcrypt";
 
 describe("User route test suite", () => {
     let app: Express;
@@ -131,17 +133,15 @@ describe("User route test suite", () => {
                 .expect(401);
         });
     });
-    
+
     describe("Reset password", () => {
         //TODO: find a way to test the token
-        it("should reset password", async () => {
-
-        });
+        it("should reset password", async () => {});
 
         it("should fail if token is wrong or expired", async () => {
             await request(app)
                 .post("/user/resetpassword")
-                .send({ newPass: "newPass", token: "wrong token" })
+                .send({ newPass: "newPass", token: "wrong token" });
         });
     });
 
@@ -197,6 +197,53 @@ describe("User route test suite", () => {
                 ]);
 
             expect(response_getEdit_profile.status).toBe(401);
+        });
+    });
+
+    describe("Editing Profile", () => {
+        it("should update profile", async () => {
+            const response = await request(app)
+                .post("/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+            expect(cookies).toBeDefined();
+
+            const hashed_password = await hashGenerator("test")
+            const response_editprofile = await request(app)
+                .post("/user/editprofile")
+                .set("Cookie", [cookie])
+                .send({
+                        password: "newpass",
+                        email: "changedemail@gmail.com",
+                        firstName: "test",
+                        lastName: "test",
+                        profileStatus: "private",
+                        bio: "test", 
+                }).expect(200);
+
+            expect(response_editprofile.body.email).toBe("changedemail@gmail.com");
+            expect(response_editprofile.body.firstName).toBe("test");
+            expect(response_editprofile.body.profileStatus).toBe("private")
+            expect(
+                await bcrypt.compare("newpass", response_editprofile.body.password)
+            ).toBe(true);
+
+        });
+
+        it("should fail to update profile if cookie token is not valid", async () => {
+            await request(app)
+                .post("/user/editprofile")
+                .set("Cookie", ["wrong cookie"])
+                .send({
+                        password: "newpass",
+                        email: "changedemail@gmail.com",
+                        firstName: "test",
+                        lastName: "test",
+                        profileStatus: "private",
+                        bio: "test", 
+                }).expect(401);
         });
     });
 });

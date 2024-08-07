@@ -121,4 +121,29 @@ describe("User service test suite", () => {
             );
         });
     });
+
+    describe("Edit profile", () => {
+        it("should update profile", async () => {
+            const hashed_password = await hashGenerator("test")
+            const response = await userService.editProfile(
+                "test",
+                hashed_password,
+                "",
+                {
+                    email: "changedemail@gmail.com",
+                    firstName: "test",
+                    lastName: "test",
+                    profileStatus: "private",
+                    bio: "test",
+                    password: "newpass"
+                }
+            ); 
+            expect(response.email).toBe("changedemail@gmail.com");
+            expect(response.firstName).toBe("test");
+            expect(response.profileStatus).toBe("private")
+            expect(
+                await bcrypt.compare("newpass", response.password)
+            ).toBe(true);
+        });
+    });
 });
