@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserService } from "../modules/user/user.service";
 
-interface DecodedToken {
+export interface DecodedToken {
     username: string;
 }
 
@@ -11,7 +11,7 @@ export const auth =
     (userService: UserService) =>
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const token = req.header("Authorization")?.replace("Bearer ", "");
+            const token = req.cookies.token;
             if (!token) {
                 throw new Error("Authentication failed. Token missing.");
             }
@@ -24,9 +24,10 @@ export const auth =
             }
 
             req.user = user;
-            req.token = token;
+            // req.token = token;
             next();
         } catch (error) {
             res.status(401).send({ error: "Authentication failed." });
+            next();
         }
     };

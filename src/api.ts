@@ -3,22 +3,24 @@ import express from "express";
 import { makeUserRouter } from "./routes/user.route";
 import { UserRepository } from "./modules/user/user.repository";
 import { UserService } from "./modules/user/user.service";
-import { ReadVResult } from "fs";
 import { errorHandler } from "./middlewares/error-handler.middleware";
+import { PasswordResetTokenRepository } from "./modules/user/forgetPassword.repository";
+import cookieParser from "cookie-parser";
 
 export const makeApp = (dataSource: DataSource) => {
-  const app = express();
+    const app = express();
+    app.use(cookieParser());
 
-  app.use(express.json());
+    app.use(express.json());
 
-  const userRepository = new UserRepository(dataSource);
-  const userService = new UserService(userRepository);
+    const userRepository = new UserRepository(dataSource);
+    const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
 
-  app.use("/user", makeUserRouter(userService));
+    const userService = new UserService(userRepository, passwordResetTokenRepo);
 
-  app.use(errorHandler);
+    app.use("/user", makeUserRouter(userService));
 
-  return app;
+    app.use(errorHandler);
+
+    return app;
 };
-
-
