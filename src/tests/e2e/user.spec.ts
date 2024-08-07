@@ -131,17 +131,15 @@ describe("User route test suite", () => {
                 .expect(401);
         });
     });
-    
+
     describe("Reset password", () => {
         //TODO: find a way to test the token
-        it("should reset password", async () => {
-
-        });
+        it("should reset password", async () => {});
 
         it("should fail if token is wrong or expired", async () => {
             await request(app)
                 .post("/user/resetpassword")
-                .send({ newPass: "newPass", token: "wrong token" })
+                .send({ newPass: "newPass", token: "wrong token" });
         });
     });
 
@@ -197,6 +195,61 @@ describe("User route test suite", () => {
                 ]);
 
             expect(response_getEdit_profile.status).toBe(401);
+        });
+    });
+
+    describe("get profile info", () => {
+        it("should login and get profile info page", async () => {
+            let cookie;
+            const response = await request(app)
+                .post("/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            cookie = cookies[0];
+            expect(cookies).toBeDefined();
+
+            const response_profile_info = await request(app)
+                .get("/user/profileInfo")
+                .set("Cookie", [cookie]);
+            expect(response_profile_info.status).toBe(200);
+
+            expect(response_profile_info.body).toHaveProperty("follower_count");
+        });
+
+        it("should fail if token is not specified", async () => {
+            let cookie;
+            const response = await request(app)
+                .post("/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            cookie = cookies[0];
+            expect(cookies).toBeDefined();
+
+            const response_profile_info = await request(app).get(
+                "/user/profileInfo"
+            );
+            expect(response_profile_info.status).toBe(401);
+        });
+
+        it("should fail if token is not valid", async () => {
+            let cookie;
+            const response = await request(app)
+                .post("/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            cookie = cookies[0];
+            expect(cookies).toBeDefined();
+
+            const response_profile_info = await request(app)
+                .get("/user/profileInfo")
+                .set("Cookie", [
+                    "token=yyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.              eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE3MjI5NzQ3MTEsImV4cCI6MTcyMzAwMzUxMX0.1oB7dtlTun4wRnvh9U-RqBc3q_7QvECZt7QM1zFRYZQ; Path=/; HttpOnly",
+                ]);
+
+            expect(response_profile_info.status).toBe(401);
         });
     });
 });

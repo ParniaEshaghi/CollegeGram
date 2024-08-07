@@ -55,7 +55,6 @@ export const makeUserRouter = (userService: UserService) => {
         try {
             const response = userService.getEditProfile(req.user);
             res.status(200).json(response);
-
         } catch (error) {
             if (error instanceof HttpError) {
                 res.status(error.status).send(error.message);
@@ -68,6 +67,20 @@ export const makeUserRouter = (userService: UserService) => {
     app.get("/geteditprofile", auth(userService), (req, res) => {
         try {
             const response = userService.getEditProfile(req.user);
+            res.status(200).json(response);
+            return;
+        } catch (error) {
+            if (error instanceof HttpError) {
+                res.status(error.status).send(error.message);
+                return;
+            }
+            res.status(500).send();
+        }
+    });
+
+    app.get("/profileInfo", auth(userService), (req, res) => {
+        try {
+            const response = userService.getProfileInfo(req.user);
             res.status(200).json(response);
             return;
         } catch (error) {
