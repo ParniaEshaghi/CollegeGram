@@ -17,7 +17,7 @@ export class PasswordResetTokenRepository {
 
     public findByToken(token: string): Promise<ForgetPassword | null> {
         return this.passwordResetTokenRepo.findOne({
-            where: { token }
+            where: { token },
         });
     }
 }

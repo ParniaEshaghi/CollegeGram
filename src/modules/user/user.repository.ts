@@ -21,13 +21,13 @@ export class UserRepository {
 
     public findByUsername(username: string): Promise<User | null> {
         return this.userRepo.findOne({
-            where: { username }
+            where: { username },
         });
     }
 
     public findByEmail(email: string): Promise<User | null> {
         return this.userRepo.findOne({
-            where: { email }
+            where: { email },
         });
     }
 
@@ -36,32 +36,29 @@ export class UserRepository {
     }
 
     public async updatePassword(user: User, newPass: string): Promise<void> {
-    public async updatePassword(user: User, newPass: string): Promise<void> {
         await this.userRepo.update(
             { username: user.username },
             { password: newPass }
         );
     }
 
-    public async updateProfile(username: string, updated: UpdateProfile): Promise<void> {
+    public async updateProfile(
+        username: string,
+        updated: UpdateProfile
+    ): Promise<void> {
         await this.userRepo.update(
             {
-                username: username
-            }, {
-            password: updated.password,
-            email: updated.email,
-            profilePicture: updated.profilePicture,
-            firstName: updated.firstName,
-            lastName: updated.lastName,
-            profileStatus: updated.profileStatus,
-            bio: updated.bio,
-        });
+                username: username,
+            },
+            {
+                password: updated.password,
+                email: updated.email,
+                profilePicture: updated.profilePicture,
+                firstName: updated.firstName,
+                lastName: updated.lastName,
+                profileStatus: updated.profileStatus,
+                bio: updated.bio,
+            }
+        );
     }
-
-    // public async addToken(user: User) {
-    //     await this.userRepo.update(
-    //         { username: user.username },
-    //         { tokens: user.tokens }
-    //     );
-    // }
 }

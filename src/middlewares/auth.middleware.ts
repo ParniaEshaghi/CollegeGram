@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserService } from "../modules/user/user.service";
 
@@ -11,7 +10,6 @@ export const auth =
     (userService: UserService) =>
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const token = req.cookies.token;
             const token = req.cookies.token;
             if (!token) {
                 throw new Error("Authentication failed. Token missing.");
@@ -25,11 +23,9 @@ export const auth =
             }
 
             req.user = user;
-            
             next();
         } catch (error) {
             res.status(401).send({ error: "Authentication failed." });
-            next();
             next();
         }
     };

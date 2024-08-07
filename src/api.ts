@@ -9,13 +9,12 @@ import cookieParser from "cookie-parser";
 
 export const makeApp = (dataSource: DataSource) => {
     const app = express();
-    app.use(cookieParser());
 
+    app.use(cookieParser());
     app.use(express.json());
 
     const userRepository = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
-
     const userService = new UserService(userRepository, passwordResetTokenRepo);
 
     app.use("/user", makeUserRouter(userService));
