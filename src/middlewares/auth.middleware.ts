@@ -24,7 +24,7 @@ export const auth =
             }
 
             req.user = user;
-            // req.token = token;
+            
             next();
         } catch (error) {
             res.status(401).send({ error: "Authentication failed." });

@@ -6,7 +6,10 @@ import { HttpError } from "../utility/http-errors";
 import { loginDto } from "../modules/user/dto/login.dto";
 import { ZodError } from "zod";
 import { auth } from "../middlewares/auth.middleware";
+import { profileUpload } from "../middlewares/upload.middleware";
+import { editProfileDto } from "../modules/user/dto/edit-profile.dto";
 import cookieParser from "cookie-parser";
+import { MulterError } from "multer";
 
 export const makeUserRouter = (userService: UserService) => {
     const app = Router();
@@ -51,6 +54,42 @@ export const makeUserRouter = (userService: UserService) => {
         }
     });
 
+    app.post("/editprofile", auth(userService), async (req, res) => {
+        // profileUpload(req, res, () => {
+        //     const dto = editProfileDto.parse(req.body);
+        //     const user = req.user;
+        //     const picturePath = req.file ? /uploads/profiles/${req.file.filename} : "";
+        //     handleExpress(res, () => userService.editProfile(user.username, user.password, picturePath, dto));
+        // });
+
+        profileUpload(req, res, async (uploadError) => {
+            if (uploadError) {
+                return res.status(400).send({ error: uploadError.message });
+            }
+
+            try {
+                const dto = editProfileDto.parse(req.body);
+                const user = req.user;
+                const picturePath = req.file ? `/uploads/profiles/${req.file.filename}` : "";
+                const result = await userService.editProfile(user.username, user.password, picturePath, dto);
+
+                res.status(200).send(result);
+            } catch (error) {
+                if (error instanceof HttpError) {
+                    res.status(400).send({ error: error.message });
+                }
+                if (error instanceof MulterError) {
+                    res.status(400).send({ error: error.message });
+                }
+                if (error instanceof ZodError) {
+                    res.status(400).send({ error: error.message });
+                    console.log(error)
+                }
+                res.status(500).send()
+            }
+        });
+    });
+
     app.get("/geteditprofile", auth(userService), (req, res) => {
         try {
             const response = userService.getEditProfile(req.user);
@@ -64,19 +103,7 @@ export const makeUserRouter = (userService: UserService) => {
         }
     });
 
-    app.get("/geteditprofile", auth(userService), (req, res) => {
-        try {
-            const response = userService.getEditProfile(req.user);
-            res.status(200).json(response);
-            return;
-        } catch (error) {
-            if (error instanceof HttpError) {
-                res.status(error.status).send(error.message);
-                return;
-            }
-            res.status(500).send();
-        }
-    });
+
 
     app.get("/profileInfo", auth(userService), (req, res) => {
         try {
