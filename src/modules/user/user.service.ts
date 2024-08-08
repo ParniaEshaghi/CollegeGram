@@ -116,6 +116,7 @@ export class UserService {
 
         const transporter = nodemailer.createTransport({
             service: "gmail",
+            host: 'smtp.gmail.com',
             port: 587,
             auth: {
                 user: "cgramcgram421@gmail.com",
