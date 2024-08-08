@@ -130,7 +130,9 @@ export class UserService {
         };
 
         try {
+            console.log("befooooooooooore");
             await transporter.sendMail(mailOptions);
+            console.log("afteeeeeeeeeeeeer")
             return {
                 message: "Password reset link sent to your email account",
             };
