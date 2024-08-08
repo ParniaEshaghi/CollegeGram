@@ -124,6 +124,7 @@ export class UserService {
             },
             logger: true,
             debug: true,
+            secure: false,
         });
 
         const mailOptions = {
