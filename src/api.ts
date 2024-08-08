@@ -6,12 +6,14 @@ import { UserService } from "./modules/user/user.service";
 import { errorHandler } from "./middlewares/error-handler.middleware";
 import { PasswordResetTokenRepository } from "./modules/user/forgetPassword.repository";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 export const makeApp = (dataSource: DataSource) => {
     const app = express();
 
     app.use(cookieParser());
     app.use(express.json());
+    app.use(cors());
 
     const userRepository = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
