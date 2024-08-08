@@ -120,6 +120,8 @@ export class UserService {
                 user: "cgramcgram421@gmail.com",
                 pass: "jbjhrygcpwxupldx",
             },
+            logger: true,
+            debug: true,
         });
 
         const mailOptions = {
