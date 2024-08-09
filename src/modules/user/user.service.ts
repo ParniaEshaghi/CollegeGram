@@ -113,9 +113,9 @@ export class UserService {
         };
 
         await this.passwordResetTokenRepo.create(resetToken);
-        
+
         const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
+            host: "smtp.gmail.com",
             port: 587,
             auth: {
                 user: "cgramcgram421@gmail.com",
@@ -180,7 +180,7 @@ export class UserService {
         return { message: "New password set" };
     }
 
-    public getEditProfile(user: User) {
+    public getEditProfile(user: User, baseUrl: string) {
         if (!user) {
             throw new HttpError(401, "Unauthorized");
         }
@@ -191,7 +191,9 @@ export class UserService {
             email: user.email,
             profileStatus: user.profileStatus,
             bio: user.bio,
-            profilePicture: user.profilePicture,
+            profilePicture: user.profilePicture
+                ? `${baseUrl}/images/profiles/${user.profilePicture}`
+                : "",
         };
 
         return response;
@@ -200,7 +202,7 @@ export class UserService {
     public async editProfile(
         username: string,
         password: string,
-        picturePath: string,
+        pictureFilename: string,
         dto: EditProfileDto
     ): Promise<User> {
         const password_hash = dto.password
@@ -210,7 +212,7 @@ export class UserService {
         await this.userRepo.updateProfile(username, {
             password: password_hash,
             email: dto.email,
-            profilePicture: picturePath,
+            profilePicture: pictureFilename,
             firstName: dto.firstName,
             lastName: dto.lastName,
             profileStatus: dto.profileStatus,
@@ -224,7 +226,7 @@ export class UserService {
         return user;
     }
 
-    public getProfileInfo(user: User) {
+    public getProfileInfo(user: User, baseUrl: string) {
         if (!user) {
             throw new HttpError(401, "Unauthorized");
         }
@@ -234,7 +236,10 @@ export class UserService {
             firstname: user.firstName,
             lastname: user.lastName,
             bio: user.bio,
-            profilePicture: user.profilePicture,
+            // Construct full URL for profilePicture
+            profilePicture: user.profilePicture
+                ? `${baseUrl}/images/profiles/${user.profilePicture}`
+                : "",
             posts: [],
             post_count: 0,
             follower_count: user.follower_count,
