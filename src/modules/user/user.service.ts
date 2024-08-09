@@ -11,7 +11,7 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { LoginDto } from "./dto/login.dto";
-import nodemailer from "nodemailer";
+const nodemailer = require("nodemailer");
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { ForgetPassword } from "./model/forgetPassword.model";
 import { EditProfileDto } from "./dto/edit-profile.dto";
@@ -113,14 +113,20 @@ export class UserService {
         };
 
         await this.passwordResetTokenRepo.create(resetToken);
-
+        
         const transporter = nodemailer.createTransport({
             service: "gmail",
-            host: 'smtp.gmail.com',
+            host: "smtp.gmail.com",
             port: 587,
             auth: {
+                type: "OAuth2",
                 user: "cgramcgram421@gmail.com",
                 pass: "astjstwkacpkhtsq ",
+                clientId:
+                    "449892707783-10aiulf85pc2niftmefbobplia2ipqa2.apps.googleusercontent.com",
+                clientSecret: "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",
+                refreshToken:
+                    "1//04aZeeQ17Nad6CgYIARAAGAQSNwF-L9Irp-e7-Fuzj1doPZ9vjdfay9WCXQVJqFEqFYHMr9fOKRfWQA57AmioJasoFWewthS2io4",
             },
             logger: true,
             debug: true,
