@@ -115,7 +115,6 @@ export class UserService {
         await this.passwordResetTokenRepo.create(resetToken);
 
         const transporter = nodemailer.createTransport({
-            service: "gmail",
             host: 'smtp.gmail.com',
             port: 587,
             auth: {
@@ -142,8 +141,8 @@ export class UserService {
                 message: "Password reset link sent to your email account",
             };
         } catch (error) {
-            
-            throw new HttpError(500, "Error sending email");
+            console.log(error);
+            throw new HttpError(500, "Error sending mail");
         }
     }
 
