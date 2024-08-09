@@ -148,6 +148,7 @@ export class UserService {
                 message: "Password reset link sent to your email account",
             };
         } catch (error) {
+            
             throw new HttpError(500, "Error sending email");
         }
     }
