@@ -20,7 +20,6 @@ export const makeUserRouter = (userService: UserService) => {
 
     app.post("/signin", async (req, res) => {
         //TODO: needs to be refactored for readability and to use the error-handler middleware and handle-express
-        //TODO: needs to be refactored for readability and to use the error-handler middleware and handle-express
         try {
             const dto = loginDto.parse(req.body);
             const { message, token } = await userService.login(dto);
@@ -78,28 +77,26 @@ export const makeUserRouter = (userService: UserService) => {
             try {
                 const dto = editProfileDto.parse(req.body);
                 const user = req.user;
-                const picturePath = req.file
-                    ? `/uploads/profiles/${req.file.filename}`
-                    : "";
+
+                const pictureFilename = req.file ? req.file.filename : "";
+
                 const result = await userService.editProfile(
                     user.username,
                     user.password,
-                    picturePath,
+                    pictureFilename, 
                     dto
                 );
 
                 res.status(200).send(result);
             } catch (error) {
-                if (error instanceof HttpError) {
-                    res.status(400).send({ error: error.message });
+                if (
+                    error instanceof HttpError ||
+                    error instanceof MulterError ||
+                    error instanceof ZodError
+                ) {
+                    return res.status(400).send({ error: error.message });
                 }
-                if (error instanceof MulterError) {
-                    res.status(400).send({ error: error.message });
-                }
-                if (error instanceof ZodError) {
-                    res.status(400).send({ error: error.message });
-                    console.log(error);
-                }
+                console.log(error)
                 res.status(500).send();
             }
         });
@@ -107,7 +104,13 @@ export const makeUserRouter = (userService: UserService) => {
 
     app.get("/geteditprofile", auth(userService), (req, res) => {
         try {
-            const response = userService.getEditProfile(req.user);
+            const baseUrl = `${req.protocol}://${req.get("host")}`;
+            const response = userService.getEditProfile(req.user, baseUrl);
+
+            if (response.profilePicture) {
+                response.profilePicture = `${baseUrl}/images/profiles/${response.profilePicture}`;
+            }
+
             res.status(200).json(response);
         } catch (error) {
             if (error instanceof HttpError) {
@@ -120,7 +123,9 @@ export const makeUserRouter = (userService: UserService) => {
 
     app.get("/profileInfo", auth(userService), (req, res) => {
         try {
-            const response = userService.getProfileInfo(req.user);
+            const baseUrl = `${req.protocol}://${req.get("host")}`; // Construct the base URL
+            const response = userService.getProfileInfo(req.user, baseUrl); // Pass the base URL
+
             res.status(200).json(response);
             return;
         } catch (error) {
