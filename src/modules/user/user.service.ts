@@ -115,18 +115,11 @@ export class UserService {
         await this.passwordResetTokenRepo.create(resetToken);
         
         const transporter = nodemailer.createTransport({
-            service: "gmail",
-            host: "smtp.gmail.com",
+            host: 'smtp.gmail.com',
             port: 587,
             auth: {
-                type: "OAuth2",
                 user: "cgramcgram421@gmail.com",
                 pass: "astjstwkacpkhtsq ",
-                clientId:
-                    "449892707783-10aiulf85pc2niftmefbobplia2ipqa2.apps.googleusercontent.com",
-                clientSecret: "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",
-                refreshToken:
-                    "1//04aZeeQ17Nad6CgYIARAAGAQSNwF-L9Irp-e7-Fuzj1doPZ9vjdfay9WCXQVJqFEqFYHMr9fOKRfWQA57AmioJasoFWewthS2io4",
             },
             logger: true,
             debug: true,
@@ -141,15 +134,13 @@ export class UserService {
         };
 
         try {
-            console.log("befooooooooooore");
             await transporter.sendMail(mailOptions);
-            console.log("afteeeeeeeeeeeeer")
             return {
                 message: "Password reset link sent to your email account",
             };
         } catch (error) {
-            
-            throw new HttpError(500, "Error sending email");
+            console.log(error);
+            throw new HttpError(500, "Error sending mail");
         }
     }
 
