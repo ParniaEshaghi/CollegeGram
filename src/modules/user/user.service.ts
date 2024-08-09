@@ -130,7 +130,7 @@ export class UserService {
             from: "Cgram App",
             to: user.email,
             subject: "Password Reset",
-            text: `Click on the following link to reset your password: http://37.32.6.230:3000/reset-password/${token}`,
+            text: `Click on the following link to reset your password: http://37.32.6.230/reset-password/${token}`,
         };
 
         try {
