@@ -148,7 +148,12 @@ export class UserService {
                 message: "Password reset link sent to your email account",
             };
         } catch (error) {
+            if (error.code === 'ECONNECTION' || error.code === 'ETIMEDOUT') {
+            throw new HttpError(408,'Connection timeout occurred while sending email');
+        } else {
             throw new HttpError(500, "Error sending email");
+        }
+            // throw new HttpError(500, "Error sending email");
         }
     }
 
