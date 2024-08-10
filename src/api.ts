@@ -15,7 +15,8 @@ export const makeApp = (dataSource: DataSource) => {
     app.use(cookieParser());
     app.use(express.json());
 
-    app.use(cors({ credentials: true }));
+    app.use(cors({ credentials: true,
+    origin: "http://37.32.6.230" }));
 
     const userRepository = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
