@@ -21,18 +21,18 @@ export const makeApp = (dataSource: DataSource) => {
         'http://37.32.6.230', // Production environment
     ];
 
-    const corsOptions = {
-        origin: function (origin, callback) {
-            if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        },
-        credentials: true, // Allow cookies to be sent with requests
-    };
+    // const corsOptions = {
+    //     origin: function (origin, callback) {
+    //         if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+    //             callback(null, true);
+    //         } else {
+    //             callback(new Error('Not allowed by CORS'));
+    //         }
+    //     },
+    //     credentials: true, // Allow cookies to be sent with requests
+    // };
 
-    app.use(cors(corsOptions));
+    app.use(cors(cors));
 
     const userRepository = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
