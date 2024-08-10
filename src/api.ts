@@ -32,7 +32,7 @@ export const makeApp = (dataSource: DataSource) => {
     //     credentials: true, // Allow cookies to be sent with requests
     // };
 
-    app.use(cors(cors));
+    app.use(cors);
 
     const userRepository = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
