@@ -16,10 +16,10 @@ export const makeApp = (dataSource: DataSource) => {
     app.use(express.json());
 
     
-    const allowedOrigins = [
-        'http://localhost:5173', // Local development environment
-        'http://37.32.6.230', // Production environment
-    ];
+    // const allowedOrigins = [
+    //     'http://localhost:5173', // Local development environment
+    //     'http://37.32.6.230', // Production environment
+    // ];
 
     // const corsOptions = {
     //     origin: function (origin, callback) {
@@ -32,7 +32,7 @@ export const makeApp = (dataSource: DataSource) => {
     //     credentials: true, // Allow cookies to be sent with requests
     // };
 
-    app.use(cors);
+    app.use(cors());
 
     const userRepository = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
