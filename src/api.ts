@@ -15,24 +15,7 @@ export const makeApp = (dataSource: DataSource) => {
     app.use(cookieParser());
     app.use(express.json());
 
-    
-    // const allowedOrigins = [
-    //     'http://localhost:5173', // Local development environment
-    //     'http://37.32.6.230', // Production environment
-    // ];
-
-    // const corsOptions = {
-    //     origin: function (origin, callback) {
-    //         if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-    //             callback(null, true);
-    //         } else {
-    //             callback(new Error('Not allowed by CORS'));
-    //         }
-    //     },
-    //     credentials: true, // Allow cookies to be sent with requests
-    // };
-
-    app.use(cors());
+    app.use(cors({ credentials: true }));
 
     const userRepository = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
