@@ -5,7 +5,7 @@ import {
 } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
 import { SignUpDto } from "./dto/signup.dto";
-import { User } from "./model/user.model";
+import { User, UserWithoutPassword } from "./model/user.model";
 import { UserRepository } from "./user.repository";
 import { z } from "zod";
 import bcrypt from "bcrypt";
@@ -23,7 +23,7 @@ export class UserService {
         private passwordResetTokenRepo: PasswordResetTokenRepository
     ) {}
 
-    async createUser(dto: SignUpDto): Promise<User> {
+    async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
         if (
             (await this.userRepo.findByEmail(dto.email)) ||
             (await this.userRepo.findByUsername(dto.username))
@@ -33,7 +33,7 @@ export class UserService {
 
         const password_hash = await hashGenerator(dto.password);
 
-        return this.userRepo.create({
+        const user = await this.userRepo.create({
             username: dto.username,
             password: password_hash,
             email: dto.email,
@@ -46,6 +46,21 @@ export class UserService {
             following_count: 0,
             post_count: 0,
         });
+
+        const userWithoutPass: UserWithoutPassword = {
+            username: user.username,
+            email: user.email,
+            profilePicture: user.profilePicture,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profileStatus: user.profileStatus,
+            bio: user.bio,
+            follower_count: user.follower_count,
+            following_count: user.following_count,
+            post_count: user.post_count,
+        };
+
+        return userWithoutPass;
     }
 
     public async login(dto: LoginDto) {
@@ -130,7 +145,7 @@ export class UserService {
             from: "Cgram App",
             to: user.email,
             subject: "Password Reset",
-            text: `Click on the following link to reset your password: http://37.32.6.230:3000/reset-password/${token}`,
+            text: `Click on the following link to reset your password: http://37.32.6.230/reset-password/${token}`,
         };
 
         try {
@@ -139,7 +154,6 @@ export class UserService {
                 message: "Password reset link sent to your email account",
             };
         } catch (error) {
-            
             throw new HttpError(500, "Error sending email");
         }
     }
@@ -204,7 +218,7 @@ export class UserService {
         password: string,
         pictureFilename: string,
         dto: EditProfileDto
-    ): Promise<User> {
+    ): Promise<UserWithoutPassword> {
         const password_hash = dto.password
             ? await hashGenerator(dto.password)
             : password;
@@ -223,7 +237,19 @@ export class UserService {
         if (!user) {
             throw new NotFoundError();
         }
-        return user;
+        const userWithoutPass: UserWithoutPassword = {
+            username: user.username,
+            email: user.email,
+            profilePicture: user.profilePicture,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profileStatus: user.profileStatus,
+            bio: user.bio,
+            follower_count: user.follower_count,
+            following_count: user.following_count,
+            post_count: user.post_count,
+        };
+        return userWithoutPass;
     }
 
     public getProfileInfo(user: User, baseUrl: string) {

@@ -16,10 +16,9 @@ export const makeApp = (dataSource: DataSource, userService: UserService) => {
     app.use(express.json());
     app.use(cors());
 
+    app.use("/api/images", express.static(path.join(__dirname, "../images")));
 
-    app.use("/images", express.static(path.join(__dirname, "../images")));
-
-    app.use("/user", makeUserRouter(userService));
+    app.use("/api/user", makeUserRouter(userService));
     app.use(errorHandler);
 
     return app;

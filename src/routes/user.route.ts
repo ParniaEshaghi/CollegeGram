@@ -24,17 +24,17 @@ export const makeUserRouter = (userService: UserService) => {
             const dto = loginDto.parse(req.body);
             const { message, token } = await userService.login(dto);
             res.cookie("token", token, { httpOnly: true });
-            res.status(200).send(message);
+            res.status(200).send({ message: message });
         } catch (error) {
             if (error instanceof HttpError) {
-                res.status(error.status).send(error.message);
+                res.status(error.status).send({ error: error.message });
                 return;
             }
             if (error instanceof ZodError) {
-                res.status(400).send({ message: error.message });
+                res.status(400).send({ error: error.message });
                 return;
             }
-            res.status(500).send();
+            res.status(500).send({});
         }
     });
 
@@ -42,14 +42,14 @@ export const makeUserRouter = (userService: UserService) => {
         const { credential } = req.body;
         try {
             const { message } = await userService.forgetPassword(credential);
-            res.status(200).send(message);
+            res.status(200).send({ message: message });
             return;
         } catch (error) {
             if (error instanceof HttpError) {
-                res.status(error.status).send(error.message);
+                res.status(error.status).send({ error: error.message });
                 return;
             }
-            res.status(500).send();
+            res.status(500).send({});
         }
     });
 
@@ -57,14 +57,14 @@ export const makeUserRouter = (userService: UserService) => {
         const { newPass, token } = req.body;
         try {
             const { message } = await userService.resetPassword(newPass, token);
-            res.status(200).send(message);
+            res.status(200).send({ message: message });
             return;
         } catch (error) {
             if (error instanceof HttpError) {
-                res.status(error.status).send(error.message);
+                res.status(error.status).send({ error: error.message });
                 return;
             }
-            res.status(500).send();
+            res.status(500).send({});
         }
     });
 
@@ -83,11 +83,11 @@ export const makeUserRouter = (userService: UserService) => {
                 const result = await userService.editProfile(
                     user.username,
                     user.password,
-                    pictureFilename, 
+                    pictureFilename,
                     dto
                 );
 
-                res.status(200).send(result);
+                res.status(200).send({ result });
             } catch (error) {
                 if (
                     error instanceof HttpError ||
@@ -96,8 +96,8 @@ export const makeUserRouter = (userService: UserService) => {
                 ) {
                     return res.status(400).send({ error: error.message });
                 }
-                console.log(error)
-                res.status(500).send();
+                console.log(error);
+                res.status(500).send({});
             }
         });
     });
@@ -114,10 +114,10 @@ export const makeUserRouter = (userService: UserService) => {
             res.status(200).json(response);
         } catch (error) {
             if (error instanceof HttpError) {
-                res.status(error.status).send(error.message);
+                res.status(error.status).send({ error: error.message });
                 return;
             }
-            res.status(500).send();
+            res.status(500).send({});
         }
     });
 
@@ -130,14 +130,14 @@ export const makeUserRouter = (userService: UserService) => {
             return;
         } catch (error) {
             if (error instanceof HttpError) {
-                res.status(error.status).send(error.message);
+                res.status(error.status).send({ error: error.message });
                 return;
             }
             if (error instanceof ZodError) {
-                res.status(400).send({ message: error.message });
+                res.status(400).send({ error: error.message });
                 return;
             }
-            res.status(500).send();
+            res.status(500).send({});
         }
     });
 

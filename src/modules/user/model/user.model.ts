@@ -11,3 +11,5 @@ export interface User {
     following_count: number;
     post_count: number;
 }
+
+export type UserWithoutPassword = Omit<User, "password">;
