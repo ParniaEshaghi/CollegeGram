@@ -1,21 +1,47 @@
-import { makeApp } from "../../api";
-import { AppDataSource } from "../../data-source";
+import { makeApp } from "../../src/api";
 import { Express } from "express";
 import request from "supertest";
-import { hashGenerator } from "../../utility/hash-generator";
 import bcrypt from "bcrypt";
+import { UserRepository } from "../../src/modules/user/user.repository";
+import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword.repository";
+import { UserService } from "../../src/modules/user/user.service";
+import { createTestDb } from "../../src/utility/test-db";
+import nodemailer from "nodemailer";
+
+jest.mock("nodemailer");
 
 describe("User route test suite", () => {
     let app: Express;
+    let userRepo: UserRepository;
+    let passwordResetTokenRepo: PasswordResetTokenRepository;
+    let userService: UserService;
 
-    beforeAll(async () => {
-        const dataSource = await AppDataSource.initialize();
-        app = makeApp(dataSource);
-    });
+    let sendMailMock: jest.Mock;
+    let emailContent: string | undefined;
 
-    afterAll(async () => {
-        await AppDataSource.dropDatabase();
-        await AppDataSource.destroy();
+    beforeEach(async () => {
+        const dataSource = await createTestDb();
+        userRepo = new UserRepository(dataSource);
+        passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
+        userService = new UserService(userRepo, passwordResetTokenRepo);
+        app = makeApp(dataSource, userService);
+
+        jest.clearAllMocks();
+
+        sendMailMock = jest.fn().mockImplementation((mailOptions) => {
+            emailContent = mailOptions.text;
+            return Promise.resolve({});
+        });
+
+        (nodemailer.createTransport as jest.Mock).mockReturnValue({
+            sendMail: sendMailMock,
+        });
+
+        await request(app).post("/user/signup").send({
+            username: "test",
+            email: "test@gmail.com",
+            password: "test",
+        });
     });
 
     describe("Signing up", () => {
@@ -23,9 +49,9 @@ describe("User route test suite", () => {
             await request(app)
                 .post("/user/signup")
                 .send({
-                    username: "test",
-                    email: "test@gmail.com",
-                    password: "test",
+                    username: "signup_test",
+                    email: "signup_test@gmail.com",
+                    password: "signup_test",
                 })
                 .expect(200);
         });
@@ -102,21 +128,24 @@ describe("User route test suite", () => {
     });
 
     describe("Forget password", () => {
-        // it works
-        it.skip("should send forget email", async () => {
-            await request(app)
-                .post("/user/signup")
-                .send({
-                    username: "parnia",
-                    email: "parniaeshaghi@gmail.com",
-                    password: "parnia",
-                })
-                .expect(200);
-
+        it("should send forget email", async () => {
             await request(app)
                 .post("/user/forgetpassword")
-                .send({ credential: "parniaeshaghi@gmail.com" })
+                .send({ credential: "test@gmail.com" })
                 .expect(200);
+
+            expect(sendMailMock).toHaveBeenCalledTimes(1);
+
+            expect(sendMailMock).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    to: "test@gmail.com",
+                })
+            );
+
+            expect(emailContent).toBeDefined();
+            expect(emailContent).toContain(
+                "http://37.32.6.230:3000/reset-password/"
+            );
         });
 
         it("should fail if credential is empty", async () => {
@@ -135,8 +164,20 @@ describe("User route test suite", () => {
     });
 
     describe("Reset password", () => {
-        //TODO: find a way to test the token
-        it("should reset password", async () => {});
+        it("should reset password", async () => {
+            await request(app)
+                .post("/user/forgetpassword")
+                .send({ credential: "test" });
+            const emailContent = sendMailMock.mock.calls[0][0].text;
+            const tokenMatch = emailContent.match(
+                /reset-password\/([a-zA-Z0-9-_\.]+)$/
+            );
+            const token = tokenMatch ? tokenMatch[1] : null;
+            await request(app)
+                .post("/user/resetpassword")
+                .send({ newPass: "newPass", token: token })
+                .expect(200);
+        });
 
         it("should fail if token is wrong or expired", async () => {
             await request(app)
@@ -265,7 +306,6 @@ describe("User route test suite", () => {
             const cookie = cookies[0];
             expect(cookies).toBeDefined();
 
-            const hashed_password = await hashGenerator("test");
             const response_editprofile = await request(app)
                 .post("/user/editprofile")
                 .set("Cookie", [cookie])
@@ -305,6 +345,62 @@ describe("User route test suite", () => {
                     bio: "test",
                 })
                 .expect(401);
+        });
+
+        it("should update profile and handle image upload", async () => {
+            const response = await request(app)
+                .post("/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+            expect(cookies).toBeDefined();
+
+            const response_editprofile = await request(app)
+                .post("/user/editprofile")
+                .set("Cookie", [cookie])
+                .field("email", "changedemail@gmail.com")
+                .field("firstName", "test")
+                .field("lastName", "test")
+                .field("profileStatus", "private")
+                .field("bio", "test")
+                .field("password", "newpass")
+                .attach("profileImage", Buffer.from(""), "testFile.jpg");
+
+            // Expect response fields to be updated
+            expect(response_editprofile.status).toBe(200);
+            expect(response_editprofile.body.email).toBe(
+                "changedemail@gmail.com"
+            );
+            expect(response_editprofile.body.firstName).toBe("test");
+            expect(response_editprofile.body.profileStatus).toBe("private");
+            expect(
+                await bcrypt.compare(
+                    "newpass",
+                    response_editprofile.body.password
+                )
+            ).toBe(true);
+        });
+
+        it("should fail to upload file if it is text", async () => {
+            const response = await request(app)
+                .post("/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+            expect(cookies).toBeDefined();
+
+            await request(app)
+                .post("/user/editprofile")
+                .set("Cookie", [cookie])
+                .field("email", "changedemail@gmail.com")
+                .field("firstName", "test")
+                .field("lastName", "test")
+                .field("profileStatus", "private")
+                .field("bio", "test")
+                .field("password", "newpass")
+                .attach("profileImage", Buffer.from(""), "testFile.txt").expect(400);
         });
     });
 });

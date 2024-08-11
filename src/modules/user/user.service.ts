@@ -11,7 +11,7 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { LoginDto } from "./dto/login.dto";
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { ForgetPassword } from "./model/forgetPassword.model";
 import { EditProfileDto } from "./dto/edit-profile.dto";
@@ -139,8 +139,8 @@ export class UserService {
                 message: "Password reset link sent to your email account",
             };
         } catch (error) {
-            console.log(error);
-            throw new HttpError(500, "Error sending mail");
+            
+            throw new HttpError(500, "Error sending email");
         }
     }
 

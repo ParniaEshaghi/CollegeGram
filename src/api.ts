@@ -9,18 +9,16 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
 
-export const makeApp = (dataSource: DataSource) => {
+export const makeApp = (dataSource: DataSource, userService: UserService) => {
     const app = express();
 
     app.use(cookieParser());
     app.use(express.json());
     app.use(cors());
 
-    const userRepository = new UserRepository(dataSource);
-    const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
-    const userService = new UserService(userRepository, passwordResetTokenRepo);
 
     app.use("/images", express.static(path.join(__dirname, "../images")));
+
     app.use("/user", makeUserRouter(userService));
     app.use(errorHandler);
 
