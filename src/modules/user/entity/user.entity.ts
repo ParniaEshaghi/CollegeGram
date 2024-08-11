@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { PostEntity } from "../../post/entity/post.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -40,4 +41,7 @@ export class UserEntity {
 
     @Column()
     post_count!: number;
+
+    @OneToMany(() => PostEntity, (post) => post.user)
+    posts!: PostEntity[];
 }

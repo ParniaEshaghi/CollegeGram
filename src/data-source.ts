@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { UserEntity } from "./modules/user/entity/user.entity";
 import { PasswordResetTokenEntity } from "./modules/user/entity/forgetPassword.entity";
+import { PostEntity } from "./modules/post/entity/post.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -12,7 +13,7 @@ export const AppDataSource = new DataSource({
     database: "cgram",
     synchronize: true,
     logging: false,
-    entities: [UserEntity, PasswordResetTokenEntity],
+    entities: [UserEntity, PasswordResetTokenEntity, PostEntity],
     migrations: [],
     subscribers: [],
 });
