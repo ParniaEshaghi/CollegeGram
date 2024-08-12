@@ -17,7 +17,6 @@ import { EditProfileDto } from "./dto/edit-profile.dto";
 import { DecodedToken } from "../../middlewares/auth.middleware";
 import { UserRelationRepository } from "./userRelation.repository";
 
-
 export class UserService {
     constructor(
         private userRepo: UserRepository,
@@ -280,5 +279,42 @@ export class UserService {
             throw new NotFoundError();
         }
         return this.userRepo.findUserFollowings(user.username);
+    }
+
+    public async getFollowStatus(user: User, following_username: string) {
+        if (!user) {
+            throw new HttpError(401, "Unauthorized");
+        }
+        const following = await this.getUserByUsername(following_username);
+        if (!following) {
+            throw new NotFoundError();
+        }
+        return await this.userRelationRepo.checkExistance(user, following);
+    }
+
+    public async follow(user: User, following_username: string) {
+        if (!user) {
+            throw new HttpError(401, "Unauthorized");
+        }
+        const following = await this.getUserByUsername(following_username);
+        if (!following) {
+            throw new NotFoundError();
+        }
+        this.userRepo.incrementFollowingCount(user.username);
+        this.userRepo.incrementFollowerCount(following.username);
+        return this.userRelationRepo.create(user, following);
+    }
+
+    public async unfollow(user: User, following_username: string) {
+        if (!user) {
+            throw new HttpError(401, "Unauthorized");
+        }
+        const following = await this.getUserByUsername(following_username);
+        if (!following) {
+            throw new NotFoundError();
+        }
+        this.userRepo.decrementFollowingCount(user.username);
+        this.userRepo.decrementFollowerCount(following.username);
+        return this.userRelationRepo.delete(user, following);
     }
 }

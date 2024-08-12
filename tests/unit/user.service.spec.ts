@@ -6,6 +6,7 @@ import { hashGenerator } from "../../src/utility/hash-generator";
 import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword.repository";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
+import { UserRelationRepository } from "../../src/modules/user/userRelation.repository";
 import { randomUUID } from "crypto";
 
 jest.mock("nodemailer");
@@ -13,6 +14,7 @@ jest.mock("nodemailer");
 describe("User service test suite", () => {
     let userRepo: UserRepository;
     let passwordResetTokenRepo: PasswordResetTokenRepository;
+    let userRelationRepo: UserRelationRepository;
     let userService: UserService;
 
     let sendMailMock: jest.Mock;
@@ -22,7 +24,12 @@ describe("User service test suite", () => {
         const dataSource = await createTestDb();
         userRepo = new UserRepository(dataSource);
         passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
-        userService = new UserService(userRepo, passwordResetTokenRepo);
+        userRelationRepo = new UserRelationRepository(dataSource);
+        userService = new UserService(
+            userRepo,
+            passwordResetTokenRepo,
+            userRelationRepo
+        );
 
         jest.clearAllMocks();
 
@@ -39,6 +46,12 @@ describe("User service test suite", () => {
             username: "test",
             email: "test@gmail.com",
             password: "test",
+        });
+
+        await userService.createUser({
+            username: "follow_test",
+            email: "follow_test@gmail.com",
+            password: "follow_test",
         });
     });
 
