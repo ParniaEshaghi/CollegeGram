@@ -13,9 +13,6 @@ export class PasswordResetTokenEntity {
     @Column()
     token!: string;
 
-    @CreateDateColumn()
-    createdAt!: Date;
-
     @Column()
     expiration!: Date;
 

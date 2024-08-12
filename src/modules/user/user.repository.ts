@@ -31,14 +31,20 @@ export class UserRepository {
         });
     }
 
+    public findById(id: string): Promise<User | null> {
+        return this.userRepo.findOne({
+            where: { id },
+        });
+    }
+
     public create(user: User): Promise<User> {
         return this.userRepo.save(user);
     }
 
-    public async updatePassword(user: User, newPass: string): Promise<void> {
+    public async updatePassword(username: string, password: string): Promise<void> {
         await this.userRepo.update(
-            { username: user.username },
-            { password: newPass }
+            { username },
+            { password }
         );
     }
 

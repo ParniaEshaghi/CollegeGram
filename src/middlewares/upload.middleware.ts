@@ -1,6 +1,7 @@
 import multer, { FileFilterCallback, StorageEngine } from "multer";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import { HttpError } from "../utility/http-errors";
 
 // Storage engine for profile pictures
 const profileStorage: StorageEngine = multer.diskStorage({
@@ -37,7 +38,7 @@ const checkFileType = (file: Express.Multer.File, cb: FileFilterCallback) => {
     if (mimetype && extname) {
         cb(null, true);
     } else {
-        cb(new Error("Error: Images Only!"));
+        cb(new HttpError(400, "Bad Request"));
     }
 };
 

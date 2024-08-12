@@ -70,34 +70,32 @@ export const makeUserRouter = (userService: UserService) => {
 
     app.post("/editprofile", auth(userService), async (req, res) => {
         profileUpload(req, res, async (uploadError) => {
-            if (uploadError) {
-                return res.status(400).send({ error: uploadError.message });
-            }
-
             try {
+                if (uploadError) {
+                    res.status(400).send({ error: uploadError.message });
+                    return;
+                }
                 const dto = editProfileDto.parse(req.body);
-                const user = req.user;
-
                 const pictureFilename = req.file ? req.file.filename : "";
-
                 const result = await userService.editProfile(
-                    user.username,
-                    user.password,
+                    req.user,
                     pictureFilename,
                     dto
                 );
 
-                res.status(200).send({ result });
+                res.status(200).send(result);
+                return;
             } catch (error) {
                 if (
                     error instanceof HttpError ||
                     error instanceof MulterError ||
                     error instanceof ZodError
                 ) {
-                    return res.status(400).send({ error: error.message });
+                    res.status(400).send({ error: error.message });
+                    return;
                 }
-                console.log(error);
                 res.status(500).send({});
+                return;
             }
         });
     });
@@ -123,8 +121,8 @@ export const makeUserRouter = (userService: UserService) => {
 
     app.get("/profileInfo", auth(userService), (req, res) => {
         try {
-            const baseUrl = `${req.protocol}://${req.get("host")}`; // Construct the base URL
-            const response = userService.getProfileInfo(req.user, baseUrl); // Pass the base URL
+            const baseUrl = `${req.protocol}://${req.get("host")}`;
+            const response = userService.getProfileInfo(req.user, baseUrl);
 
             res.status(200).json(response);
             return;
