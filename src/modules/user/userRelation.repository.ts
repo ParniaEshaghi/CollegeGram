@@ -1,6 +1,7 @@
 import { DataSource, Repository } from "typeorm";
 import { UserRelationEntity } from "./entity/userRelation.entity";
 import { User } from "./model/user.model";
+import { UserRelation } from "./model/userRelation.model";
 
 export class UserRelationRepository {
     private userRelationRepo: Repository<UserRelationEntity>;
@@ -16,7 +17,13 @@ export class UserRelationRepository {
         return this.userRelationRepo.save({ follower, following });
     }
 
+    public checkExistance(follower: User, following: User): Promise<boolean> {
+        return this.userRelationRepo.exists({
+            where: { follower, following },
+        });
+    };
+
     public async delete(follower: User, following: User): Promise<void> {
-        await this.userRelationRepo.delete({ follower, following });
+        await this.userRelationRepo.softDelete({ follower, following });
     }
 }

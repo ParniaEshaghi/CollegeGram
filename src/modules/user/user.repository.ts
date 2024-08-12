@@ -89,4 +89,20 @@ export class UserRepository {
             (relation) => relation.following.username
         );
     }
+
+    public async incrementFollowerCount(username: string): Promise<void> {
+        await this.userRepo.increment({ username }, "follower_count", 1);
+    }
+
+    public async decrementFollowerCount(username: string): Promise<void> {
+        await this.userRepo.decrement({ username }, "follower_count", 1);
+    }
+
+    public async incrementFollowingCount(username: string): Promise<void> {
+        await this.userRepo.increment({ username }, "following_count", 1);
+    }
+
+    public async decrementFollowingCount(username: string): Promise<void> {
+        await this.userRepo.decrement({ username }, "following_count", 1);
+    }
 }

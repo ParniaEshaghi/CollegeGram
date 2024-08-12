@@ -1,4 +1,4 @@
-import { CreateDateColumn, Entity, ManyToOne } from "typeorm";
+import { CreateDateColumn, DeleteDateColumn, Entity, ManyToOne } from "typeorm";
 import { UserEntity } from "../../user/entity/user.entity";
 
 @Entity("userRelations")
@@ -11,4 +11,7 @@ export class UserRelationEntity {
 
     @CreateDateColumn()
     createdAt!: Date;
+
+    @DeleteDateColumn()
+    deletedAt!: Date;
 }
