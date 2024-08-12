@@ -14,11 +14,15 @@ import { LoginDto } from "./dto/login.dto";
 import nodemailer from "nodemailer";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { EditProfileDto } from "./dto/edit-profile.dto";
+import { DecodedToken } from "../../middlewares/auth.middleware";
+import { UserRelationRepository } from "./userRelation.repository";
+
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
-        private passwordResetTokenRepo: PasswordResetTokenRepository
+        private passwordResetTokenRepo: PasswordResetTokenRepository,
+        private userRelationRepo: UserRelationRepository
     ) {}
 
     async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -260,5 +264,21 @@ export class UserService {
         };
 
         return response;
+    }
+
+    public async getUserFollowers(username: string): Promise<string[]> {
+        const user = await this.getUserByUsername(username);
+        if (!user) {
+            throw new NotFoundError();
+        }
+        return this.userRepo.findUserFollowers(user.username);
+    }
+
+    public async getUserFollowings(username: string): Promise<string[]> {
+        const user = await this.getUserByUsername(username);
+        if (!user) {
+            throw new NotFoundError();
+        }
+        return this.userRepo.findUserFollowings(user.username);
     }
 }

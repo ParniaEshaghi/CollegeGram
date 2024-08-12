@@ -67,4 +67,26 @@ export class UserRepository {
             }
         );
     }
+
+    public async findUserFollowers(username: string): Promise<string[]> {
+        const userWithFollowers = await this.userRepo.findOne({
+            where: { username },
+            relations: ["followers", "followers.follower"],
+        });
+
+        return userWithFollowers!.followers.map(
+            (relation) => relation.follower.username
+        );
+    }
+
+    public async findUserFollowings(username: string): Promise<string[]> {
+        const userWithFollowings = await this.userRepo.findOne({
+            where: { username },
+            relations: ["followings", "followings.following"],
+        });
+
+        return userWithFollowings!.followings.map(
+            (relation) => relation.following.username
+        );
+    }
 }
