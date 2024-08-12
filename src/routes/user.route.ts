@@ -24,7 +24,7 @@ export const makeUserRouter = (userService: UserService) => {
             const dto = loginDto.parse(req.body);
             const { message, token } = await userService.login(dto);
             // res.cookie("token", token, { httpOnly: true });
-                        res.cookie("token", token, { });
+                        res.cookie("token", token, { secure: false, sameSite: "none" });
 
             res.status(200).send(token);
         } catch (error) {
