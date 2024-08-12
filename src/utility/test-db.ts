@@ -3,6 +3,8 @@ import { DataSource } from "typeorm";
 import { UserEntity } from "../modules/user/entity/user.entity";
 import { PasswordResetTokenEntity } from "../modules/user/entity/forgetPassword.entity";
 import { v4 } from "uuid";
+import { PostEntity } from "../modules/post/entity/post.entity";
+import { UserRelationEntity } from "../modules/user/entity/userRelation.entity";
 
 export const createTestDb = async () => {
     // Create a new in-memory database
@@ -39,7 +41,12 @@ export const createTestDb = async () => {
     const dataSource = new DataSource({
         type: "postgres",
         driver: db.adapters.createPg(), // Create the driver directly from the pg-mem instance
-        entities: [UserEntity, PasswordResetTokenEntity],
+        entities: [
+            UserEntity,
+            PasswordResetTokenEntity,
+            PostEntity,
+            UserRelationEntity,
+        ],
         synchronize: true,
         logging: false,
     });

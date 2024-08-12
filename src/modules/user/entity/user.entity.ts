@@ -1,5 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+} from "typeorm";
 import { PostEntity } from "../../post/entity/post.entity";
+import { UserRelationEntity } from "./userRelation.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -44,4 +52,16 @@ export class UserEntity {
 
     @OneToMany(() => PostEntity, (post) => post.user)
     posts!: PostEntity[];
+
+    @OneToMany(() => UserRelationEntity, (relation) => relation.follower)
+    followers!: UserRelationEntity[];
+
+    @OneToMany(() => UserRelationEntity, (relation) => relation.following)
+    followings!: UserRelationEntity[];
+
+    @CreateDateColumn()
+    createdAt!: Date;
+
+    @UpdateDateColumn()
+    updatedAt!: Date;
 }
