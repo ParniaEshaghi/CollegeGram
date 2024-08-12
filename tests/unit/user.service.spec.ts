@@ -6,6 +6,7 @@ import { hashGenerator } from "../../src/utility/hash-generator";
 import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword.repository";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
+import { randomUUID } from "crypto";
 
 jest.mock("nodemailer");
 
@@ -135,7 +136,7 @@ describe("User service test suite", () => {
             );
             expect(emailContent).toBeDefined();
             expect(emailContent).toContain(
-                "http://37.32.6.230:3000/reset-password/"
+                "http://37.32.6.230/reset-password/"
             );
         });
 
@@ -155,7 +156,7 @@ describe("User service test suite", () => {
             await userService.forgetPassword("test@gmail.com");
             const emailContent = sendMailMock.mock.calls[0][0].text;
             const tokenMatch = emailContent.match(
-                /reset-password\/([a-zA-Z0-9-_\.]+)$/
+                /reset-password\/([a-fA-F0-9-]+~[a-fA-F0-9-]+)$/
             );
             const token = tokenMatch ? tokenMatch[1] : null;
             const response = await userService.resetPassword(
@@ -167,17 +168,20 @@ describe("User service test suite", () => {
 
         it("should fail to reset password if token is expired or wrong", async () => {
             expect(
-                userService.resetPassword("test", "wrongtoken")
-            ).rejects.toThrow(new HttpError(401, "Authentication failed."));
+                userService.resetPassword(
+                    "test",
+                    `${randomUUID()}~${randomUUID()}`
+                )
+            ).rejects.toThrow(new HttpError(401, "Unauthorized"));
         });
     });
 
     describe("Edit profile", () => {
         it("should update profile without image", async () => {
             const hashed_password = await hashGenerator("test");
+            const user = await userService.getUserByUsername("test")
             const response = await userService.editProfile(
-                "test",
-                hashed_password,
+                user!,
                 "",
                 {
                     email: "changedemail@gmail.com",
@@ -191,9 +195,6 @@ describe("User service test suite", () => {
             expect(response.email).toBe("changedemail@gmail.com");
             expect(response.firstName).toBe("test");
             expect(response.profileStatus).toBe("private");
-            expect(await bcrypt.compare("newpass", response.password)).toBe(
-                true
-            );
         });
     });
 });

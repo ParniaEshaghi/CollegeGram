@@ -13,9 +13,7 @@ import jwt from "jsonwebtoken";
 import { LoginDto } from "./dto/login.dto";
 import nodemailer from "nodemailer";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
-import { ForgetPassword } from "./model/forgetPassword.model";
 import { EditProfileDto } from "./dto/edit-profile.dto";
-import { DecodedToken } from "../../middlewares/auth.middleware";
 
 export class UserService {
     constructor(
@@ -115,19 +113,16 @@ export class UserService {
             throw new HttpError(401, "Invalid credential");
         }
 
-        const token = jwt.sign({ username: user.username }, "10", {
-            expiresIn: "1h",
-        });
         const expirationTime = new Date();
-        expirationTime.setHours(expirationTime.getHours() + 1);
+        expirationTime.setHours(expirationTime.getHours() + 2);
+        const token = crypto.randomUUID();
+        const token_hash = await hashGenerator(token);
 
-        const resetToken: ForgetPassword = {
-            token: token,
+        const resetToken = await this.passwordResetTokenRepo.create({
+            token: token_hash,
             expiration: expirationTime,
             username: user.username,
-        };
-
-        await this.passwordResetTokenRepo.create(resetToken);
+        });
 
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
@@ -145,7 +140,7 @@ export class UserService {
             from: "Cgram App",
             to: user.email,
             subject: "Password Reset",
-            text: `Click on the following link to reset your password: http://37.32.6.230/reset-password/${token}`,
+            text: `Click on the following link to reset your password: http://37.32.6.230/reset-password/${resetToken.id}~${token}`,
         };
 
         try {
@@ -159,38 +154,28 @@ export class UserService {
     }
 
     public async resetPassword(newPass: string, token: string) {
-        let user;
+        let id, resetToken;
         try {
-            const decoded = jwt.verify(token, "10") as DecodedToken;
-            user = await this.getUserByUsername(decoded.username);
-
-            const dbtoken = await this.passwordResetTokenRepo.findByToken(
-                token
-            );
-
-            if (!dbtoken) {
-                throw new NotFoundError();
-            }
-
-            if (dbtoken.username !== user?.username) {
-                throw new ForbiddenError();
-            }
-
-            if (dbtoken.expiration.getTime() < new Date().getTime()) {
-                throw new ForbiddenError();
-            }
-
-            if (!user) {
-                throw new NotFoundError();
-            }
-        } catch (error) {
-            throw new HttpError(401, "Authentication failed.");
+            [id, resetToken] = token.split("~");
+        } catch (e) {
+            throw new HttpError(401, "Unauthorized");
         }
 
+        const dbtoken = await this.passwordResetTokenRepo.findById(id);
+        if (!dbtoken) {
+            throw new HttpError(401, "Unauthorized");
+        }
+        if (dbtoken.expiration.getTime() < new Date().getTime()) {
+            this.passwordResetTokenRepo.delete(dbtoken.id);
+            throw new ForbiddenError();
+        }
+        const isMatch = await bcrypt.compare(resetToken, dbtoken.token);
+        if (!isMatch) {
+            throw new HttpError(401, "Unauthorized");
+        }
         const password_hash = await hashGenerator(newPass);
-
-        this.userRepo.updatePassword(user, password_hash);
-
+        this.userRepo.updatePassword(dbtoken.username, password_hash);
+        this.passwordResetTokenRepo.delete(dbtoken.id);
         return { message: "New password set" };
     }
 
@@ -206,7 +191,7 @@ export class UserService {
             profileStatus: user.profileStatus,
             bio: user.bio,
             profilePicture: user.profilePicture
-                ? `${baseUrl}/images/profiles/${user.profilePicture}`
+                ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
                 : "",
         };
 
@@ -214,16 +199,18 @@ export class UserService {
     }
 
     public async editProfile(
-        username: string,
-        password: string,
+        user: User,
         pictureFilename: string,
         dto: EditProfileDto
     ): Promise<UserWithoutPassword> {
+        if (!user) {
+            throw new HttpError(401, "Unauthorized");
+        }
         const password_hash = dto.password
             ? await hashGenerator(dto.password)
-            : password;
+            : user.password;
 
-        await this.userRepo.updateProfile(username, {
+        await this.userRepo.updateProfile(user.username, {
             password: password_hash,
             email: dto.email,
             profilePicture: pictureFilename,
@@ -233,21 +220,21 @@ export class UserService {
             bio: dto.bio,
         });
 
-        const user = await this.getUserByUsername(username);
-        if (!user) {
+        const newUser = await this.getUserByUsername(user.username);
+        if (!newUser) {
             throw new NotFoundError();
         }
         const userWithoutPass: UserWithoutPassword = {
-            username: user.username,
-            email: user.email,
-            profilePicture: user.profilePicture,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profileStatus: user.profileStatus,
-            bio: user.bio,
-            follower_count: user.follower_count,
-            following_count: user.following_count,
-            post_count: user.post_count,
+            username: newUser.username,
+            email: newUser.email,
+            profilePicture: newUser.profilePicture,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            profileStatus: newUser.profileStatus,
+            bio: newUser.bio,
+            follower_count: newUser.follower_count,
+            following_count: newUser.following_count,
+            post_count: newUser.post_count,
         };
         return userWithoutPass;
     }
@@ -264,7 +251,7 @@ export class UserService {
             bio: user.bio,
             // Construct full URL for profilePicture
             profilePicture: user.profilePicture
-                ? `${baseUrl}/images/profiles/${user.profilePicture}`
+                ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
                 : "",
             posts: [],
             post_count: 0,
