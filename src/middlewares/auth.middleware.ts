@@ -14,10 +14,11 @@ export const auth =
             if (!token) {
                 throw new Error("Authentication failed. Token missing.");
             }
-
+            console.log("heeeeeeeeeeeer1 ")
             const decoded = jwt.verify(token, "10") as DecodedToken;
+            console.log("heeeeeeeeeeeer2 ",decoded)
             const user = await userService.getUserByUsername(decoded.username);
-
+            console.log("heeeeeeeeeeeer3 ", user)
             if (!user) {
                 throw new Error("Authentication failed. User not found.");
             }
