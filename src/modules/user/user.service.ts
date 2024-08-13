@@ -16,6 +16,7 @@ import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { EditProfileDto } from "./dto/edit-profile.dto";
 import { DecodedToken } from "../../middlewares/auth.middleware";
 import { UserRelationRepository } from "./userRelation.repository";
+import { Post } from "../post/model/post.model";
 
 export class UserService {
     constructor(
@@ -281,6 +282,10 @@ export class UserService {
         return this.userRepo.findUserFollowings(user.username);
     }
 
+    public async getUserPosts(username: string): Promise<Post[]> {
+        return await this.userRepo.getUserPosts(username);
+    }
+    
     public async getFollowStatus(user: User, following_username: string) {
         if (!user) {
             throw new HttpError(401, "Unauthorized");

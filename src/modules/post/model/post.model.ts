@@ -7,3 +7,5 @@ export interface Post {
     tags: string[];
     mentions: string[];
 }
+
+export type PostWithoutUser = Omit<Post, "user">;

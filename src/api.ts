@@ -8,8 +8,14 @@ import { PasswordResetTokenRepository } from "./modules/user/forgetPassword.repo
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
+import { makePostRouter } from "./routes/post.route";
+import { PostService } from "./modules/post/post.service";
 
-export const makeApp = (dataSource: DataSource, userService: UserService) => {
+export const makeApp = (
+    dataSource: DataSource,
+    userService: UserService,
+    postService: PostService
+) => {
     const app = express();
 
     app.use(cookieParser());
@@ -17,8 +23,9 @@ export const makeApp = (dataSource: DataSource, userService: UserService) => {
     app.use(cors());
 
     app.use("/api/images", express.static(path.join(__dirname, "../images")));
-
     app.use("/api/user", makeUserRouter(userService));
+    app.use("/api/post", makePostRouter(postService, userService));
+
     app.use(errorHandler);
 
     return app;
