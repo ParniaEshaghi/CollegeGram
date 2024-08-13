@@ -1,13 +1,16 @@
 import { makeApp } from "../../src/api";
 import { Express } from "express";
 import request from "supertest";
-import bcrypt from "bcrypt";
 import { UserRepository } from "../../src/modules/user/user.repository";
 import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword.repository";
 import { UserService } from "../../src/modules/user/user.service";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
 import { randomUUID } from "crypto";
+import { UserRelationRepository } from "../../src/modules/user/userRelation/userRelation.repository";
+import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
+import { PostRepository } from "../../src/modules/post/post.repository";
+import { PostService } from "../../src/modules/post/post.service";
 
 jest.mock("nodemailer");
 
@@ -15,7 +18,11 @@ describe("User route test suite", () => {
     let app: Express;
     let userRepo: UserRepository;
     let passwordResetTokenRepo: PasswordResetTokenRepository;
+    let userRelationRepo: UserRelationRepository;
     let userService: UserService;
+    let userRelationService: UserRelationService;
+    let postRepo: PostRepository;
+    let postService: PostService;
 
     let sendMailMock: jest.Mock;
     let emailContent: string | undefined;
@@ -24,8 +31,20 @@ describe("User route test suite", () => {
         const dataSource = await createTestDb();
         userRepo = new UserRepository(dataSource);
         passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
+        userRelationRepo = new UserRelationRepository(dataSource);
         userService = new UserService(userRepo, passwordResetTokenRepo);
-        app = makeApp(dataSource, userService);
+        userRelationService = new UserRelationService(
+            userRelationRepo,
+            userService
+        );
+        postRepo = new PostRepository(dataSource);
+        postService = new PostService(postRepo);
+        app = makeApp(
+            dataSource,
+            userService,
+            userRelationService,
+            postService
+        );
 
         jest.clearAllMocks();
 
@@ -173,7 +192,9 @@ describe("User route test suite", () => {
             const tokenMatch = emailContent.match(
                 /reset-password\/([a-zA-Z0-9-_\.]+)~([a-zA-Z0-9-_\.]+)$/
             );
-            const token = tokenMatch ? `${tokenMatch[1]}~${tokenMatch[2]}` : null;
+            const token = tokenMatch
+                ? `${tokenMatch[1]}~${tokenMatch[2]}`
+                : null;
             await request(app)
                 .post("/api/user/resetpassword")
                 .send({ newPass: "newPass", token: token })
@@ -183,7 +204,11 @@ describe("User route test suite", () => {
         it("should fail if token is wrong or expired", async () => {
             await request(app)
                 .post("/api/user/resetpassword")
-                .send({ newPass: "newPass", token: `${randomUUID()}~${randomUUID()}` }).expect(401);
+                .send({
+                    newPass: "newPass",
+                    token: `${randomUUID()}~${randomUUID()}`,
+                })
+                .expect(401);
         });
     });
 
@@ -331,7 +356,7 @@ describe("User route test suite", () => {
         it.skip("should fail to update profile if cookie token is not valid", async () => {
             await request(app)
                 .post("/api/user/editprofile")
-                .set("Cookie", ['badcookie'])
+                .set("Cookie", ["badcookie"])
                 .send({
                     password: "newpass",
                     email: "changedemail@gmail.com",
@@ -389,7 +414,58 @@ describe("User route test suite", () => {
                 .field("profileStatus", "private")
                 .field("bio", "test")
                 .field("password", "newpass")
-                .attach("profileImage", Buffer.from(""), "testFile.txt").expect(400);
+                .attach("profileImage", Buffer.from(""), "testFile.txt")
+                .expect(400);
+        });
+    });
+
+    describe("Following and unfollowing", () => {
+        it("should follow user", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "follow_test",
+                email: "follow_test@gmail.com",
+                password: "follow_test",
+            });
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            const follow_response = await request(app)
+                .post("/api/user/follow/follow_test")
+                .set("Cookie", [cookie])
+                .expect(200);
+
+            expect(follow_response.body.message).toBe("User followed");
+        });
+
+        it("should unfollow user", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "follow_test",
+                email: "follow_test@gmail.com",
+                password: "follow_test",
+            });
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            await request(app)
+                .post("/api/user/follow/follow_test")
+                .set("Cookie", [cookie]);
+
+            const unfollow_response = await request(app)
+                .post("/api/user/unfollow/follow_test")
+                .set("Cookie", [cookie])
+                .expect(200);
+
+            expect(unfollow_response.body.message).toBe("User unfollowed");
         });
     });
 });

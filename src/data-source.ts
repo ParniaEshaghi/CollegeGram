@@ -3,7 +3,7 @@ import { DataSource } from "typeorm";
 import { UserEntity } from "./modules/user/entity/user.entity";
 import { PasswordResetTokenEntity } from "./modules/user/entity/forgetPassword.entity";
 import { PostEntity } from "./modules/post/entity/post.entity";
-import { UserRelationEntity } from "./modules/user/entity/userRelation.entity";
+import { UserRelationEntity } from "./modules/user/userRelation/entity/userRelation.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",

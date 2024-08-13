@@ -69,28 +69,6 @@ export class UserRepository {
         );
     }
 
-    public async findUserFollowers(username: string): Promise<string[]> {
-        const userWithFollowers = await this.userRepo.findOne({
-            where: { username },
-            relations: ["followers", "followers.follower"],
-        });
-
-        return userWithFollowers!.followers.map(
-            (relation) => relation.follower.username
-        );
-    }
-
-    public async findUserFollowings(username: string): Promise<string[]> {
-        const userWithFollowings = await this.userRepo.findOne({
-            where: { username },
-            relations: ["followings", "followings.following"],
-        });
-
-        return userWithFollowings!.followings.map(
-            (relation) => relation.following.username
-        );
-    }
-
     public async getUserPosts(username: string): Promise<Post[]> {
         const userWithPosts = await this.userRepo.findOne({
             where: { username },
@@ -102,20 +80,5 @@ export class UserRepository {
         }
 
         return [];
-
-    public async incrementFollowerCount(username: string): Promise<void> {
-        await this.userRepo.increment({ username }, "follower_count", 1);
-    }
-
-    public async decrementFollowerCount(username: string): Promise<void> {
-        await this.userRepo.decrement({ username }, "follower_count", 1);
-    }
-
-    public async incrementFollowingCount(username: string): Promise<void> {
-        await this.userRepo.increment({ username }, "following_count", 1);
-    }
-
-    public async decrementFollowingCount(username: string): Promise<void> {
-        await this.userRepo.decrement({ username }, "following_count", 1);
     }
 }

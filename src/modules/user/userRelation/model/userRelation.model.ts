@@ -1,4 +1,4 @@
-import { User } from "./user.model";
+import { User } from "../../model/user.model";
 
 export interface UserRelation {
     follower: User;
