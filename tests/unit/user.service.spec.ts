@@ -1,13 +1,14 @@
 import { UserRepository } from "../../src/modules/user/user.repository";
 import { UserService } from "../../src/modules/user/user.service";
 import bcrypt from "bcrypt";
-import { HttpError } from "../../src/utility/http-errors";
+import { HttpError, NotFoundError } from "../../src/utility/http-errors";
 import { hashGenerator } from "../../src/utility/hash-generator";
 import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword.repository";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
-import { UserRelationRepository } from "../../src/modules/user/userRelation.repository";
+import { UserRelationRepository } from "../../src/modules/user/userRelation/userRelation.repository";
 import { randomUUID } from "crypto";
+import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
 
 jest.mock("nodemailer");
 
@@ -16,6 +17,7 @@ describe("User service test suite", () => {
     let passwordResetTokenRepo: PasswordResetTokenRepository;
     let userRelationRepo: UserRelationRepository;
     let userService: UserService;
+    let userRelationService: UserRelationService;
 
     let sendMailMock: jest.Mock;
     let emailContent: string | undefined;
@@ -25,10 +27,10 @@ describe("User service test suite", () => {
         userRepo = new UserRepository(dataSource);
         passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
         userRelationRepo = new UserRelationRepository(dataSource);
-        userService = new UserService(
-            userRepo,
-            passwordResetTokenRepo,
-            userRelationRepo
+        userService = new UserService(userRepo, passwordResetTokenRepo);
+        userRelationService = new UserRelationService(
+            userRelationRepo,
+            userService
         );
 
         jest.clearAllMocks();
@@ -46,12 +48,6 @@ describe("User service test suite", () => {
             username: "test",
             email: "test@gmail.com",
             password: "test",
-        });
-
-        await userService.createUser({
-            username: "follow_test",
-            email: "follow_test@gmail.com",
-            password: "follow_test",
         });
     });
 
@@ -192,19 +188,15 @@ describe("User service test suite", () => {
     describe("Edit profile", () => {
         it("should update profile without image", async () => {
             const hashed_password = await hashGenerator("test");
-            const user = await userService.getUserByUsername("test")
-            const response = await userService.editProfile(
-                user!,
-                "",
-                {
-                    email: "changedemail@gmail.com",
-                    firstName: "test",
-                    lastName: "test",
-                    profileStatus: "private",
-                    bio: "test",
-                    password: "newpass",
-                }
-            );
+            const user = await userService.getUserByUsername("test");
+            const response = await userService.editProfile(user!, "", {
+                email: "changedemail@gmail.com",
+                firstName: "test",
+                lastName: "test",
+                profileStatus: "private",
+                bio: "test",
+                password: "newpass",
+            });
             expect(response.email).toBe("changedemail@gmail.com");
             expect(response.firstName).toBe("test");
             expect(response.profileStatus).toBe("private");

@@ -7,7 +7,7 @@ import {
     UpdateDateColumn,
 } from "typeorm";
 import { PostEntity } from "../../post/entity/post.entity";
-import { UserRelationEntity } from "./userRelation.entity";
+import { UserRelationEntity } from "../userRelation/entity/userRelation.entity";
 
 @Entity("users")
 export class UserEntity {

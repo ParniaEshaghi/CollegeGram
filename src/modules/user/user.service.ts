@@ -14,15 +14,12 @@ import { LoginDto } from "./dto/login.dto";
 import nodemailer from "nodemailer";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { EditProfileDto } from "./dto/edit-profile.dto";
-import { DecodedToken } from "../../middlewares/auth.middleware";
-import { UserRelationRepository } from "./userRelation.repository";
 import { Post } from "../post/model/post.model";
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
-        private passwordResetTokenRepo: PasswordResetTokenRepository,
-        private userRelationRepo: UserRelationRepository
+        private passwordResetTokenRepo: PasswordResetTokenRepository
     ) {}
 
     async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -266,60 +263,7 @@ export class UserService {
         return response;
     }
 
-    public async getUserFollowers(username: string): Promise<string[]> {
-        const user = await this.getUserByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
-        return this.userRepo.findUserFollowers(user.username);
-    }
-
-    public async getUserFollowings(username: string): Promise<string[]> {
-        const user = await this.getUserByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
-        return this.userRepo.findUserFollowings(user.username);
-    }
-
     public async getUserPosts(username: string): Promise<Post[]> {
         return await this.userRepo.getUserPosts(username);
-    }
-    
-    public async getFollowStatus(user: User, following_username: string) {
-        if (!user) {
-            throw new HttpError(401, "Unauthorized");
-        }
-        const following = await this.getUserByUsername(following_username);
-        if (!following) {
-            throw new NotFoundError();
-        }
-        return await this.userRelationRepo.checkExistance(user, following);
-    }
-
-    public async follow(user: User, following_username: string) {
-        if (!user) {
-            throw new HttpError(401, "Unauthorized");
-        }
-        const following = await this.getUserByUsername(following_username);
-        if (!following) {
-            throw new NotFoundError();
-        }
-        this.userRepo.incrementFollowingCount(user.username);
-        this.userRepo.incrementFollowerCount(following.username);
-        return this.userRelationRepo.create(user, following);
-    }
-
-    public async unfollow(user: User, following_username: string) {
-        if (!user) {
-            throw new HttpError(401, "Unauthorized");
-        }
-        const following = await this.getUserByUsername(following_username);
-        if (!following) {
-            throw new NotFoundError();
-        }
-        this.userRepo.decrementFollowingCount(user.username);
-        this.userRepo.decrementFollowerCount(following.username);
-        return this.userRelationRepo.delete(user, following);
     }
 }

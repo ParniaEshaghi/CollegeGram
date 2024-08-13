@@ -6,7 +6,8 @@ import { PasswordResetTokenRepository } from "./modules/user/forgetPassword.repo
 import { User } from "./modules/user/model/user.model";
 import { UserRepository } from "./modules/user/user.repository";
 import { UserService } from "./modules/user/user.service";
-import { UserRelationRepository } from "./modules/user/userRelation.repository";
+import { UserRelationRepository } from "./modules/user/userRelation/userRelation.repository";
+import { UserRelationService } from "./modules/user/userRelation/userRelation.service";
 
 const PORT = 3000;
 
@@ -23,16 +24,20 @@ AppDataSource.initialize().then((dataSource) => {
     const userRepo = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
     const userRelationRepo = new UserRelationRepository(dataSource);
-    const postRepo = new PostRepository(dataSource);
-
-    const userService = new UserService(
-        userRepo,
-        passwordResetTokenRepo,
-        userRelationRepo
+    const userService = new UserService(userRepo, passwordResetTokenRepo);
+    const userRelationService = new UserRelationService(
+        userRelationRepo,
+        userService
     );
+    const postRepo = new PostRepository(dataSource);
     const postService = new PostService(postRepo);
 
-    const app = makeApp(dataSource, userService, postService);
+    const app = makeApp(
+        dataSource,
+        userService,
+        userRelationService,
+        postService
+    );
     app.listen(PORT, () => {
         console.log("listening on Port " + PORT);
     });

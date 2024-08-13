@@ -4,7 +4,7 @@ import { UserEntity } from "../modules/user/entity/user.entity";
 import { PasswordResetTokenEntity } from "../modules/user/entity/forgetPassword.entity";
 import { v4 } from "uuid";
 import { PostEntity } from "../modules/post/entity/post.entity";
-import { UserRelationEntity } from "../modules/user/entity/userRelation.entity";
+import { UserRelationEntity } from "../modules/user/userRelation/entity/userRelation.entity";
 
 export const createTestDb = async () => {
     // Create a new in-memory database

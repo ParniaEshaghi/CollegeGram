@@ -9,8 +9,12 @@ import { auth } from "../middlewares/auth.middleware";
 import { profileUpload } from "../middlewares/upload.middleware";
 import { editProfileDto } from "../modules/user/dto/edit-profile.dto";
 import { MulterError } from "multer";
+import { UserRelationService } from "../modules/user/userRelation/userRelation.service";
 
-export const makeUserRouter = (userService: UserService) => {
+export const makeUserRouter = (
+    userService: UserService,
+    UserRelationService: UserRelationService
+) => {
     const app = Router();
 
     app.post("/signup", (req, res) => {
@@ -136,6 +140,40 @@ export const makeUserRouter = (userService: UserService) => {
                 return;
             }
             res.status(500).send({});
+        }
+    });
+
+    app.post("/follow/:username", auth(userService), async (req, res) => {
+        try {
+            const username = req.params.username;
+            const message = await UserRelationService.follow(
+                req.user,
+                username
+            );
+
+            return res.status(200).send(message);
+        } catch (error) {
+            if (error instanceof HttpError) {
+                return res.status(error.status).send({ error: error.message });
+            }
+            return res.status(500).send({});
+        }
+    });
+
+    app.post("/unfollow/:username", auth(userService), async (req, res) => {
+        try {
+            const username = req.params.username;
+            const message = await UserRelationService.unfollow(
+                req.user,
+                username
+            );
+
+            return res.status(200).send(message);
+        } catch (error) {
+            if (error instanceof HttpError) {
+                return res.status(error.status).send({ error: error.message });
+            }
+            return res.status(500).send({});
         }
     });
 

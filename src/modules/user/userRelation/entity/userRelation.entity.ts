@@ -5,13 +5,13 @@ import {
     ManyToOne,
     PrimaryGeneratedColumn,
 } from "typeorm";
-import { UserEntity } from "../../user/entity/user.entity";
+import { UserEntity } from "../../entity/user.entity";
 
 @Entity("userRelations")
 export class UserRelationEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
-
+    
     @ManyToOne(() => UserEntity, (user) => user.followers)
     follower!: UserEntity;
 
