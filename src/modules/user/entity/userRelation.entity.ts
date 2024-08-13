@@ -1,8 +1,17 @@
-import { CreateDateColumn, DeleteDateColumn, Entity, ManyToOne } from "typeorm";
+import {
+    CreateDateColumn,
+    DeleteDateColumn,
+    Entity,
+    ManyToOne,
+    PrimaryGeneratedColumn,
+} from "typeorm";
 import { UserEntity } from "../../user/entity/user.entity";
 
 @Entity("userRelations")
 export class UserRelationEntity {
+    @PrimaryGeneratedColumn("uuid")
+    id!: string;
+
     @ManyToOne(() => UserEntity, (user) => user.followers)
     follower!: UserEntity;
 

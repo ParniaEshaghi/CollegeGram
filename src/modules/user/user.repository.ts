@@ -1,6 +1,7 @@
 import { DataSource, Repository } from "typeorm";
 import { UserEntity } from "./entity/user.entity";
 import { User } from "./model/user.model";
+import { Post } from "../post/model/post.model";
 
 interface UpdateProfile {
     password: string;
@@ -41,11 +42,11 @@ export class UserRepository {
         return this.userRepo.save(user);
     }
 
-    public async updatePassword(username: string, password: string): Promise<void> {
-        await this.userRepo.update(
-            { username },
-            { password }
-        );
+    public async updatePassword(
+        username: string,
+        password: string
+    ): Promise<void> {
+        await this.userRepo.update({ username }, { password });
     }
 
     public async updateProfile(
@@ -89,6 +90,18 @@ export class UserRepository {
             (relation) => relation.following.username
         );
     }
+
+    public async getUserPosts(username: string): Promise<Post[]> {
+        const userWithPosts = await this.userRepo.findOne({
+            where: { username },
+            relations: ["posts"],
+        });
+
+        if (userWithPosts) {
+            return userWithPosts.posts;
+        }
+
+        return [];
 
     public async incrementFollowerCount(username: string): Promise<void> {
         await this.userRepo.increment({ username }, "follower_count", 1);
