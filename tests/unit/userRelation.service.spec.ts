@@ -1,4 +1,6 @@
-import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword.repository";
+import { EmailService } from "../../src/modules/email/email.service";
+import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword/forgetPassword.repository";
+import { ForgetPasswordService } from "../../src/modules/user/forgetPassword/forgetPassword.service";
 import { UserRepository } from "../../src/modules/user/user.repository";
 import { UserService } from "../../src/modules/user/user.service";
 import { UserRelationRepository } from "../../src/modules/user/userRelation/userRelation.repository";
@@ -9,16 +11,26 @@ import { createTestDb } from "../../src/utility/test-db";
 describe("User relation service test suite", () => {
     let userRepo: UserRepository;
     let passwordResetTokenRepo: PasswordResetTokenRepository;
+    let forgetPasswordService: ForgetPasswordService;
     let userRelationRepo: UserRelationRepository;
     let userService: UserService;
+    let emailService: EmailService;
     let userRelationService: UserRelationService;
 
     beforeEach(async () => {
         const dataSource = await createTestDb();
         userRepo = new UserRepository(dataSource);
         passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
+        forgetPasswordService = new ForgetPasswordService(
+            passwordResetTokenRepo
+        );
         userRelationRepo = new UserRelationRepository(dataSource);
-        userService = new UserService(userRepo, passwordResetTokenRepo);
+        emailService = new EmailService();
+        userService = new UserService(
+            userRepo,
+            forgetPasswordService,
+            emailService
+        );
         userRelationService = new UserRelationService(
             userRelationRepo,
             userService

@@ -24,6 +24,6 @@ export class PasswordResetTokenRepository {
     }
 
     public async delete(id: string): Promise<void> {
-        await this.passwordResetTokenRepo.delete({ id });
+        await this.passwordResetTokenRepo.softDelete({ id });
     }
 }

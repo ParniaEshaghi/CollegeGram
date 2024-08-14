@@ -1,8 +1,10 @@
 import { makeApp } from "./api";
 import { AppDataSource } from "./data-source";
+import { EmailService } from "./modules/email/email.service";
+import { PasswordResetTokenRepository } from "./modules/user/forgetPassword/forgetPassword.repository";
+import { ForgetPasswordService } from "./modules/user/forgetPassword/forgetPassword.service";
 import { PostRepository } from "./modules/post/post.repository";
 import { PostService } from "./modules/post/post.service";
-import { PasswordResetTokenRepository } from "./modules/user/forgetPassword.repository";
 import { User } from "./modules/user/model/user.model";
 import { UserRepository } from "./modules/user/user.repository";
 import { UserService } from "./modules/user/user.service";
@@ -23,8 +25,16 @@ declare global {
 AppDataSource.initialize().then((dataSource) => {
     const userRepo = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
+    const forgetPasswordService = new ForgetPasswordService(
+        passwordResetTokenRepo
+    );
     const userRelationRepo = new UserRelationRepository(dataSource);
-    const userService = new UserService(userRepo, passwordResetTokenRepo);
+    const emailService = new EmailService();
+    const userService = new UserService(
+        userRepo,
+        forgetPasswordService,
+        emailService
+    );
     const userRelationService = new UserRelationService(
         userRelationRepo,
         userService
@@ -38,6 +48,7 @@ AppDataSource.initialize().then((dataSource) => {
         userRelationService,
         postService
     );
+
     app.listen(PORT, () => {
         console.log("listening on Port " + PORT);
     });

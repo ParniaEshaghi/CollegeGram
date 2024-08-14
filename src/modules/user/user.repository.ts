@@ -68,7 +68,6 @@ export class UserRepository {
             }
         );
     }
-
     public async getUserPosts(username: string): Promise<Post[]> {
         const userWithPosts = await this.userRepo.findOne({
             where: { username },
