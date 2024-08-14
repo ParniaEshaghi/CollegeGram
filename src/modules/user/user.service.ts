@@ -1,8 +1,4 @@
-import {
-    ForbiddenError,
-    HttpError,
-    NotFoundError,
-} from "../../utility/http-errors";
+import { HttpError, NotFoundError } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
 import { SignUpDto } from "./dto/signup.dto";
 import { User, UserWithoutPassword } from "./model/user.model";
@@ -11,15 +7,16 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { LoginDto } from "./dto/login.dto";
-import nodemailer from "nodemailer";
-import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import { EditProfileDto } from "./dto/edit-profile.dto";
+import { ForgetPasswordService } from "./forgetPassword/forgetPassword.service";
+import { EmailService } from "../email/email.service";
 import { Post } from "../post/model/post.model";
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
-        private passwordResetTokenRepo: PasswordResetTokenRepository
+        private forgetPasswordService: ForgetPasswordService,
+        private emailService: EmailService
     ) {}
 
     async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -99,84 +96,29 @@ export class UserService {
         if (!credential) {
             throw new HttpError(400, "Credential is  required");
         }
-
         const { success, error } = z.string().email().safeParse(credential);
-
-        let user;
-
-        if (success) {
-            user = await this.getUserByEmail(credential);
-        } else {
-            user = await this.getUserByUsername(credential);
-        }
+        const user = success
+            ? await this.getUserByEmail(credential)
+            : await this.getUserByUsername(credential);
 
         if (!user) {
             throw new HttpError(401, "Invalid credential");
         }
-
-        const expirationTime = new Date();
-        expirationTime.setHours(expirationTime.getHours() + 2);
-        const token = crypto.randomUUID();
-        const token_hash = await hashGenerator(token);
-
-        const resetToken = await this.passwordResetTokenRepo.create({
-            token: token_hash,
-            expiration: expirationTime,
-            username: user.username,
-        });
-
-        const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            auth: {
-                user: "cgramcgram421@gmail.com",
-                pass: "astjstwkacpkhtsq ",
-            },
-            logger: true,
-            debug: true,
-            secure: false,
-        });
-
-        const mailOptions = {
-            from: "Cgram App",
-            to: user.email,
+        const { id, token } = await this.forgetPasswordService.createToken(
+            user.username
+        );
+        const mailContent = {
+            reciever: user.email,
             subject: "Password Reset",
-            text: `Click on the following link to reset your password: http://37.32.6.230/reset-password/${resetToken.id}~${token}`,
+            text: `Click on the following link to reset your password: http://37.32.6.230/reset-password/${id}~${token}`,
         };
-
-        try {
-            await transporter.sendMail(mailOptions);
-            return {
-                message: "Password reset link sent to your email account",
-            };
-        } catch (error) {
-            throw new HttpError(500, "Error sending email");
-        }
+        return await this.emailService.sendEmail(mailContent);
     }
 
     public async resetPassword(newPass: string, token: string) {
-        let id, resetToken;
-        try {
-            [id, resetToken] = token.split("~");
-        } catch (e) {
-            throw new HttpError(401, "Unauthorized");
-        }
-
-        const dbtoken = await this.passwordResetTokenRepo.findById(id);
-        if (!dbtoken) {
-            throw new HttpError(401, "Unauthorized");
-        }
-        if (dbtoken.expiration.getTime() < new Date().getTime()) {
-            this.passwordResetTokenRepo.delete(dbtoken.id);
-            throw new ForbiddenError();
-        }
-        const isMatch = await bcrypt.compare(resetToken, dbtoken.token);
-        if (!isMatch) {
-            throw new HttpError(401, "Unauthorized");
-        }
         const password_hash = await hashGenerator(newPass);
-        this.userRepo.updatePassword(dbtoken.username, password_hash);
-        this.passwordResetTokenRepo.delete(dbtoken.id);
+        const username = await this.forgetPasswordService.checkToken(token);
+        this.userRepo.updatePassword(username, password_hash);
         return { message: "New password set" };
     }
 

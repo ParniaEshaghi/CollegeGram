@@ -1,6 +1,6 @@
 import {
     Column,
-    CreateDateColumn,
+    DeleteDateColumn,
     Entity,
     PrimaryGeneratedColumn,
 } from "typeorm";
@@ -18,4 +18,7 @@ export class PasswordResetTokenEntity {
 
     @Column()
     username!: string;
+
+    @DeleteDateColumn()
+    deletedAt!: Date;
 }

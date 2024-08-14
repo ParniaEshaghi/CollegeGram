@@ -2,13 +2,15 @@ import { makeApp } from "../../src/api";
 import { Express } from "express";
 import request from "supertest";
 import { UserRepository } from "../../src/modules/user/user.repository";
-import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword.repository";
 import { UserService } from "../../src/modules/user/user.service";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
 import { randomUUID } from "crypto";
 import { UserRelationRepository } from "../../src/modules/user/userRelation/userRelation.repository";
 import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
+import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword/forgetPassword.repository";
+import { EmailService } from "../../src/modules/email/email.service";
+import { ForgetPasswordService } from "../../src/modules/user/forgetPassword/forgetPassword.service";
 import { PostRepository } from "../../src/modules/post/post.repository";
 import { PostService } from "../../src/modules/post/post.service";
 
@@ -18,8 +20,10 @@ describe("User route test suite", () => {
     let app: Express;
     let userRepo: UserRepository;
     let passwordResetTokenRepo: PasswordResetTokenRepository;
+    let forgetPasswordService: ForgetPasswordService;
     let userRelationRepo: UserRelationRepository;
     let userService: UserService;
+    let emailService: EmailService;
     let userRelationService: UserRelationService;
     let postRepo: PostRepository;
     let postService: PostService;
@@ -28,11 +32,32 @@ describe("User route test suite", () => {
     let emailContent: string | undefined;
 
     beforeEach(async () => {
+        jest.clearAllMocks();
+
+        sendMailMock = jest.fn().mockImplementation((mailOptions) => {
+            emailContent = mailOptions.text;
+            return Promise.resolve({});
+        });
+
+        (nodemailer.createTransport as jest.Mock).mockReturnValue({
+            sendMail: sendMailMock,
+        });
+
         const dataSource = await createTestDb();
         userRepo = new UserRepository(dataSource);
-        passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
+        passwordResetTokenRepo = new PasswordResetTokenRepository(
+            dataSource
+        );
+        forgetPasswordService = new ForgetPasswordService(
+            passwordResetTokenRepo
+        );
         userRelationRepo = new UserRelationRepository(dataSource);
-        userService = new UserService(userRepo, passwordResetTokenRepo);
+        emailService = new EmailService();
+        userService = new UserService(
+            userRepo,
+            forgetPasswordService,
+            emailService
+        );
         userRelationService = new UserRelationService(
             userRelationRepo,
             userService
@@ -45,17 +70,6 @@ describe("User route test suite", () => {
             userRelationService,
             postService
         );
-
-        jest.clearAllMocks();
-
-        sendMailMock = jest.fn().mockImplementation((mailOptions) => {
-            emailContent = mailOptions.text;
-            return Promise.resolve({});
-        });
-
-        (nodemailer.createTransport as jest.Mock).mockReturnValue({
-            sendMail: sendMailMock,
-        });
 
         await request(app).post("/api/user/signup").send({
             username: "test",

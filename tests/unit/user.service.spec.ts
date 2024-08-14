@@ -3,36 +3,30 @@ import { UserService } from "../../src/modules/user/user.service";
 import bcrypt from "bcrypt";
 import { HttpError, NotFoundError } from "../../src/utility/http-errors";
 import { hashGenerator } from "../../src/utility/hash-generator";
-import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword.repository";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
 import { UserRelationRepository } from "../../src/modules/user/userRelation/userRelation.repository";
 import { randomUUID } from "crypto";
 import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
+import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword/forgetPassword.repository";
+import { ForgetPasswordService } from "../../src/modules/user/forgetPassword/forgetPassword.service";
+import { EmailService } from "../../src/modules/email/email.service";
 
 jest.mock("nodemailer");
 
 describe("User service test suite", () => {
     let userRepo: UserRepository;
     let passwordResetTokenRepo: PasswordResetTokenRepository;
+    let forgetPasswordService: ForgetPasswordService;
     let userRelationRepo: UserRelationRepository;
     let userService: UserService;
+    let emailService: EmailService;
     let userRelationService: UserRelationService;
 
     let sendMailMock: jest.Mock;
     let emailContent: string | undefined;
 
     beforeEach(async () => {
-        const dataSource = await createTestDb();
-        userRepo = new UserRepository(dataSource);
-        passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
-        userRelationRepo = new UserRelationRepository(dataSource);
-        userService = new UserService(userRepo, passwordResetTokenRepo);
-        userRelationService = new UserRelationService(
-            userRelationRepo,
-            userService
-        );
-
         jest.clearAllMocks();
 
         sendMailMock = jest.fn().mockImplementation((mailOptions) => {
@@ -43,6 +37,24 @@ describe("User service test suite", () => {
         (nodemailer.createTransport as jest.Mock).mockReturnValue({
             sendMail: sendMailMock,
         });
+
+        const dataSource = await createTestDb();
+        userRepo = new UserRepository(dataSource);
+        passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
+        forgetPasswordService = new ForgetPasswordService(
+            passwordResetTokenRepo
+        );
+        userRelationRepo = new UserRelationRepository(dataSource);
+        emailService = new EmailService();
+        userService = new UserService(
+            userRepo,
+            forgetPasswordService,
+            emailService
+        );
+        userRelationService = new UserRelationService(
+            userRelationRepo,
+            userService
+        );
 
         await userService.createUser({
             username: "test",
@@ -140,9 +152,7 @@ describe("User service test suite", () => {
                     to: "test@gmail.com",
                 })
             );
-            expect(response.message).toBe(
-                "Password reset link sent to your email account"
-            );
+            expect(response.message).toBe("Email successfully sent");
             expect(emailContent).toBeDefined();
             expect(emailContent).toContain(
                 "http://37.32.6.230/reset-password/"
