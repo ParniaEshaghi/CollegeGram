@@ -68,4 +68,30 @@ export class UserRelationService {
         await this.userRelationRepo.delete(user, following);
         return { message: "User unfollowed" };
     }
+
+    public async userProfile(session_user: User, username: string, baseUrl: string) {
+        if (!session_user) {
+            throw new HttpError(401, "Unauthorized");
+        }
+        const user = await this.userService.getUserByUsername(username);
+        if (!user) {
+            throw new NotFoundError;
+        }
+        const follow_status = await this.getFollowStatus(session_user, username);
+        const response = {
+            username: user.username,
+            firstname: user.firstName,
+            lastname: user.lastName,
+            bio: user.bio,
+            profilePicture: user.profilePicture
+                ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+                : "",
+            follower_count: user.follower_count,
+            following_count: user.following_count,
+            post_count: user.post_count,
+            follow_status: follow_status,
+        };
+
+        return response;
+    }
 }

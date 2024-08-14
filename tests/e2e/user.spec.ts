@@ -482,4 +482,69 @@ describe("User route test suite", () => {
             expect(unfollow_response.body.message).toBe("User unfollowed");
         });
     });
+
+    describe("Get another user profile", () => {
+        it("should get user profile / not followed", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "follow_test",
+                email: "follow_test@gmail.com",
+                password: "follow_test",
+            });
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            const profile_response = await request(app)
+                .get("/api/user/follow_test")
+                .set("Cookie", [cookie])
+                .expect(200);
+
+            expect(profile_response.body.username).toBe("follow_test");
+            expect(profile_response.body.follow_status).toBe(false);
+        });
+
+        it("should get user profile / followed", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "follow_test",
+                email: "follow_test@gmail.com",
+                password: "follow_test",
+            });
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            await request(app)
+                .post("/api/user/follow/follow_test")
+                .set("Cookie", [cookie]);
+
+            const profile_response = await request(app)
+                .get("/api/user/follow_test")
+                .set("Cookie", [cookie])
+                .expect(200);
+
+            expect(profile_response.body.username).toBe("follow_test");
+            expect(profile_response.body.follow_status).toBe(true);
+        });
+
+        it("should fail to get profile if username is wrong", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+            await request(app)
+                .get("/api/user/follow_test")
+                .set("Cookie", [cookie])
+                .expect(404);
+        });
+    });
 });
