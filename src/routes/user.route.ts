@@ -177,5 +177,19 @@ export const makeUserRouter = (
         }
     });
 
+    app.get("/:username", auth(userService), async (req, res) => {
+        try {
+            const username = req.params.username;
+            const baseUrl = `${req.protocol}://${req.get("host")}`;
+            const response = await UserRelationService.userProfile(req.user, username, baseUrl);
+            return res.status(200).send(response);
+        } catch (error) {
+            if (error instanceof HttpError) {
+                return res.status(error.status).send({ error: error.message });
+            }
+            return res.status(500).send({});
+        }
+    });
+
     return app;
 };
