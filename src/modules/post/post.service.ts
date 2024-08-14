@@ -1,5 +1,5 @@
 import { promises } from "dns";
-import { HttpError, NotFoundError } from "../../utility/http-errors";
+import { HttpError, NotFoundError, UnauthorizedError } from "../../utility/http-errors";
 import { User } from "../user/model/user.model";
 import { PostDto } from "./entity/dto/post.dto";
 import { Post, PostWithoutUser } from "./model/post.model";
@@ -53,7 +53,7 @@ export class PostService {
         baseUrl: string
     ): Promise<PostWithoutUser> {
         if (!user) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
 
         const post = await this.postRepo.findPostById(postId);

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { UserService } from "../modules/user/user.service";
-import { HttpError } from "../utility/http-errors";
+import { AuthenticationFailError, HttpError } from "../utility/http-errors";
 
 export interface DecodedToken {
     username: string;
@@ -13,20 +13,14 @@ export const auth =
         try {
             const token = req.cookies.token;
             if (!token) {
-                throw new HttpError(
-                    401,
-                    "Authentication failed. Token missing."
-                );
+                throw new AuthenticationFailError();
             }
 
             const decoded = jwt.verify(token, "10") as DecodedToken;
             const user = await userService.getUserByUsername(decoded.username);
 
             if (!user) {
-                throw new HttpError(
-                    401,
-                    "Authentication failed. User not found."
-                );
+                throw new AuthenticationFailError();
             }
 
             req.user = user;
