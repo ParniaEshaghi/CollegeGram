@@ -1,6 +1,7 @@
 import { HttpError, NotFoundError } from "../../../utility/http-errors";
 import { User } from "../model/user.model";
 import { UserService } from "../user.service";
+import { toProfile } from "./model/userRelation.model";
 import { UserRelationRepository } from "./userRelation.repository";
 
 export class UserRelationService {
@@ -9,7 +10,7 @@ export class UserRelationService {
         private userService: UserService
     ) {}
 
-    public async getFollowStatus(user: User, following_username: string) {
+    async getFollowStatus(user: User, following_username: string) {
         if (!user) {
             throw new HttpError(401, "Unauthorized");
         }
@@ -78,20 +79,6 @@ export class UserRelationService {
             throw new NotFoundError;
         }
         const follow_status = await this.getFollowStatus(session_user, username);
-        const response = {
-            username: user.username,
-            firstname: user.firstName,
-            lastname: user.lastName,
-            bio: user.bio,
-            profilePicture: user.profilePicture
-                ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
-                : "",
-            follower_count: user.follower_count,
-            following_count: user.following_count,
-            post_count: user.post_count,
-            follow_status: follow_status,
-        };
-
-        return response;
+        return toProfile(user, follow_status, baseUrl);
     }
 }

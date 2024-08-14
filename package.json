@@ -28,6 +28,7 @@
         "pg-mem": "^3.0.2",
         "reflect-metadata": "^0.2.2",
         "supertest": "^7.0.0",
+        "tsconfig-paths": "^4.2.0",
         "typeorm": "^0.3.20",
         "uuid": "^10.0.0"
     },

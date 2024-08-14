@@ -262,13 +262,11 @@ describe("User route test suite", () => {
         });
 
         it("should fail if token is not valid", async () => {
-            let cookie;
             const response = await request(app)
                 .post("/api/user/signin")
                 .send({ credential: "test@gmail.com", password: "test" })
                 .expect(200);
             const cookies = response.headers["set-cookie"];
-            cookie = cookies[0];
             expect(cookies).toBeDefined();
 
             const response_getEdit_profile = await request(app)
@@ -317,13 +315,11 @@ describe("User route test suite", () => {
         });
 
         it("should fail if token is not valid", async () => {
-            let cookie;
             const response = await request(app)
                 .post("/api/user/signin")
                 .send({ credential: "test@gmail.com", password: "test" })
                 .expect(200);
             const cookies = response.headers["set-cookie"];
-            cookie = cookies[0];
             expect(cookies).toBeDefined();
 
             const response_profile_info = await request(app)
@@ -352,8 +348,8 @@ describe("User route test suite", () => {
                 .send({
                     password: "newpass",
                     email: "changedemail@gmail.com",
-                    firstName: "test",
-                    lastName: "test",
+                    firstname: "test",
+                    lastname: "test",
                     profileStatus: "private",
                     bio: "test",
                 })
@@ -362,20 +358,28 @@ describe("User route test suite", () => {
             expect(response_editprofile.body.email).toBe(
                 "changedemail@gmail.com"
             );
-            expect(response_editprofile.body.firstName).toBe("test");
+            expect(response_editprofile.body.firstname).toBe("test");
             expect(response_editprofile.body.profileStatus).toBe("private");
         });
 
-        // DOES NOT WORK!!!!
-        it.skip("should fail to update profile if cookie token is not valid", async () => {
+        it("should fail to update profile if cookie token is not valid", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+
             await request(app)
                 .post("/api/user/editprofile")
-                .set("Cookie", ["badcookie"])
+                .set("Cookie", [
+                    "token=yyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.              eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE3MjI5NzQ3MTEsImV4cCI6MTcyMzAwMzUxMX0.1oB7dtlTun4wRnvh9U-RqBc3q_7QvECZt7QM1zFRYZQ; Path=/; HttpOnly",
+                ])
                 .send({
                     password: "newpass",
                     email: "changedemail@gmail.com",
-                    firstName: "test",
-                    lastName: "test",
+                    firstname: "test",
+                    lastname: "test",
                     profileStatus: "private",
                     bio: "test",
                 })
@@ -395,8 +399,8 @@ describe("User route test suite", () => {
                 .post("/api/user/editprofile")
                 .set("Cookie", [cookie])
                 .field("email", "changedemail@gmail.com")
-                .field("firstName", "test")
-                .field("lastName", "test")
+                .field("firstname", "test")
+                .field("lastname", "test")
                 .field("profileStatus", "private")
                 .field("bio", "test")
                 .field("password", "newpass")
@@ -406,7 +410,7 @@ describe("User route test suite", () => {
             expect(response_editprofile.body.email).toBe(
                 "changedemail@gmail.com"
             );
-            expect(response_editprofile.body.firstName).toBe("test");
+            expect(response_editprofile.body.firstname).toBe("test");
             expect(response_editprofile.body.profileStatus).toBe("private");
         });
 
