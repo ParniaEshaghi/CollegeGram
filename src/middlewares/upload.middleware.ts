@@ -43,14 +43,22 @@ const checkFileType = (file: Express.Multer.File, cb: FileFilterCallback) => {
     }
 };
 
-// Initialize multer for profile and post uploads
-export const profileUpload = multer({
-    storage: profileStorage,
-    limits: { fileSize: 2000000 },
-    fileFilter: (req, file, cb) => {
-        checkFileType(file, cb);
-    },
-}).single("profileImage"); //TODO: update after getting name tag from frontend team
+export const profileUpload: RequestHandler = (req, res, next) => {
+    const upload = multer({
+        storage: postStorage,
+        limits: { fileSize: 2000000 },
+        fileFilter: (req, file, cb) => {
+            checkFileType(file, cb);
+        },
+    }).single("profileImage"); //TODO: update after getting name tag from frontend team
+
+    upload(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
+        next();
+    });
+};
 
 export const postUpload: RequestHandler = (req, res, next) => {
     const upload = multer({

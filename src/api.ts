@@ -9,6 +9,7 @@ import path from "path";
 import { UserRelationService } from "./modules/user/userRelation/userRelation.service";
 import { makePostRouter } from "./routes/post.route";
 import { PostService } from "./modules/post/post.service";
+import { setBaseUrl } from "./middlewares/setBaseUrl.middleware";
 
 export const makeApp = (
     dataSource: DataSource,
@@ -21,6 +22,8 @@ export const makeApp = (
     app.use(cookieParser());
     app.use(express.json());
     app.use(cors());
+
+    app.use(setBaseUrl)
 
     app.use("/api/images", express.static(path.join(__dirname, "../images")));
     app.use("/api/user", makeUserRouter(userService, userRelationService));

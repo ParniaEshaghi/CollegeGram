@@ -22,7 +22,9 @@ declare global {
     }
 }
 
-AppDataSource.initialize().then((dataSource) => {
+const run = async () => {
+    const dataSource = await AppDataSource.initialize();
+
     const userRepo = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
     const forgetPasswordService = new ForgetPasswordService(
@@ -50,11 +52,13 @@ AppDataSource.initialize().then((dataSource) => {
     );
 
     app.listen(PORT, () => {
-        console.log("listening on Port " + PORT);
+        console.log("Listening on Port " + PORT);
     });
 
-    process.on("SIGINT", function () {
+    process.on("SIGINT", () => {
         console.log("\nGracefully shutting down from SIGINT (Ctrl-C)");
         process.exit(0);
     });
-});
+};
+
+run();

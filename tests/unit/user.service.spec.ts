@@ -199,16 +199,21 @@ describe("User service test suite", () => {
         it("should update profile without image", async () => {
             const hashed_password = await hashGenerator("test");
             const user = await userService.getUserByUsername("test");
-            const response = await userService.editProfile(user!, "", {
-                email: "changedemail@gmail.com",
-                firstName: "test",
-                lastName: "test",
-                profileStatus: "private",
-                bio: "test",
-                password: "newpass",
-            });
+            const response = await userService.editProfile(
+                user!,
+                "",
+                {
+                    email: "changedemail@gmail.com",
+                    firstname: "test",
+                    lastname: "test",
+                    profileStatus: "private",
+                    bio: "test",
+                    password: "newpass",
+                },
+                "http://localhost:3000"
+            );
             expect(response.email).toBe("changedemail@gmail.com");
-            expect(response.firstName).toBe("test");
+            expect(response.firstname).toBe("test");
             expect(response.profileStatus).toBe("private");
         });
     });

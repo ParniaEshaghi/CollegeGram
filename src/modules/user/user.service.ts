@@ -1,7 +1,13 @@
 import { HttpError, NotFoundError } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
 import { SignUpDto } from "./dto/signup.dto";
-import { User, UserWithoutPassword } from "./model/user.model";
+import {
+    toEditProfileInfo,
+    toProfileInfo,
+    toUserWithoutPassword,
+    User,
+    UserWithoutPassword,
+} from "./model/user.model";
 import { UserRepository } from "./user.repository";
 import { z } from "zod";
 import bcrypt from "bcrypt";
@@ -27,36 +33,9 @@ export class UserService {
             throw new HttpError(403, "Username and/or email already in use");
         }
 
-        const password_hash = await hashGenerator(dto.password);
+        const user = await this.userRepo.create(dto);
 
-        const user = await this.userRepo.create({
-            username: dto.username,
-            password: password_hash,
-            email: dto.email,
-            profilePicture: "",
-            firstName: "",
-            lastName: "",
-            profileStatus: "public",
-            bio: "",
-            follower_count: 0,
-            following_count: 0,
-            post_count: 0,
-        });
-
-        const userWithoutPass: UserWithoutPassword = {
-            username: user.username,
-            email: user.email,
-            profilePicture: user.profilePicture,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profileStatus: user.profileStatus,
-            bio: user.bio,
-            follower_count: user.follower_count,
-            following_count: user.following_count,
-            post_count: user.post_count,
-        };
-
-        return userWithoutPass;
+        return toUserWithoutPassword(user);
     }
 
     public async login(dto: LoginDto) {
@@ -66,11 +45,7 @@ export class UserService {
             ? await this.getUserByEmail(dto.credential)
             : await this.getUserByUsername(dto.credential);
 
-        if (!user) {
-            throw new HttpError(401, "Invalid credential or password");
-        }
-
-        const match = await bcrypt.compare(dto.password, user.password);
+        const match = await bcrypt.compare(dto.password, user?.password ?? "");
         if (!user || !match) {
             throw new HttpError(401, "Invalid credential or password");
         }
@@ -126,83 +101,31 @@ export class UserService {
         if (!user) {
             throw new HttpError(401, "Unauthorized");
         }
-
-        const response = {
-            firstname: user.firstName,
-            lastname: user.lastName,
-            email: user.email,
-            profileStatus: user.profileStatus,
-            bio: user.bio,
-            profilePicture: user.profilePicture
-                ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
-                : "",
-        };
-
-        return response;
+        return toEditProfileInfo(user, baseUrl);
     }
 
     public async editProfile(
         user: User,
         pictureFilename: string,
-        dto: EditProfileDto
-    ): Promise<UserWithoutPassword> {
+        dto: EditProfileDto,
+        baseUrl: string
+    ) {
         if (!user) {
             throw new HttpError(401, "Unauthorized");
         }
-        const password_hash = dto.password
-            ? await hashGenerator(dto.password)
-            : user.password;
-
-        await this.userRepo.updateProfile(user.username, {
-            password: password_hash,
-            email: dto.email,
-            profilePicture: pictureFilename,
-            firstName: dto.firstName,
-            lastName: dto.lastName,
-            profileStatus: dto.profileStatus,
-            bio: dto.bio,
-        });
-
-        const newUser = await this.getUserByUsername(user.username);
-        if (!newUser) {
-            throw new NotFoundError();
-        }
-        const userWithoutPass: UserWithoutPassword = {
-            username: newUser.username,
-            email: newUser.email,
-            profilePicture: newUser.profilePicture,
-            firstName: newUser.firstName,
-            lastName: newUser.lastName,
-            profileStatus: newUser.profileStatus,
-            bio: newUser.bio,
-            follower_count: newUser.follower_count,
-            following_count: newUser.following_count,
-            post_count: newUser.post_count,
-        };
-        return userWithoutPass;
+        const updatedUser = await this.userRepo.updateProfile(
+            user,
+            pictureFilename,
+            dto
+        );
+        return toEditProfileInfo(updatedUser as User, baseUrl);
     }
 
     public getProfileInfo(user: User, baseUrl: string) {
         if (!user) {
             throw new HttpError(401, "Unauthorized");
         }
-
-        const response = {
-            username: user.username,
-            firstname: user.firstName,
-            lastname: user.lastName,
-            bio: user.bio,
-            // Construct full URL for profilePicture
-            profilePicture: user.profilePicture
-                ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
-                : "",
-            posts: [],
-            post_count: 0,
-            follower_count: user.follower_count,
-            following_count: user.following_count,
-        };
-
-        return response;
+        return toProfileInfo(user, baseUrl);
     }
 
     public async getUserPosts(username: string): Promise<Post[]> {
