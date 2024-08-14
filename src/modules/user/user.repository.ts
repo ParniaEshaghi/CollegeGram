@@ -93,9 +93,9 @@ export class UserRepository {
             },
             updatedData
         );
-
         return updatedData;
     }
+    
     public async getUserPosts(username: string): Promise<Post[]> {
         const userWithPosts = await this.userRepo.findOne({
             where: { username },

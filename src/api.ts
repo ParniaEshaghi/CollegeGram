@@ -10,6 +10,8 @@ import { UserRelationService } from "./modules/user/userRelation/userRelation.se
 import { makePostRouter } from "./routes/post.route";
 import { PostService } from "./modules/post/post.service";
 import { setBaseUrl } from "./middlewares/setBaseUrl.middleware";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocs from "./swagger-options";
 
 export const makeApp = (
     dataSource: DataSource,
@@ -30,6 +32,8 @@ export const makeApp = (
     app.use("/api/post", makePostRouter(postService, userService));
 
     app.use(errorHandler);
+
+    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
     return app;
 };

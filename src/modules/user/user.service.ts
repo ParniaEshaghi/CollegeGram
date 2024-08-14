@@ -91,6 +91,9 @@ export class UserService {
     }
 
     public async resetPassword(newPass: string, token: string) {
+        if (!newPass || !token) {
+            throw new HttpError(400, "Token and new password are required")
+        }
         const password_hash = await hashGenerator(newPass);
         const username = await this.forgetPasswordService.checkToken(token);
         this.userRepo.updatePassword(username, password_hash);
