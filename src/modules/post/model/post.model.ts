@@ -9,3 +9,7 @@ export interface Post {
 }
 
 export type PostWithoutUser = Omit<Post, "user">;
+
+export type PostWithoutUserWithId = Omit<Post, "user"> & {
+    id: string;
+};

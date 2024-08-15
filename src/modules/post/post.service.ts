@@ -7,7 +7,11 @@ import {
 } from "../../utility/http-errors";
 import { User } from "../user/model/user.model";
 import { PostDto } from "./entity/dto/post.dto";
-import { Post, PostWithoutUser } from "./model/post.model";
+import {
+    Post,
+    PostWithoutUser,
+    PostWithoutUserWithId,
+} from "./model/post.model";
 import { PostRepository } from "./post.repository";
 import { PostEntity } from "./entity/post.entity";
 import path from "path";
@@ -21,7 +25,7 @@ export class PostService {
         postDto: PostDto,
         postImagesFileNames: string[],
         baseUrl: string
-    ): Promise<PostWithoutUser> {
+    ): Promise<PostWithoutUserWithId> {
         if (!user) {
             throw new HttpError(401, "Unauthorized");
         }
@@ -37,6 +41,7 @@ export class PostService {
         try {
             const crestedPost = await this.postRepo.create(newPost);
             return {
+                id: crestedPost.id,
                 caption: crestedPost.caption,
                 mentions: crestedPost.mentions,
                 tags: crestedPost.tags,
@@ -68,11 +73,11 @@ export class PostService {
             throw new NotFoundError();
         }
 
-        const userPosts: Post[] = await this.postRepo.getPostsByUser(
+        const userPosts: PostEntity[] = await this.postRepo.getPostsByUser(
             user.username
         );
 
-        if (!userPosts.includes(post)) {
+        if (!userPosts.map((upost) => upost.id).includes(post.id)) {
             throw new NotFoundError();
         }
 
@@ -113,7 +118,6 @@ export class PostService {
             tags: this.extractTags(postDto.caption),
             mentions: postDto.mentions,
         };
-
         const updatedPost = await this.postRepo.update(postId, editedPost);
         return {
             caption: updatedPost.caption,

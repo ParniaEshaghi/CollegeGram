@@ -17,7 +17,7 @@ export const makePostRouter = (
 
     app.post("/createpost", auth(userService), postUpload, async (req, res) => {
         const dto = postDto.parse(req.body);
-        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        // const baseUrl = `${req.protocol}://${req.get("host")}`;
         if (req.files) {
             const postImageFilenames = (req.files as Express.Multer.File[]).map(
                 (file) => file.filename
@@ -28,7 +28,7 @@ export const makePostRouter = (
                     req.user,
                     dto,
                     postImageFilenames,
-                    baseUrl
+                    req.baseUrl
                 );
                 res.status(200).send(newPost);
                 return;
@@ -51,13 +51,13 @@ export const makePostRouter = (
 
     app.get("/:postid", auth(userService), async (req, res) => {
         const postId: string = req.params.postid;
-        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        // const baseUrl = `${req.protocol}://${req.get("host")}`;
 
         try {
             const post = await postService.getPostByPostId(
                 req.user,
                 postId,
-                baseUrl
+                req.baseUrl
             );
             res.status(200).send(post);
             return;

@@ -12,11 +12,11 @@ export class PostRepository {
         return this.postRepo.save(post);
     }
 
-    public findPostById(postId: string): Promise<Post | null> {
+    public findPostById(postId: string): Promise<PostEntity | null> {
         return this.postRepo.findOne({ where: { id: postId } });
     }
 
-    public getPostsByUser(username: string): Promise<Post[]> {
+    public getPostsByUser(username: string): Promise<PostEntity[]> {
         return this.postRepo.find({ where: { user: { username } } });
     }
 
