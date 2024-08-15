@@ -7,6 +7,7 @@ import { postDto } from "../modules/post/entity/dto/post.dto";
 import { HttpError } from "../utility/http-errors";
 import { MulterError } from "multer";
 import { ZodError } from "zod";
+import { handleExpress } from "../utility/handle-express";
 
 export const makePostRouter = (
     postService: PostService,
@@ -69,6 +70,28 @@ export const makePostRouter = (
             return;
         }
     });
+
+    app.post(
+        "/updatepost/:postid",
+        auth(userService),
+        postUpload,
+        async (req, res) => {
+            const postid = req.params.postid;
+            const dto = postDto.parse(req.body);
+            const postImageFilenames = (req.files as Express.Multer.File[]).map(
+                (file) => file.filename
+            );
+            handleExpress(res, () =>
+                postService.updatePost(
+                    req.user,
+                    postid,
+                    dto,
+                    postImageFilenames,
+                    req.baseUrl,
+                )
+            );
+        }
+    );
 
     return app;
 };

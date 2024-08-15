@@ -18,6 +18,7 @@ export const handleExpress = async <T>(
             res.status(error.status).send(error.message);
             return;
         }
+        console.log(error)
         res.status(500).send();
     }
 };

@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class RenameFirstNameLastName implements MigrationInterface {
+export class RenameFirstNameLastName1723636558559 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         // Create Posts table
         await queryRunner.query(`
@@ -42,7 +42,7 @@ export class RenameFirstNameLastName implements MigrationInterface {
             `ALTER TABLE "users" ADD "updatedAt" TIMESTAMP NOT NULL DEFAULT now()`
         );
         await queryRunner.query(
-            `ALTER TABLE "passwordRestTokens" ADD "username" character varying NOT NULL`
+            `ALTER TABLE "passwordRestTokens" ADD "username" character`
         );
         await queryRunner.query(
             `ALTER TABLE "passwordRestTokens" ADD "deletedAt" TIMESTAMP`

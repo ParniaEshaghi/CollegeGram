@@ -19,4 +19,11 @@ export class PostRepository {
     public getPostsByUser(username: string): Promise<Post[]> {
         return this.postRepo.find({ where: { user: { username } } });
     }
+
+    public update(id: string, post: Post): Promise<PostEntity> {
+        return this.postRepo.save({
+            id,
+            ...post,
+        });
+    }
 }

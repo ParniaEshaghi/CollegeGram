@@ -73,6 +73,9 @@ export const postUpload: RequestHandler = (req, res, next) => {
         if (err) {
             return res.status(400).json({ message: err.message });
         }
+        if (!req.files) {
+            return res.status(400).json({ message: "Posts require at least one image"})
+        }
         next();
     });
 };
