@@ -63,7 +63,7 @@ export const profileUpload: RequestHandler = (req, res, next) => {
 export const postUpload: RequestHandler = (req, res, next) => {
     const upload = multer({
         storage: postStorage,
-        limits: { fileSize: 2000000 },
+        limits: { fileSize: 200000000 },
         fileFilter: (req, file, cb) => {
             checkFileType(file, cb);
         },
@@ -73,8 +73,10 @@ export const postUpload: RequestHandler = (req, res, next) => {
         if (err) {
             return res.status(400).json({ message: err.message });
         }
-        if (!req.files) {
-            return res.status(400).json({ message: "Posts require at least one image"})
+        if (!req.files || req.files.length == 0) {
+            return res
+                .status(400)
+                .json({ message: "Posts require at least one image" });
         }
         next();
     });
