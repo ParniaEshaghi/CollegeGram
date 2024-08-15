@@ -1,13 +1,20 @@
 import { DataSource, Repository } from "typeorm";
 import { UserEntity } from "./entity/user.entity";
 import { User } from "./model/user.model";
+import { Post } from "../post/model/post.model";
+import { hashGenerator } from "../../utility/hash-generator";
 
-interface UpdateProfile {
+interface CreateUser {
+    username: string;
     password: string;
     email: string;
-    profilePicture: string;
-    firstName: string;
-    lastName: string;
+}
+
+interface UpdateProfile {
+    password?: string;
+    email: string;
+    firstname: string;
+    lastname: string;
     profileStatus: "public" | "private";
     bio: string;
 }
@@ -31,34 +38,74 @@ export class UserRepository {
         });
     }
 
-    public create(user: User): Promise<User> {
-        return this.userRepo.save(user);
+    public findById(id: string): Promise<User | null> {
+        return this.userRepo.findOne({
+            where: { id },
+        });
     }
 
-    public async updatePassword(user: User, newPass: string): Promise<void> {
-        await this.userRepo.update(
-            { username: user.username },
-            { password: newPass }
-        );
+    public async hashPassword(password: string): Promise<string> {
+        return await hashGenerator(password);
+    }
+
+    public async create(user: CreateUser): Promise<User> {
+        return this.userRepo.save({
+            username: user.username,
+            password: await this.hashPassword(user.password),
+            email: user.email,
+            profilePicture: "",
+            firstname: "",
+            lastname: "",
+            profileStatus: "public",
+            bio: "",
+            follower_count: 0,
+            following_count: 0,
+            post_count: 0,
+        });
+    }
+
+    public async updatePassword(
+        username: string,
+        password: string
+    ): Promise<void> {
+        await this.userRepo.update({ username }, { password });
     }
 
     public async updateProfile(
-        username: string,
+        user: User,
+        profilePicture: string,
         updated: UpdateProfile
-    ): Promise<void> {
+    ): Promise<UpdateProfile> {
+        const updatedData = {
+            password: updated.password
+                ? await this.hashPassword(updated.password)
+                : user.password,
+            email: updated.email,
+            profilePicture: profilePicture,
+            firstname: updated.firstname,
+            lastname: updated.lastname,
+            profileStatus: updated.profileStatus,
+            bio: updated.bio,
+        };
         await this.userRepo.update(
             {
-                username: username,
+                username: user.username,
             },
-            {
-                password: updated.password,
-                email: updated.email,
-                profilePicture: updated.profilePicture,
-                firstName: updated.firstName,
-                lastName: updated.lastName,
-                profileStatus: updated.profileStatus,
-                bio: updated.bio,
-            }
+            updatedData
         );
+        return updatedData;
+    }
+    
+    public async getUserPosts(username: string): Promise<Post[]> {
+        const userWithPosts = await this.userRepo.findOne({
+            where: { username },
+            relations: ["posts"],
+        });
+
+        if (userWithPosts) {
+            return userWithPosts.posts;
+        }
+
+        return [];
     }
 }

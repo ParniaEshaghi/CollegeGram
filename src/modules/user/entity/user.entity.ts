@@ -1,4 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+} from "typeorm";
+import { PostEntity } from "../../post/entity/post.entity";
+import { UserRelationEntity } from "../userRelation/entity/userRelation.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -18,10 +27,10 @@ export class UserEntity {
     profilePicture!: string;
 
     @Column()
-    firstName!: string;
+    firstname!: string;
 
     @Column()
-    lastName!: string;
+    lastname!: string;
 
     @Column({
         type: "enum",
@@ -40,4 +49,19 @@ export class UserEntity {
 
     @Column()
     post_count!: number;
+
+    @OneToMany(() => PostEntity, (post) => post.user)
+    posts!: PostEntity[];
+
+    @OneToMany(() => UserRelationEntity, (relation) => relation.follower)
+    followers!: UserRelationEntity[];
+
+    @OneToMany(() => UserRelationEntity, (relation) => relation.following)
+    followings!: UserRelationEntity[];
+
+    @CreateDateColumn()
+    createdAt!: Date;
+
+    @UpdateDateColumn()
+    updatedAt!: Date;
 }

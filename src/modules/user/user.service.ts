@@ -1,51 +1,46 @@
 import {
-    ForbiddenError,
-    HttpError,
-    NotFoundError,
+    BadRequestError,
+    DuplicateError,
+    InvalidCredentialError,
+    UnauthorizedError,
 } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
 import { SignUpDto } from "./dto/signup.dto";
-import { User } from "./model/user.model";
+import {
+    toEditProfileInfo,
+    toProfileInfo,
+    toUserWithoutPassword,
+    User,
+    UserWithoutPassword,
+} from "./model/user.model";
 import { UserRepository } from "./user.repository";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { LoginDto } from "./dto/login.dto";
-const nodemailer = require("nodemailer");
-import { PasswordResetTokenRepository } from "./forgetPassword.repository";
-import { ForgetPassword } from "./model/forgetPassword.model";
 import { EditProfileDto } from "./dto/edit-profile.dto";
-import { DecodedToken } from "../../middlewares/auth.middleware";
+import { ForgetPasswordService } from "./forgetPassword/forgetPassword.service";
+import { EmailService } from "../email/email.service";
+import { ProfilePost, toProfilePost } from "../post/model/post.model";
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
-        private passwordResetTokenRepo: PasswordResetTokenRepository
+        private forgetPasswordService: ForgetPasswordService,
+        private emailService: EmailService
     ) {}
 
-    async createUser(dto: SignUpDto): Promise<User> {
+    async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
         if (
             (await this.userRepo.findByEmail(dto.email)) ||
             (await this.userRepo.findByUsername(dto.username))
         ) {
-            throw new HttpError(403, "Username and/or email already in use");
+            throw new DuplicateError();
         }
 
-        const password_hash = await hashGenerator(dto.password);
+        const user = await this.userRepo.create(dto);
 
-        return this.userRepo.create({
-            username: dto.username,
-            password: password_hash,
-            email: dto.email,
-            profilePicture: "",
-            firstName: "",
-            lastName: "",
-            profileStatus: "public",
-            bio: "",
-            follower_count: 0,
-            following_count: 0,
-            post_count: 0,
-        });
+        return toUserWithoutPassword(user);
     }
 
     public async login(dto: LoginDto) {
@@ -55,13 +50,9 @@ export class UserService {
             ? await this.getUserByEmail(dto.credential)
             : await this.getUserByUsername(dto.credential);
 
-        if (!user) {
-            throw new HttpError(401, "Invalid credential or password");
-        }
-
-        const match = await bcrypt.compare(dto.password, user.password);
+        const match = await bcrypt.compare(dto.password, user?.password ?? "");
         if (!user || !match) {
-            throw new HttpError(401, "Invalid credential or password");
+            throw new InvalidCredentialError();
         }
 
         const expiry = dto.keepMeSignedIn ? "7d" : "8h";
@@ -83,169 +74,74 @@ export class UserService {
 
     public async forgetPassword(credential: string) {
         if (!credential) {
-            throw new HttpError(400, "Credential is  required");
+            throw new BadRequestError();
         }
-
         const { success, error } = z.string().email().safeParse(credential);
-
-        let user;
-
-        if (success) {
-            user = await this.getUserByEmail(credential);
-        } else {
-            user = await this.getUserByUsername(credential);
-        }
+        const user = success
+            ? await this.getUserByEmail(credential)
+            : await this.getUserByUsername(credential);
 
         if (!user) {
-            throw new HttpError(401, "Invalid credential");
+            throw new InvalidCredentialError();
         }
-
-        const token = jwt.sign({ username: user.username }, "10", {
-            expiresIn: "1h",
-        });
-        const expirationTime = new Date();
-        expirationTime.setHours(expirationTime.getHours() + 1);
-
-        const resetToken: ForgetPassword = {
-            token: token,
-            expiration: expirationTime,
-            username: user.username,
-        };
-
-        await this.passwordResetTokenRepo.create(resetToken);
-
-        const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            auth: {
-                user: "cgramcgram421@gmail.com",
-                pass: "astjstwkacpkhtsq ",
-            },
-            logger: true,
-            debug: true,
-            secure: false,
-        });
-
-        const mailOptions = {
-            from: "Cgram App",
-            to: user.email,
+        const { id, token } = await this.forgetPasswordService.createToken(
+            user.username
+        );
+        const mailContent = {
+            reciever: user.email,
             subject: "Password Reset",
-            text: `Click on the following link to reset your password: http://37.32.6.230/reset-password/${token}`,
+            text: `Click on the following link to reset your password: http://37.32.6.230:3000/reset-password/${token}`,
         };
-
-        try {
-            await transporter.sendMail(mailOptions);
-            return {
-                message: "Password reset link sent to your email account",
-            };
-        } catch (error) {
-            console.log(error);
-            throw new HttpError(500, "Error sending mail");
-        }
+        return await this.emailService.sendEmail(mailContent);
     }
 
     public async resetPassword(newPass: string, token: string) {
-        let user;
-        try {
-            const decoded = jwt.verify(token, "10") as DecodedToken;
-            user = await this.getUserByUsername(decoded.username);
-
-            const dbtoken = await this.passwordResetTokenRepo.findByToken(
-                token
-            );
-
-            if (!dbtoken) {
-                throw new NotFoundError();
-            }
-
-            if (dbtoken.username !== user?.username) {
-                throw new ForbiddenError();
-            }
-
-            if (dbtoken.expiration.getTime() < new Date().getTime()) {
-                throw new ForbiddenError();
-            }
-
-            if (!user) {
-                throw new NotFoundError();
-            }
-        } catch (error) {
-            throw new HttpError(401, "Authentication failed.");
+        if (!newPass || !token) {
+            throw new BadRequestError();
         }
-
         const password_hash = await hashGenerator(newPass);
-
-        this.userRepo.updatePassword(user, password_hash);
-
+        const username = await this.forgetPasswordService.checkToken(token);
+        this.userRepo.updatePassword(username, password_hash);
         return { message: "New password set" };
     }
 
     public getEditProfile(user: User, baseUrl: string) {
         if (!user) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
-
-        const response = {
-            firstname: user.firstName,
-            lastname: user.lastName,
-            email: user.email,
-            profileStatus: user.profileStatus,
-            bio: user.bio,
-            profilePicture: user.profilePicture
-                ? `${baseUrl}/images/profiles/${user.profilePicture}`
-                : "",
-        };
-
-        return response;
+        return toEditProfileInfo(user, baseUrl);
     }
 
     public async editProfile(
-        username: string,
-        password: string,
+        user: User,
         pictureFilename: string,
-        dto: EditProfileDto
-    ): Promise<User> {
-        const password_hash = dto.password
-            ? await hashGenerator(dto.password)
-            : password;
-
-        await this.userRepo.updateProfile(username, {
-            password: password_hash,
-            email: dto.email,
-            profilePicture: pictureFilename,
-            firstName: dto.firstName,
-            lastName: dto.lastName,
-            profileStatus: dto.profileStatus,
-            bio: dto.bio,
-        });
-
-        const user = await this.getUserByUsername(username);
+        dto: EditProfileDto,
+        baseUrl: string
+    ) {
         if (!user) {
-            throw new NotFoundError();
+            throw new UnauthorizedError();
         }
-        return user;
+        const updatedUser = await this.userRepo.updateProfile(
+            user,
+            pictureFilename,
+            dto
+        );
+        return toEditProfileInfo(updatedUser as User, baseUrl);
     }
 
-    public getProfileInfo(user: User, baseUrl: string) {
+    public async getProfileInfo(user: User, baseUrl: string) {
         if (!user) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
+        const posts = await this.getUserPosts(user.username);
+        return toProfileInfo(user, posts, baseUrl);
+    }
 
-        const response = {
-            username: user.username,
-            firstname: user.firstName,
-            lastname: user.lastName,
-            bio: user.bio,
-            // Construct full URL for profilePicture
-            profilePicture: user.profilePicture
-                ? `${baseUrl}/images/profiles/${user.profilePicture}`
-                : "",
-            posts: [],
-            post_count: 0,
-            follower_count: user.follower_count,
-            following_count: user.following_count,
-        };
-
-        return response;
+    public async getUserPosts(username: string) {
+        const posts = await this.userRepo.getUserPosts(username);
+        const profilePosts: ProfilePost[] = posts.map((post) =>
+            toProfilePost(post)
+        );
+        return profilePosts;
     }
 }

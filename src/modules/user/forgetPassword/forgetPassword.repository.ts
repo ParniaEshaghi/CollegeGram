@@ -11,13 +11,19 @@ export class PasswordResetTokenRepository {
         );
     }
 
-    public create(forgetPassword: ForgetPassword): Promise<ForgetPassword> {
+    public create(
+        forgetPassword: ForgetPassword
+    ): Promise<PasswordResetTokenEntity> {
         return this.passwordResetTokenRepo.save(forgetPassword);
     }
 
-    public findByToken(token: string): Promise<ForgetPassword | null> {
+    public findById(id: string): Promise<PasswordResetTokenEntity | null> {
         return this.passwordResetTokenRepo.findOne({
-            where: { token },
+            where: { id },
         });
+    }
+
+    public async delete(id: string): Promise<void> {
+        await this.passwordResetTokenRepo.softDelete({ id });
     }
 }
