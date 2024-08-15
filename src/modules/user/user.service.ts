@@ -1,4 +1,11 @@
-import { HttpError, NotFoundError } from "../../utility/http-errors";
+import {
+    BadRequestError,
+    DuplicateError,
+    HttpError,
+    InvalidCredentialError,
+    NotFoundError,
+    UnauthorizedError,
+} from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
 import { SignUpDto } from "./dto/signup.dto";
 import {
@@ -30,7 +37,7 @@ export class UserService {
             (await this.userRepo.findByEmail(dto.email)) ||
             (await this.userRepo.findByUsername(dto.username))
         ) {
-            throw new HttpError(403, "Username and/or email already in use");
+            throw new DuplicateError();
         }
 
         const user = await this.userRepo.create(dto);
@@ -47,7 +54,7 @@ export class UserService {
 
         const match = await bcrypt.compare(dto.password, user?.password ?? "");
         if (!user || !match) {
-            throw new HttpError(401, "Invalid credential or password");
+            throw new InvalidCredentialError();
         }
 
         const expiry = dto.keepMeSignedIn ? "7d" : "8h";
@@ -69,7 +76,7 @@ export class UserService {
 
     public async forgetPassword(credential: string) {
         if (!credential) {
-            throw new HttpError(400, "Credential is  required");
+            throw new BadRequestError();
         }
         const { success, error } = z.string().email().safeParse(credential);
         const user = success
@@ -77,7 +84,7 @@ export class UserService {
             : await this.getUserByUsername(credential);
 
         if (!user) {
-            throw new HttpError(401, "Invalid credential");
+            throw new InvalidCredentialError();
         }
         const { id, token } = await this.forgetPasswordService.createToken(
             user.username
@@ -92,7 +99,7 @@ export class UserService {
 
     public async resetPassword(newPass: string, token: string) {
         if (!newPass || !token) {
-            throw new HttpError(400, "Token and new password are required")
+            throw new BadRequestError();
         }
         const password_hash = await hashGenerator(newPass);
         const username = await this.forgetPasswordService.checkToken(token);
@@ -102,7 +109,7 @@ export class UserService {
 
     public getEditProfile(user: User, baseUrl: string) {
         if (!user) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
         return toEditProfileInfo(user, baseUrl);
     }
@@ -114,7 +121,7 @@ export class UserService {
         baseUrl: string
     ) {
         if (!user) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
         const updatedUser = await this.userRepo.updateProfile(
             user,
@@ -126,7 +133,7 @@ export class UserService {
 
     public getProfileInfo(user: User, baseUrl: string) {
         if (!user) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
         return toProfileInfo(user, baseUrl);
     }

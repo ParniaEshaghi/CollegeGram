@@ -1,7 +1,13 @@
 import { UserRepository } from "../../src/modules/user/user.repository";
 import { UserService } from "../../src/modules/user/user.service";
 import bcrypt from "bcrypt";
-import { HttpError, NotFoundError } from "../../src/utility/http-errors";
+import {
+    BadRequestError,
+    HttpError,
+    InvalidCredentialError,
+    NotFoundError,
+    UnauthorizedError,
+} from "../../src/utility/http-errors";
 import { hashGenerator } from "../../src/utility/hash-generator";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
@@ -114,9 +120,7 @@ describe("User service test suite", () => {
                     credential: "test@gmail.com",
                     password: "11111",
                 })
-            ).rejects.toThrow(
-                new HttpError(401, "Invalid credential or password")
-            );
+            ).rejects.toThrow(new InvalidCredentialError());
         });
 
         it("should fail if username is not valid", async () => {
@@ -125,9 +129,7 @@ describe("User service test suite", () => {
                     credential: "testwrongusername",
                     password: "11111",
                 })
-            ).rejects.toThrow(
-                new HttpError(401, "Invalid credential or password")
-            );
+            ).rejects.toThrow(new InvalidCredentialError());
         });
 
         it("should fail if email is not valid", async () => {
@@ -136,9 +138,7 @@ describe("User service test suite", () => {
                     credential: "testwrong@gmail.com",
                     password: "11111",
                 })
-            ).rejects.toThrow(
-                new HttpError(401, "Invalid credential or password")
-            );
+            ).rejects.toThrow(new InvalidCredentialError());
         });
     });
 
@@ -161,13 +161,13 @@ describe("User service test suite", () => {
 
         it("should fail if credential is  empty", async () => {
             expect(userService.forgetPassword("")).rejects.toThrow(
-                new HttpError(400, "Credential is  required")
+                new BadRequestError()
             );
         });
 
         it("should fail if credential is not valid", async () => {
             expect(userService.forgetPassword("notvalid")).rejects.toThrow(
-                new HttpError(401, "Invalid credential")
+                new InvalidCredentialError()
             );
         });
 
@@ -191,7 +191,7 @@ describe("User service test suite", () => {
                     "test",
                     `${randomUUID()}~${randomUUID()}`
                 )
-            ).rejects.toThrow(new HttpError(401, "Unauthorized"));
+            ).rejects.toThrow(new UnauthorizedError());
         });
     });
 

@@ -1,5 +1,8 @@
 import { hashGenerator } from "../../../utility/hash-generator";
-import { ForbiddenError, HttpError } from "../../../utility/http-errors";
+import {
+    ForbiddenError,
+    UnauthorizedError,
+} from "../../../utility/http-errors";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import bcrypt from "bcrypt";
 
@@ -30,12 +33,12 @@ export class ForgetPasswordService {
         try {
             [id, resetToken] = token.split("~");
         } catch (e) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
 
         const dbtoken = await this.passwordResetTokenRepo.findById(id);
         if (!dbtoken) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
         if (dbtoken.expiration.getTime() < new Date().getTime()) {
             this.passwordResetTokenRepo.delete(dbtoken.id);
@@ -43,7 +46,7 @@ export class ForgetPasswordService {
         }
         const isMatch = await bcrypt.compare(resetToken, dbtoken.token);
         if (!isMatch) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
         await this.deleteUsedToken(id);
         return dbtoken.username;

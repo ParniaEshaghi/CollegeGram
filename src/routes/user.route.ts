@@ -7,6 +7,7 @@ import { auth } from "../middlewares/auth.middleware";
 import { profileUpload } from "../middlewares/upload.middleware";
 import { editProfileDto } from "../modules/user/dto/edit-profile.dto";
 import { UserRelationService } from "../modules/user/userRelation/userRelation.service";
+import { HttpError } from "../utility/http-errors";
 
 export const makeUserRouter = (
     userService: UserService,

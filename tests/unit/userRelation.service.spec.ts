@@ -5,7 +5,11 @@ import { UserRepository } from "../../src/modules/user/user.repository";
 import { UserService } from "../../src/modules/user/user.service";
 import { UserRelationRepository } from "../../src/modules/user/userRelation/userRelation.repository";
 import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
-import { HttpError, NotFoundError } from "../../src/utility/http-errors";
+import {
+    BadRequestError,
+    HttpError,
+    NotFoundError,
+} from "../../src/utility/http-errors";
 import { createTestDb } from "../../src/utility/test-db";
 
 describe("User relation service test suite", () => {
@@ -75,7 +79,7 @@ describe("User relation service test suite", () => {
                     (await userService.getUserByUsername("test"))!,
                     "follow_test"
                 )
-            ).rejects.toThrow(new HttpError(400, "Bad Request"));
+            ).rejects.toThrow(new BadRequestError());
         });
 
         it("should fail to follow someone that does not exist", async () => {
@@ -114,7 +118,7 @@ describe("User relation service test suite", () => {
                     (await userService.getUserByUsername("test"))!,
                     "follow_test"
                 )
-            ).rejects.toThrow(new HttpError(400, "Bad Request"));
+            ).rejects.toThrow(new BadRequestError());
         });
 
         it("should fail to unfollow someone that does not exist", async () => {
