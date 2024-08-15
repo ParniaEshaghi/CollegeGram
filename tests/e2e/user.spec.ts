@@ -13,6 +13,7 @@ import { EmailService } from "../../src/modules/email/email.service";
 import { ForgetPasswordService } from "../../src/modules/user/forgetPassword/forgetPassword.service";
 import { PostRepository } from "../../src/modules/post/post.repository";
 import { PostService } from "../../src/modules/post/post.service";
+import { PostDto } from "../../src/modules/post/entity/dto/post.dto";
 
 jest.mock("nodemailer");
 
@@ -330,6 +331,38 @@ describe("User route test suite", () => {
 
             expect(response_profile_info.status).toBe(401);
         });
+        
+        it("should get profile with posts", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+            
+            const response_profile_info = await request(app)
+                .get("/api/user/profileInfo")
+                .set("Cookie", [cookie]);
+            expect(response_profile_info.status).toBe(200);
+            expect(response_profile_info.body).toHaveProperty("posts");
+            expect(response_profile_info.body.posts).toHaveLength(1)
+            expect(response_profile_info.body.posts[0].images).toHaveLength(2);
+        })
     });
 
     describe("Editing Profile", () => {

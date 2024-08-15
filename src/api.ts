@@ -33,7 +33,7 @@ export const makeApp = (
 
     app.use(errorHandler);
 
-    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+    app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
     return app;
 };

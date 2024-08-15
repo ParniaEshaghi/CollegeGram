@@ -1,3 +1,5 @@
+import { Post, ProfilePost } from "../../post/model/post.model";
+
 export interface User {
     username: string;
     password: string;
@@ -23,12 +25,16 @@ export type ProfileInfo = Omit<User, "password" | "email" | "profileStatus"> & {
     posts: any[];
 };
 
-export const toProfileInfo = (user: User, baseUrl: string): ProfileInfo => {
+export const toProfileInfo = (
+    user: User,
+    posts: ProfilePost[],
+    baseUrl: string
+): ProfileInfo => {
     const { password, profileStatus, email, profilePicture, ...profileInfo } =
         user;
     return {
         ...profileInfo,
-        posts: [],
+        posts,
         profilePicture: user.profilePicture
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",

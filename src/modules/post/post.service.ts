@@ -1,4 +1,3 @@
-import { promises } from "dns";
 import {
     ForbiddenError,
     HttpError,
@@ -9,11 +8,10 @@ import { User } from "../user/model/user.model";
 import { PostDto } from "./entity/dto/post.dto";
 import {
     Post,
-    PostWithoutUser,
-    PostWithoutUserWithId,
+    PostWithUsername,
+    toPostWithUsername,
 } from "./model/post.model";
-import { PostRepository } from "./post.repository";
-import { PostEntity } from "./entity/post.entity";
+import { CreatePost, PostRepository } from "./post.repository";
 import path from "path";
 import { promises as fs } from "fs";
 
@@ -25,12 +23,12 @@ export class PostService {
         postDto: PostDto,
         postImagesFileNames: string[],
         baseUrl: string
-    ): Promise<PostWithoutUserWithId> {
+    ): Promise<PostWithUsername> {
         if (!user) {
-            throw new HttpError(401, "Unauthorized");
+            throw new UnauthorizedError();
         }
 
-        const newPost: Post = {
+        const newPost: CreatePost = {
             user: user,
             images: postImagesFileNames,
             caption: postDto.caption,
@@ -38,20 +36,8 @@ export class PostService {
             mentions: postDto.mentions,
         };
 
-        try {
-            const crestedPost = await this.postRepo.create(newPost);
-            return {
-                id: crestedPost.id,
-                caption: crestedPost.caption,
-                mentions: crestedPost.mentions,
-                tags: crestedPost.tags,
-                images: crestedPost.images.map(
-                    (image) => `${baseUrl}/api/images/posts/${image}`
-                ),
-            };
-        } catch (error) {
-            throw new HttpError(500, "server error");
-        }
+        const createdPost = await this.postRepo.create(newPost);
+        return toPostWithUsername(createdPost, baseUrl)
     }
 
     private extractTags(caption: string): string[] {
@@ -63,7 +49,7 @@ export class PostService {
         user: User,
         postId: string,
         baseUrl: string
-    ): Promise<PostWithoutUser> {
+    ): Promise<PostWithUsername> {
         if (!user) {
             throw new UnauthorizedError();
         }
@@ -73,22 +59,11 @@ export class PostService {
             throw new NotFoundError();
         }
 
-        const userPosts: PostEntity[] = await this.postRepo.getPostsByUser(
-            user.username
-        );
-
-        if (!userPosts.map((upost) => upost.id).includes(post.id)) {
-            throw new NotFoundError();
+        if (post.user.username !== user.username) {
+            throw new ForbiddenError();
         }
 
-        return {
-            caption: post.caption,
-            mentions: post.mentions,
-            tags: post.tags,
-            images: post.images.map(
-                (image) => `${baseUrl}/api/images/posts/${image}`
-            ),
-        };
+        return toPostWithUsername(post, baseUrl);
     }
 
     public async updatePost(
@@ -97,7 +72,7 @@ export class PostService {
         postDto: PostDto,
         postImagesFileNames: string[],
         baseUrl: string
-    ): Promise<PostWithoutUser> {
+    ): Promise<PostWithUsername> {
         if (!user) {
             throw new HttpError(401, "Unauthorized");
         }
@@ -105,6 +80,7 @@ export class PostService {
         if (!post) {
             throw new NotFoundError();
         }
+
         if (post.user.username !== user.username) {
             throw new ForbiddenError();
         }
@@ -112,21 +88,16 @@ export class PostService {
         await this.deleteUnusedImages(post.images);
 
         const editedPost: Post = {
+            id: postId,
             user: user,
             images: postImagesFileNames,
             caption: postDto.caption,
             tags: this.extractTags(postDto.caption),
             mentions: postDto.mentions,
         };
-        const updatedPost = await this.postRepo.update(postId, editedPost);
-        return {
-            caption: updatedPost.caption,
-            mentions: updatedPost.mentions,
-            tags: updatedPost.tags,
-            images: updatedPost.images.map(
-                (image) => `${baseUrl}/api/images/posts/${image}`
-            ),
-        };
+        const updatedPost = await this.postRepo.update(editedPost);
+
+        return toPostWithUsername(updatedPost, baseUrl);
     }
 
     public async deleteUnusedImages(images: string[]) {

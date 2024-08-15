@@ -83,30 +83,43 @@
  *   post:
  *     tags: [User]
  *     summary: Edit User Profile
- *     description: Updates user profile information including profile picture.
- *     consumes:
- *       - multipart/form-data
- *     parameters:
- *       - in: formData
- *         name: firstname
- *         type: string
- *         required: true
- *         description: User's first name
- *       - in: formData
- *         name: lastname
- *         type: string
- *         required: true
- *         description: User's last name
- *       - in: formData
- *         name: bio
- *         type: string
- *         required: false
- *         description: User's bio (optional)
- *       - in: formData
- *         name: profilePicture
- *         type: file
- *         required: false
- *         description: Profile picture file (optional)
+ *     description: Updates the user's profile information including profile picture.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *                 description: User's first name
+ *                 example: John
+ *               lastname:
+ *                 type: string
+ *                 description: User's last name
+ *                 example: Doe
+ *               bio:
+ *                 type: string
+ *                 description: User's bio
+ *                 example: Software Developer
+ *               email:
+ *                 type: string
+ *                 description: User's email address
+ *                 example: johndoe@example.com
+ *               profileStatus:
+ *                 type: string
+ *                 enum: [public, private]
+ *                 description: User's profile visibility status
+ *                 example: public
+ *               profilePicture:
+ *                 type: string
+ *                 format: binary
+ *                 description: Profile picture file (optional)
+ *               password:
+ *                 type: string
+ *                 description: User's new password (optional)
+ *                 example: newSecurePassword123
  *     responses:
  *       200:
  *         description: Profile updated successfully
@@ -130,6 +143,13 @@
  *                     bio:
  *                       type: string
  *                       example: Software Developer
+ *                     email:
+ *                       type: string
+ *                       example: johndoe@example.com
+ *                     profileStatus:
+ *                       type: string
+ *                       enum: [public, private]
+ *                       example: public
  *                     profilePicture:
  *                       type: string
  *                       example: http://localhost:3000/api/images/profiles/profile.jpg
@@ -140,6 +160,8 @@
  *       500:
  *         description: Internal server error
  */
+
+
 
 /**
  * @swagger
@@ -186,7 +208,7 @@
  *   get:
  *     tags: [User]
  *     summary: Get User Profile Information
- *     description: Retrieves the profile information of the logged-in user.
+ *     description: Retrieves the profile information of the logged-in user, including posts.
  *     responses:
  *       200:
  *         description: Profile information retrieved successfully
@@ -210,11 +232,34 @@
  *                 profilePicture:
  *                   type: string
  *                   example: http://localhost:3000/api/images/profiles/profile.jpg
+ *                 follower_count:
+ *                   type: integer
+ *                   example: 150
+ *                 following_count:
+ *                   type: integer
+ *                   example: 180
+ *                 post_count:
+ *                   type: integer
+ *                   example: 75
+ *                 posts:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 12345
+ *                       images:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: http://localhost:3000/api/images/posts/post1.jpg
  *       401:
  *         description: Unauthorized
  *       500:
  *         description: Internal server error
  */
+
 
 /**
  * @swagger
