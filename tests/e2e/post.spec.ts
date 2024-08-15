@@ -14,7 +14,7 @@ import { PostRepository } from "../../src/modules/post/post.repository";
 import { PostService } from "../../src/modules/post/post.service";
 import { PostDto } from "../../src/modules/post/entity/dto/post.dto";
 
-describe("User route test suite", () => {
+describe("Post route test suite", () => {
     let app: Express;
     let userRepo: UserRepository;
     let passwordResetTokenRepo: PasswordResetTokenRepository;
@@ -83,14 +83,8 @@ describe("User route test suite", () => {
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
 
-                .attach(
-                    "postImage",
-                    "C:\\Users\\EXO\\Desktop\\cgram-back\\img1.jpeg"
-                )
-                .attach(
-                    "postImage",
-                    "C:\\Users\\EXO\\Desktop\\cgram-back\\img2.jpeg"
-                )
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
             // console.log(create_post_response.body.images);
             expect(create_post_response.body.caption).toBe(postDto.caption);
@@ -127,7 +121,7 @@ describe("User route test suite", () => {
                 .expect(400);
         });
 
-        it.skip("should fail user not authenticate", async () => {
+        it("should fail user not authenticate", async () => {
             const postDto: PostDto = {
                 caption: "This is a test post #test",
                 mentions: ["user1", "user2"],
@@ -140,19 +134,13 @@ describe("User route test suite", () => {
                 ])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach(
-                    "postImage",
-                    "C:\\Users\\EXO\\Desktop\\cgram-back\\img1.jpeg"
-                )
-                .attach(
-                    "postImage",
-                    "C:\\Users\\EXO\\Desktop\\cgram-back\\img2.jpeg"
-                )
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
                 .expect(401);
         });
     });
 
-    describe("get Post successfully", () => {
+    describe("get Post by id", () => {
         it("should  return a post with id", async () => {
             const response = await request(app)
                 .post("/api/user/signin")
@@ -175,14 +163,8 @@ describe("User route test suite", () => {
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
 
-                .attach(
-                    "postImage",
-                    "C:\\Users\\EXO\\Desktop\\cgram-back\\img1.jpeg"
-                )
-                .attach(
-                    "postImage",
-                    "C:\\Users\\EXO\\Desktop\\cgram-back\\img2.jpeg"
-                )
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_getPostByPostId = await request(app)
@@ -199,7 +181,7 @@ describe("User route test suite", () => {
             );
         });
 
-        it("should faild in post id is not valid", async () => {
+        it("should fail if post id is not valid", async () => {
             const response = await request(app)
                 .post("/api/user/signin")
                 .send({ credential: "test", password: "test" })
@@ -211,7 +193,58 @@ describe("User route test suite", () => {
             const response_getPostByPostId = await request(app)
                 .get("/api/post/a3efc682-66b1-402a-9b58-c0a114c1a9c0")
                 .set("Cookie", [cookie])
-                .expect(400);
+                .expect(404);
+        });
+    });
+
+    describe("Update post", () => {
+        it("should update post", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            const create_post_response = await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+
+            const updatedPostDto: PostDto = {
+                caption: "This #is a test #post #test",
+                mentions: ["user1", "user2", "user3"],
+            };
+
+            const response_editpost = await request(app)
+                .post(`/api/post/updatepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .field("caption", updatedPostDto.caption)
+                .field("mentions", updatedPostDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("postImage", Buffer.from(""), "testFile3.jpg")
+                .attach("postImage", Buffer.from(""), "testFile4.jpg")
+                .expect(200);
+            expect(response_editpost.body.caption).toBe(updatedPostDto.caption);
+            expect(response_editpost.body.mentions).toEqual(
+                updatedPostDto.mentions
+            );
+            expect(response_editpost.body.tags).toEqual([
+                "#is",
+                "#post",
+                "#test",
+            ]);
+            expect(response_editpost.body.images).toHaveLength(3);
         });
     });
 });

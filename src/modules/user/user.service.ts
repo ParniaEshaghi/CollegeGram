@@ -1,9 +1,7 @@
 import {
     BadRequestError,
     DuplicateError,
-    HttpError,
     InvalidCredentialError,
-    NotFoundError,
     UnauthorizedError,
 } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
@@ -23,7 +21,7 @@ import { LoginDto } from "./dto/login.dto";
 import { EditProfileDto } from "./dto/edit-profile.dto";
 import { ForgetPasswordService } from "./forgetPassword/forgetPassword.service";
 import { EmailService } from "../email/email.service";
-import { Post } from "../post/model/post.model";
+import { ProfilePost, toProfilePost } from "../post/model/post.model";
 
 export class UserService {
     constructor(
@@ -131,14 +129,19 @@ export class UserService {
         return toEditProfileInfo(updatedUser as User, baseUrl);
     }
 
-    public getProfileInfo(user: User, baseUrl: string) {
+    public async getProfileInfo(user: User, baseUrl: string) {
         if (!user) {
             throw new UnauthorizedError();
         }
-        return toProfileInfo(user, baseUrl);
+        const posts = await this.getUserPosts(user.username);
+        return toProfileInfo(user, posts, baseUrl);
     }
 
-    public async getUserPosts(username: string): Promise<Post[]> {
-        return await this.userRepo.getUserPosts(username);
+    public async getUserPosts(username: string) {
+        const posts = await this.userRepo.getUserPosts(username);
+        const profilePosts: ProfilePost[] = posts.map((post) =>
+            toProfilePost(post)
+        );
+        return profilePosts;
     }
 }
