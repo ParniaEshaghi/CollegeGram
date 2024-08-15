@@ -11,8 +11,7 @@ export const auth =
     (userService: UserService) =>
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            // const token = req.cookies.token;
-            const token = req.header('Authorization')?.split(' ')[1];
+            const token = req.cookies.token;
             if (!token) {
                 throw new AuthenticationFailError();
             }

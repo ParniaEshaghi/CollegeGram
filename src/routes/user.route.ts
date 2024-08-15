@@ -28,7 +28,7 @@ export const makeUserRouter = (
                 return { message, token };
             },
             ({ token }) => {
-                res.cookie("token", token, { httpOnly: true });
+                res.cookie("token", token);
             }
         );
     });

@@ -11,7 +11,7 @@ export class EmailService {
             pass: "astjstwkacpkhtsq ",
         },
         logger: true,
-        debug: true,
+        debug: false,
         secure: false,
     });
 

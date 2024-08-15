@@ -24,14 +24,22 @@ export const makeApp = (
     app.use(cookieParser());
     app.use(express.json());
 
-    app.use(cors({ credentials: true,
-    origin: ["http://37.32.6.230", "http://localhost:3000", "http://localhost:5173"],
-    exposedHeaders: ['set-cookie','ajax_redirect'],
-    preflightContinue: true,
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-    optionsSuccessStatus: 200, }));
+    app.use(
+        cors({
+            credentials: true,
+            origin: [
+                "http://37.32.6.230",
+                "http://localhost:3000",
+                "http://localhost:5173",
+            ],
+            exposedHeaders: ["set-cookie", "ajax_redirect"],
+            preflightContinue: true,
+            methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+            optionsSuccessStatus: 200,
+        })
+    );
 
-    app.use(setBaseUrl)
+    app.use(setBaseUrl);
 
     app.use("/api/images", express.static(path.join(__dirname, "../images")));
     app.use("/api/user", makeUserRouter(userService, userRelationService));

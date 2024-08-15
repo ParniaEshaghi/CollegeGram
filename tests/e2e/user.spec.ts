@@ -205,7 +205,7 @@ describe("User route test suite", () => {
                 .send({ credential: "test" });
             const emailContent = sendMailMock.mock.calls[0][0].text;
             const tokenMatch = emailContent.match(
-                /reset-password\/([a-zA-Z0-9-_\.]+)~([a-zA-Z0-9-_\.]+)$/
+                /reset-password\/([a-fA-F0-9-]+~[a-fA-F0-9-]+)$/
             );
             const token = tokenMatch
                 ? `${tokenMatch[1]}~${tokenMatch[2]}`

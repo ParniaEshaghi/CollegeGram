@@ -95,7 +95,6 @@ describe("Post route test suite", () => {
             expect(create_post_response.body.images).toHaveLength(
                 postImagesFileNames.length
             );
-            console.log(create_post_response.body);
         });
 
         it("should fail if no image present in createpost request", async () => {
@@ -106,7 +105,6 @@ describe("Post route test suite", () => {
             const cookies = response.headers["set-cookie"];
             expect(cookies).toBeDefined();
             const cookie = cookies[0];
-            console.log(cookie);
             const postDto: PostDto = {
                 caption: "This is a test post #test",
                 mentions: ["user1", "user2"],
