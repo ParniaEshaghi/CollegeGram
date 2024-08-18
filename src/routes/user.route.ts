@@ -19,7 +19,6 @@ export const makeUserRouter = (
         handleExpress(res, () => userService.createUser(dto));
     });
 
-
     app.post("/signin", (req, res) => {
         const dto = loginDto.parse(req.body);
         handleExpress(
@@ -92,6 +91,26 @@ export const makeUserRouter = (
         const username = req.params.username;
         handleExpress(res, () =>
             UserRelationService.userProfile(req.user, username, req.base_url)
+        );
+    });
+
+    app.get("/followers/:username", auth(userService), (req, res) => {
+        const username = req.params.username;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            UserRelationService.followerList(req.user, username, page, limit)
+        );
+    });
+
+    app.get("/followings/:username", auth(userService), (req, res) => {
+        const username = req.params.username;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            UserRelationService.followeingList(req.user, username, page, limit)
         );
     });
 
