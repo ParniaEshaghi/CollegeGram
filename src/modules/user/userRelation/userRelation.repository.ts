@@ -43,12 +43,17 @@ export class UserRelationRepository {
         });
     }
 
-    public checkExistance(
+    public async checkExistance(
         follower: User,
         following: User
     ): Promise<UserRelation | null> {
-        return this.userRelationRepo.findOne({
-            where: { follower, following },
+        const reponse = await this.userRelationRepo.findOne({
+            where: {
+                follower: { username: follower.username },
+                following: { username: following.username },
+            },
         });
+
+        return reponse;
     }
 }

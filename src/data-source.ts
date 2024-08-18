@@ -21,8 +21,6 @@ export const AppDataSource = new DataSource({
         PostEntity,
         UserRelationEntity,
     ],
-    migrations: [
-        RenameFirstNameLastName1723636558559,
-    ],
+    migrations: [RenameFirstNameLastName1723636558559],
     subscribers: [],
 });
