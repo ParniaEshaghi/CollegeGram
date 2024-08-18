@@ -5,6 +5,12 @@ import { PasswordResetTokenEntity } from "./modules/user/forgetPassword/entity/f
 import { PostEntity } from "./modules/post/entity/post.entity";
 import { UserRelationEntity } from "./modules/user/userRelation/entity/userRelation.entity";
 import { RenameFirstNameLastName1723636558559 } from "../migrations/1723636558559-RenameFirstNameLastName";
+import {
+    CommentLikeEntity,
+    PostLikeEntity,
+} from "./modules/post/like/entity/like.entity";
+import { CommentEntity } from "./modules/post/comment/entity/comment.entity";
+import { SavedPostsEntity } from "./modules/user/savedPost/entity/savedPost.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -20,6 +26,10 @@ export const AppDataSource = new DataSource({
         PasswordResetTokenEntity,
         PostEntity,
         UserRelationEntity,
+        PostLikeEntity,
+        CommentLikeEntity,
+        CommentEntity,
+        SavedPostsEntity,
     ],
     migrations: [RenameFirstNameLastName1723636558559],
     subscribers: [],

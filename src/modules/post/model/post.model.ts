@@ -7,7 +7,15 @@ export interface Post {
     caption: string;
     tags: string[];
     mentions: string[];
+    like_count: number;
+    comment_count: number;
+    saved_count: number;
 }
+
+export type UpdatePost = Omit<
+    Post,
+    "like_count" | "comment_count" | "saved_count"
+>;
 
 export type PostWithUsername = Omit<Post, "user"> & {
     username: string;

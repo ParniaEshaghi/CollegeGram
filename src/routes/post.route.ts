@@ -3,7 +3,7 @@ import { PostService } from "../modules/post/post.service";
 import { auth } from "../middlewares/auth.middleware";
 import { UserService } from "../modules/user/user.service";
 import { postUpload } from "../middlewares/upload.middleware";
-import { postDto } from "../modules/post/entity/dto/post.dto";
+import { postDto } from "../modules/post/dto/post.dto";
 import { handleExpress } from "../utility/handle-express";
 
 export const makePostRouter = (

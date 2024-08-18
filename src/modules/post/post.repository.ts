@@ -1,5 +1,5 @@
-import { DataSource, Repository } from "typeorm";
-import { Post } from "./model/post.model";
+import { DataSource, Repository, UnorderedBulkOperation } from "typeorm";
+import { Post, UpdatePost } from "./model/post.model";
 import { PostEntity } from "./entity/post.entity";
 import { User } from "../user/model/user.model";
 
@@ -9,6 +9,9 @@ export interface CreatePost {
     caption: string;
     tags: string[];
     mentions: string[];
+    like_count: number;
+    comment_count: number;
+    saved_count: number;
 }
 
 export class PostRepository {
@@ -32,7 +35,7 @@ export class PostRepository {
         return this.postRepo.find({ where: { user: { username } } });
     }
 
-    public update(post: Post): Promise<Post> {
+    public update(post: UpdatePost): Promise<Post> {
         return this.postRepo.save(post);
     }
 }

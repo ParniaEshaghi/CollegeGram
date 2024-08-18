@@ -8,6 +8,11 @@ import {
 } from "typeorm";
 import { PostEntity } from "../../post/entity/post.entity";
 import { UserRelationEntity } from "../userRelation/entity/userRelation.entity";
+import { CommentEntity } from "../../post/comment/entity/comment.entity";
+import {
+    CommentLikeEntity,
+    PostLikeEntity,
+} from "../../post/like/entity/like.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -58,6 +63,18 @@ export class UserEntity {
 
     @OneToMany(() => UserRelationEntity, (relation) => relation.following)
     followings!: UserRelationEntity[];
+
+    @OneToMany(() => CommentEntity, (relation) => relation.user)
+    comments!: CommentEntity[];
+
+    @OneToMany(() => PostLikeEntity, (relation) => relation.user)
+    postLikes!: PostLikeEntity[];
+
+    @OneToMany(() => CommentLikeEntity, (relation) => relation.user)
+    commentLikes!: CommentLikeEntity[];
+
+    @OneToMany(() => CommentEntity, (relation) => relation.user)
+    savedPosts!: CommentEntity[];
 
     @CreateDateColumn()
     createdAt!: Date;
