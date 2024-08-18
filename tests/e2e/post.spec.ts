@@ -31,15 +31,12 @@ describe("Post route test suite", () => {
         userRepo = new UserRepository(dataSource);
         passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
         forgetPasswordService = new ForgetPasswordService(
-            passwordResetTokenRepo
+            passwordResetTokenRepo,
+            emailService
         );
         userRelationRepo = new UserRelationRepository(dataSource);
         emailService = new EmailService();
-        userService = new UserService(
-            userRepo,
-            forgetPasswordService,
-            emailService
-        );
+        userService = new UserService(userRepo, forgetPasswordService);
         userRelationService = new UserRelationService(
             userRelationRepo,
             userService

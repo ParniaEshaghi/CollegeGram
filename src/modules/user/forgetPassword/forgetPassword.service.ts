@@ -3,11 +3,17 @@ import {
     ForbiddenError,
     UnauthorizedError,
 } from "../../../utility/http-errors";
+import { EmailService } from "../../email/email.service";
 import { PasswordResetTokenRepository } from "./forgetPassword.repository";
 import bcrypt from "bcrypt";
+import fs from "fs";
+import path from "path";
 
 export class ForgetPasswordService {
-    constructor(private passwordResetTokenRepo: PasswordResetTokenRepository) {}
+    constructor(
+        private passwordResetTokenRepo: PasswordResetTokenRepository,
+        private emailService: EmailService
+    ) {}
 
     public async createToken(username: string) {
         const expirationTime = new Date();
@@ -50,5 +56,26 @@ export class ForgetPasswordService {
         }
         await this.deleteUsedToken(id);
         return dbtoken.username;
+    }
+
+    public sendForgetPasswordEmail(
+        email: string,
+        id: string,
+        token: string
+    ) {
+        const htmlTemplate = fs.readFileSync(
+            path.join(__dirname, "email-template/index.html"),
+            "utf-8"
+        );
+
+        const resetLink = `http://37.32.6.230/reset-password/${id}~${token}`;
+        const htmlContent = htmlTemplate.replace("{{resetLink}}", resetLink);
+
+        const mailContent = {
+            reciever: email,
+            subject: "Password Reset",
+            html: htmlContent,
+        };
+        return this.emailService.sendEmail(mailContent);
     }
 }
