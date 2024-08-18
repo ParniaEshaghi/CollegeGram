@@ -13,7 +13,7 @@ import { EmailService } from "../../src/modules/email/email.service";
 import { ForgetPasswordService } from "../../src/modules/user/forgetPassword/forgetPassword.service";
 import { PostRepository } from "../../src/modules/post/post.repository";
 import { PostService } from "../../src/modules/post/post.service";
-import { PostDto } from "../../src/modules/post/entity/dto/post.dto";
+import { PostDto } from "../../src/modules/post/dto/post.dto";
 
 jest.mock("nodemailer");
 

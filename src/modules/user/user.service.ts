@@ -21,7 +21,7 @@ import { LoginDto } from "./dto/login.dto";
 import { EditProfileDto } from "./dto/edit-profile.dto";
 import { ForgetPasswordService } from "./forgetPassword/forgetPassword.service";
 import { EmailService } from "../email/email.service";
-import { ProfilePost, toProfilePost } from "../post/model/post.model";
+import { PostWithUsername, toProfilePost } from "../post/model/post.model";
 import fs from "fs";
 
 export class UserService {
@@ -87,7 +87,11 @@ export class UserService {
         const { id, token } = await this.forgetPasswordService.createToken(
             user.username
         );
-        return this.forgetPasswordService.sendForgetPasswordEmail(user.email, id, token)
+        return this.forgetPasswordService.sendForgetPasswordEmail(
+            user.email,
+            id,
+            token
+        );
     }
 
     public async resetPassword(newPass: string, token: string) {
