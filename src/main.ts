@@ -27,15 +27,15 @@ const run = async () => {
 
     const userRepo = new UserRepository(dataSource);
     const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
+    const emailService = new EmailService();
     const forgetPasswordService = new ForgetPasswordService(
-        passwordResetTokenRepo
+        passwordResetTokenRepo,
+        emailService
     );
     const userRelationRepo = new UserRelationRepository(dataSource);
-    const emailService = new EmailService();
     const userService = new UserService(
         userRepo,
-        forgetPasswordService,
-        emailService
+        forgetPasswordService
     );
     const userRelationService = new UserRelationService(
         userRelationRepo,

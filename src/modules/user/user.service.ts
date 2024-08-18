@@ -22,12 +22,12 @@ import { EditProfileDto } from "./dto/edit-profile.dto";
 import { ForgetPasswordService } from "./forgetPassword/forgetPassword.service";
 import { EmailService } from "../email/email.service";
 import { ProfilePost, toProfilePost } from "../post/model/post.model";
+import fs from "fs";
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
         private forgetPasswordService: ForgetPasswordService,
-        private emailService: EmailService
     ) {}
 
     async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -87,12 +87,7 @@ export class UserService {
         const { id, token } = await this.forgetPasswordService.createToken(
             user.username
         );
-        const mailContent = {
-            reciever: user.email,
-            subject: "Password Reset",
-            text: `Click on the following link to reset your password: http://37.32.6.230/reset-password/${id}~${token}`,
-        };
-        return await this.emailService.sendEmail(mailContent);
+        return this.forgetPasswordService.sendForgetPasswordEmail(user.email, id, token)
     }
 
     public async resetPassword(newPass: string, token: string) {

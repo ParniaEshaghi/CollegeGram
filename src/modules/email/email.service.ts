@@ -10,7 +10,7 @@ export class EmailService {
             user: "cgramcgram421@gmail.com",
             pass: "astjstwkacpkhtsq ",
         },
-        logger: true,
+        logger: false,
         debug: false,
         secure: false,
     });
@@ -22,7 +22,7 @@ export class EmailService {
             from: "Cgram App",
             to: dto.reciever,
             subject: dto.subject,
-            text: dto.text,
+            html: dto.html,
         }
 
         try {
