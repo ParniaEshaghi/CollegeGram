@@ -12,7 +12,7 @@ export const makePostRouter = (
 ) => {
     const app = Router();
 
-    app.post("/createpost", auth(userService), postUpload, async (req, res) => {
+    app.post("/createpost", auth(userService), postUpload, (req, res) => {
         const dto = postDto.parse(req.body);
         const postImageFilenames = (req.files as Express.Multer.File[]).map(
             (file) => file.filename
@@ -24,17 +24,21 @@ export const makePostRouter = (
                     req.user,
                     dto,
                     postImageFilenames,
-                    req.baseUrl
+                    req.base_url
                 )
         );
     });
 
-    app.get("/:postid", auth(userService), async (req, res) => {
+    app.get("/:postid", auth(userService), (req, res) => {
         const postId: string = req.params.postid;
         handleExpress(
             res,
             async () =>
-                await postService.getPostByPostId(req.user, postId, req.baseUrl)
+                await postService.getPostByPostId(
+                    req.user,
+                    postId,
+                    req.base_url
+                )
         );
     });
 
@@ -42,7 +46,7 @@ export const makePostRouter = (
         "/updatepost/:postid",
         auth(userService),
         postUpload,
-        async (req, res) => {
+        (req, res) => {
             const postid = req.params.postid;
             const dto = postDto.parse(req.body);
             const postImageFilenames = (req.files as Express.Multer.File[]).map(
@@ -54,7 +58,7 @@ export const makePostRouter = (
                     postid,
                     dto,
                     postImageFilenames,
-                    req.baseUrl
+                    req.base_url
                 )
             );
         }

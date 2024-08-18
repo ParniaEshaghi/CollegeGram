@@ -27,13 +27,17 @@ export const toPostWithUsername = (
     };
 };
 
-export type ProfilePost = Omit<Post, "user" | "caption" | "tags" | "mentions">;
-
-export const toProfilePost = (post: Post): ProfilePost => {
-    const images = post.images;
-    const id = post.id;
+export const toProfilePost = (
+    username: string,
+    post: Post,
+    baseUrl: string
+): PostWithUsername => {
+    const { user, images, ...postDetails } = post;
     return {
-        id,
-        images,
+        ...postDetails,
+        username: username,
+        images: post.images.map(
+            (image) => `${baseUrl}/api/images/posts/${image}`
+        ),
     };
 };
