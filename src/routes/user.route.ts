@@ -33,33 +33,23 @@ export const makeUserRouter = (
         );
     });
 
-    app.post("/forgetpassword", async (req, res) => {
+    app.post("/forgetpassword", (req, res) => {
         const { credential } = req.body;
         handleExpress(res, () => userService.forgetPassword(credential));
     });
 
-    app.post("/resetpassword", async (req, res) => {
+    app.post("/resetpassword", (req, res) => {
         const { newPass, token } = req.body;
         handleExpress(res, () => userService.resetPassword(newPass, token));
     });
 
-    app.post(
-        "/editprofile",
-        auth(userService),
-        profileUpload,
-        async (req, res) => {
-            const dto = editProfileDto.parse(req.body);
-            const pictureFilename = req.file ? req.file.filename : "";
-            handleExpress(res, () =>
-                userService.editProfile(
-                    req.user,
-                    pictureFilename,
-                    dto,
-                    req.baseUrl
-                )
-            );
-        }
-    );
+    app.post("/editprofile", auth(userService), profileUpload, (req, res) => {
+        const dto = editProfileDto.parse(req.body);
+        const pictureFilename = req.file ? req.file.filename : "";
+        handleExpress(res, () =>
+            userService.editProfile(req.user, pictureFilename, dto, req.baseUrl)
+        );
+    });
 
     app.get("/geteditprofile", auth(userService), (req, res) => {
         handleExpress(res, async () =>
@@ -73,21 +63,21 @@ export const makeUserRouter = (
         );
     });
 
-    app.post("/follow/:username", auth(userService), async (req, res) => {
+    app.post("/follow/:username", auth(userService), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
             UserRelationService.follow(req.user, username)
         );
     });
 
-    app.post("/unfollow/:username", auth(userService), async (req, res) => {
+    app.post("/unfollow/:username", auth(userService), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
             UserRelationService.unfollow(req.user, username)
         );
     });
 
-    app.get("/:username", auth(userService), async (req, res) => {
+    app.get("/:username", auth(userService), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
             UserRelationService.userProfile(req.user, username, req.baseUrl)
