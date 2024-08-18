@@ -128,14 +128,14 @@ export class UserService {
         if (!user) {
             throw new UnauthorizedError();
         }
-        const posts = await this.getUserPosts(user.username);
+        const posts = await this.getUserPosts(user.username, baseUrl);
         return toProfileInfo(user, posts, baseUrl);
     }
 
-    public async getUserPosts(username: string) {
+    public async getUserPosts(username: string, baseUrl: string) {
         const posts = await this.userRepo.getUserPosts(username);
-        const profilePosts: ProfilePost[] = posts.map((post) =>
-            toProfilePost(post)
+        const profilePosts: PostWithUsername[] = posts.map((post) =>
+            toProfilePost(username, post, baseUrl)
         );
         return profilePosts;
     }
