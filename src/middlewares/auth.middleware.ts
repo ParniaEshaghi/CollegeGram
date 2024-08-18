@@ -7,11 +7,24 @@ export interface DecodedToken {
     username: string;
 }
 
+const getToken = (req: Request): string | undefined => {
+    if (req.cookies.token) {
+        return req.cookies.token;
+    }
+
+    if (req.headers["authorization"]) {
+        return req.headers["authorization"].split(" ")[1];
+    }
+
+    return undefined;
+};
+
 export const auth =
     (userService: UserService) =>
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const token = req.cookies.token;
+            const token = getToken(req);
+
             if (!token) {
                 throw new AuthenticationFailError();
             }

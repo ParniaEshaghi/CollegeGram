@@ -24,7 +24,7 @@ export const makePostRouter = (
                     req.user,
                     dto,
                     postImageFilenames,
-                    req.baseUrl
+                    req.base_url
                 )
         );
     });
@@ -34,7 +34,11 @@ export const makePostRouter = (
         handleExpress(
             res,
             async () =>
-                await postService.getPostByPostId(req.user, postId, req.baseUrl)
+                await postService.getPostByPostId(
+                    req.user,
+                    postId,
+                    req.base_url
+                )
         );
     });
 
@@ -54,7 +58,7 @@ export const makePostRouter = (
                     postid,
                     dto,
                     postImageFilenames,
-                    req.baseUrl
+                    req.base_url
                 )
             );
         }

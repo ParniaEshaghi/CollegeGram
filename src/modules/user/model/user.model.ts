@@ -1,4 +1,4 @@
-import { Post, ProfilePost } from "../../post/model/post.model";
+import { Post, PostWithUsername } from "../../post/model/post.model";
 
 export interface User {
     username: string;
@@ -27,7 +27,7 @@ export type ProfileInfo = Omit<User, "password" | "email" | "profileStatus"> & {
 
 export const toProfileInfo = (
     user: User,
-    posts: ProfilePost[],
+    posts: PostWithUsername[],
     baseUrl: string
 ): ProfileInfo => {
     const { password, profileStatus, email, profilePicture, ...profileInfo } =

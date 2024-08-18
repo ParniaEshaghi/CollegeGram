@@ -43,23 +43,33 @@ export const makeUserRouter = (
         handleExpress(res, () => userService.resetPassword(newPass, token));
     });
 
-    app.post("/editprofile", auth(userService), profileUpload, (req, res) => {
-        const dto = editProfileDto.parse(req.body);
-        const pictureFilename = req.file ? req.file.filename : "";
-        handleExpress(res, () =>
-            userService.editProfile(req.user, pictureFilename, dto, req.baseUrl)
-        );
-    });
+    app.post(
+        "/editprofile",
+        auth(userService),
+        profileUpload,
+        async (req, res) => {
+            const dto = editProfileDto.parse(req.body);
+            const pictureFilename = req.file ? req.file.filename : "";
+            handleExpress(res, () =>
+                userService.editProfile(
+                    req.user,
+                    pictureFilename,
+                    dto,
+                    req.base_url
+                )
+            );
+        }
+    );
 
     app.get("/geteditprofile", auth(userService), (req, res) => {
         handleExpress(res, async () =>
-            userService.getEditProfile(req.user, req.baseUrl)
+            userService.getEditProfile(req.user, req.base_url)
         );
     });
 
     app.get("/profileInfo", auth(userService), (req, res) => {
         handleExpress(res, async () =>
-            userService.getProfileInfo(req.user, req.baseUrl)
+            userService.getProfileInfo(req.user, req.base_url)
         );
     });
 
@@ -80,7 +90,7 @@ export const makeUserRouter = (
     app.get("/:username", auth(userService), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
-            UserRelationService.userProfile(req.user, username, req.baseUrl)
+            UserRelationService.userProfile(req.user, username, req.base_url)
         );
     });
 
