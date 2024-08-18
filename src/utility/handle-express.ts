@@ -15,10 +15,10 @@ export const handleExpress = async <T>(
         res.status(200).send(data);
     } catch (error) {
         if (error instanceof HttpError) {
-            res.status(error.status).send(error.message);
+            res.status(error.status).send({ message: error.message });
             return;
         }
-        console.log(error)
+        console.log(error);
         res.status(500).send();
     }
 };
