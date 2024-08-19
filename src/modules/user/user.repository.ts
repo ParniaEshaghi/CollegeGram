@@ -75,7 +75,7 @@ export class UserRepository {
         user: User,
         profilePicture: string,
         updated: UpdateProfile
-    ): Promise<UpdateProfile> {
+    ): Promise<void> {
         const updatedData = {
             password: updated.password
                 ? await this.hashPassword(updated.password)
@@ -93,7 +93,6 @@ export class UserRepository {
             },
             updatedData
         );
-        return updatedData;
     }
 
     public async getUserPosts(username: string): Promise<Post[]> {
