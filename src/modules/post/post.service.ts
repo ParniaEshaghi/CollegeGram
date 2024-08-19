@@ -48,12 +48,8 @@ export class PostService {
         const tags = caption.match(/#\w+/g);
         return tags ? tags.map((tag) => tag.toLocaleLowerCase()) : [];
     }
-
-    public async getPostByPostId(postId: string) {
-        return await this.postRepo.findPostById(postId);
-    }
-
-    public async getPostInfo(
+    
+    public async getPostByPostId(
         user: User,
         postId: string,
         baseUrl: string
@@ -74,8 +70,6 @@ export class PostService {
         return toPostWithUsername(post, baseUrl);
     }
 
-=======
->>>>>>> src/modules/post/post.service.ts
     public async updatePost(
         user: User,
         postId: string,

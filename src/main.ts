@@ -1,19 +1,7 @@
 import { makeApp } from "./api";
 import { AppDataSource } from "./data-source";
-import { EmailService } from "./modules/email/email.service";
-import { PasswordResetTokenRepository } from "./modules/user/forgetPassword/forgetPassword.repository";
-import { ForgetPasswordService } from "./modules/user/forgetPassword/forgetPassword.service";
-import { PostRepository } from "./modules/post/post.repository";
-import { PostService } from "./modules/post/post.service";
 import { User } from "./modules/user/model/user.model";
-import { UserRepository } from "./modules/user/user.repository";
-import { UserService } from "./modules/user/user.service";
-import { UserRelationRepository } from "./modules/user/userRelation/userRelation.repository";
-import { UserRelationService } from "./modules/user/userRelation/userRelation.service";
-import { CommentService } from "./modules/post/comment/comment.service";
-import { CommentRepository } from "./modules/post/comment/comment.repository";
-import { PostLikeRepository } from "./modules/post/like/like.repository";
-import { PostLikeService } from "./modules/post/like/like.service";
+import { ServiceFactory } from "./utility/service-factory";
 
 const PORT = 3000;
 
@@ -29,36 +17,15 @@ declare global {
 
 const run = async () => {
     const dataSource = await AppDataSource.initialize();
-
-    const userRepo = new UserRepository(dataSource);
-    const passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
-    const emailService = new EmailService();
-    const forgetPasswordService = new ForgetPasswordService(
-        passwordResetTokenRepo,
-        emailService
-    );
-    const userRelationRepo = new UserRelationRepository(dataSource);
-    const userService = new UserService(userRepo, forgetPasswordService);
-    const userRelationService = new UserRelationService(
-        userRelationRepo,
-        userService
-    );
-    const postRepo = new PostRepository(dataSource);
-    const postService = new PostService(postRepo);
-
-    const commentRepo = new CommentRepository(dataSource);
-    const commentService = new CommentService(commentRepo, postService);
-
-    const postLikeRepo = new PostLikeRepository(dataSource);
-    const postLikeService = new PostLikeService(postLikeRepo, postService);
+    const serviceFactory = new ServiceFactory(dataSource);
 
     const app = makeApp(
         dataSource,
-        userService,
-        userRelationService,
-        postService,
-        commentService,
-        postLikeService
+        serviceFactory.getUserService(),
+        serviceFactory.getUserRelationService(),
+        serviceFactory.getPostService(),
+        serviceFactory.getCommentService(),
+        serviceFactory.getPostLikeService()
     );
 
     app.listen(PORT, () => {

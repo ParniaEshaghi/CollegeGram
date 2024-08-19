@@ -49,7 +49,12 @@ export const makeApp = (
     app.use("/api/user", makeUserRouter(userService, userRelationService));
     app.use(
         "/api/post",
-        makePostRouter(postService, userService, commentService, postLikeService)
+        makePostRouter(
+            postService,
+            userService,
+            commentService,
+            postLikeService
+        )
     );
 
     app.use(errorHandler);
