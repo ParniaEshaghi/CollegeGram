@@ -10,6 +10,8 @@ import { UserRepository } from "./modules/user/user.repository";
 import { UserService } from "./modules/user/user.service";
 import { UserRelationRepository } from "./modules/user/userRelation/userRelation.repository";
 import { UserRelationService } from "./modules/user/userRelation/userRelation.service";
+import { PostLikeRepository } from "./modules/post/like/like.repository";
+import { PostLikeService } from "./modules/post/like/like.service";
 
 const PORT = 3000;
 
@@ -34,10 +36,7 @@ const run = async () => {
         emailService
     );
     const userRelationRepo = new UserRelationRepository(dataSource);
-    const userService = new UserService(
-        userRepo,
-        forgetPasswordService
-    );
+    const userService = new UserService(userRepo, forgetPasswordService);
     const userRelationService = new UserRelationService(
         userRelationRepo,
         userService
@@ -45,11 +44,15 @@ const run = async () => {
     const postRepo = new PostRepository(dataSource);
     const postService = new PostService(postRepo);
 
+    const postLikeRepo = new PostLikeRepository(dataSource);
+    const postLikeService = new PostLikeService(postLikeRepo, postService);
+
     const app = makeApp(
         dataSource,
         userService,
         userRelationService,
-        postService
+        postService,
+        postLikeService
     );
 
     app.listen(PORT, () => {

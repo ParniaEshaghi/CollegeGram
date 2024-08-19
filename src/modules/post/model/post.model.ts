@@ -21,6 +21,10 @@ export type PostWithUsername = Omit<Post, "user"> & {
     username: string;
 };
 
+export type PostPage = PostWithUsername & {
+    like_status: boolean;
+};
+
 export const toPostWithUsername = (
     post: Post,
     baseUrl: string
@@ -32,6 +36,22 @@ export const toPostWithUsername = (
         images: post.images.map(
             (image) => `${baseUrl}/api/images/posts/${image}`
         ),
+    };
+};
+
+export const toPostPage = (
+    post: Post,
+    baseUrl: string,
+    like_status: boolean
+): PostPage => {
+    const { user, images, ...postDetails } = post;
+    return {
+        ...postDetails,
+        username: user.username,
+        images: post.images.map(
+            (image) => `${baseUrl}/api/images/posts/${image}`
+        ),
+        like_status,
     };
 };
 

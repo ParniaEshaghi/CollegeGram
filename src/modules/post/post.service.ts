@@ -49,27 +49,6 @@ export class PostService {
         return tags ? tags.map((tag) => tag.toLocaleLowerCase()) : [];
     }
 
-    public async getPostByPostId(
-        user: User,
-        postId: string,
-        baseUrl: string
-    ): Promise<PostWithUsername> {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
-        const post = await this.postRepo.findPostById(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
-
-        if (post.user.username !== user.username) {
-            throw new ForbiddenError();
-        }
-
-        return toPostWithUsername(post, baseUrl);
-    }
-
     public async updatePost(
         user: User,
         postId: string,
@@ -115,5 +94,9 @@ export class PostService {
                 console.error(`Failed to delete image: ${filePath}`);
             });
         }
+    }
+
+    public async getPost(postId: string): Promise<Post | null> {
+        return await this.postRepo.findPostById(postId);
     }
 }

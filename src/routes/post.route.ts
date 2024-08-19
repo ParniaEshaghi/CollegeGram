@@ -5,10 +5,12 @@ import { UserService } from "../modules/user/user.service";
 import { postUpload } from "../middlewares/upload.middleware";
 import { postDto } from "../modules/post/dto/post.dto";
 import { handleExpress } from "../utility/handle-express";
+import { PostLikeService } from "../modules/post/like/like.service";
 
 export const makePostRouter = (
     postService: PostService,
-    userService: UserService
+    userService: UserService,
+    postLikeService: PostLikeService
 ) => {
     const app = Router();
 
@@ -34,7 +36,7 @@ export const makePostRouter = (
         handleExpress(
             res,
             async () =>
-                await postService.getPostByPostId(
+                await postLikeService.getPostByPostId(
                     req.user,
                     postId,
                     req.base_url
@@ -63,6 +65,18 @@ export const makePostRouter = (
             );
         }
     );
+
+    app.post("/likepost/:postid", auth(userService), (req, res) => {
+        const postid = req.params.postid;
+
+        handleExpress(res, () => postLikeService.likePost(req.user, postid));
+    });
+
+    app.post("/unlikepost/:postid", auth(userService), (req, res) => {
+        const postid = req.params.postid;
+
+        handleExpress(res, () => postLikeService.unLikePost(req.user, postid));
+    });
 
     return app;
 };
