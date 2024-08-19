@@ -10,6 +10,8 @@ import { UserRepository } from "./modules/user/user.repository";
 import { UserService } from "./modules/user/user.service";
 import { UserRelationRepository } from "./modules/user/userRelation/userRelation.repository";
 import { UserRelationService } from "./modules/user/userRelation/userRelation.service";
+import { CommentService } from "./modules/post/comment/comment.service";
+import { CommentRepository } from "./modules/post/comment/comment.repository";
 import { PostLikeRepository } from "./modules/post/like/like.repository";
 import { PostLikeService } from "./modules/post/like/like.service";
 
@@ -44,6 +46,9 @@ const run = async () => {
     const postRepo = new PostRepository(dataSource);
     const postService = new PostService(postRepo);
 
+    const commentRepo = new CommentRepository(dataSource);
+    const commentService = new CommentService(commentRepo, postService);
+
     const postLikeRepo = new PostLikeRepository(dataSource);
     const postLikeService = new PostLikeService(postLikeRepo, postService);
 
@@ -52,6 +57,7 @@ const run = async () => {
         userService,
         userRelationService,
         postService,
+        commentService,
         postLikeService
     );
 

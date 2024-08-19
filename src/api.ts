@@ -12,6 +12,7 @@ import { PostService } from "./modules/post/post.service";
 import { setBaseUrl } from "./middlewares/setBaseUrl.middleware";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocs from "./swagger-options";
+import { CommentService } from "./modules/post/comment/comment.service";
 import { PostLikeService } from "./modules/post/like/like.service";
 
 export const makeApp = (
@@ -19,6 +20,7 @@ export const makeApp = (
     userService: UserService,
     userRelationService: UserRelationService,
     postService: PostService,
+    commentService: CommentService,
     postLikeService: PostLikeService
 ) => {
     const app = express();
@@ -47,7 +49,7 @@ export const makeApp = (
     app.use("/api/user", makeUserRouter(userService, userRelationService));
     app.use(
         "/api/post",
-        makePostRouter(postService, userService, postLikeService)
+        makePostRouter(postService, userService, commentService, postLikeService)
     );
 
     app.use(errorHandler);

@@ -49,6 +49,33 @@ export class PostService {
         return tags ? tags.map((tag) => tag.toLocaleLowerCase()) : [];
     }
 
+    public async getPostByPostId(postId: string) {
+        return await this.postRepo.findPostById(postId);
+    }
+
+    public async getPostInfo(
+        user: User,
+        postId: string,
+        baseUrl: string
+    ): Promise<PostWithUsername> {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+
+        const post = await this.postRepo.findPostById(postId);
+        if (!post) {
+            throw new NotFoundError();
+        }
+
+        if (post.user.username !== user.username) {
+            throw new ForbiddenError();
+        }
+
+        return toPostWithUsername(post, baseUrl);
+    }
+
+=======
+>>>>>>> src/modules/post/post.service.ts
     public async updatePost(
         user: User,
         postId: string,

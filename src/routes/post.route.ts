@@ -5,11 +5,14 @@ import { UserService } from "../modules/user/user.service";
 import { postUpload } from "../middlewares/upload.middleware";
 import { postDto } from "../modules/post/dto/post.dto";
 import { handleExpress } from "../utility/handle-express";
+import { commentDto } from "../modules/post/comment/dto/comment.dto";
+import { CommentService } from "../modules/post/comment/comment.service";
 import { PostLikeService } from "../modules/post/like/like.service";
 
 export const makePostRouter = (
     postService: PostService,
     userService: UserService,
+    commentService: CommentService,
     postLikeService: PostLikeService
 ) => {
     const app = Router();
@@ -36,6 +39,7 @@ export const makePostRouter = (
         handleExpress(
             res,
             async () =>
+                await postService.getPostInfo(req.user, postId, req.base_url)
                 await postLikeService.getPostByPostId(
                     req.user,
                     postId,
@@ -65,6 +69,10 @@ export const makePostRouter = (
             );
         }
     );
+
+    app.post("/comment", auth(userService), (req, res) => {
+        const dto = commentDto.parse(req.body);
+        handleExpress(res, () => commentService.createComment(req.user, dto));
 
     app.post("/likepost/:postid", auth(userService), (req, res) => {
         const postid = req.params.postid;
