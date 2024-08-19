@@ -14,6 +14,8 @@ import { ForgetPasswordService } from "../../src/modules/user/forgetPassword/for
 import { PostRepository } from "../../src/modules/post/post.repository";
 import { PostService } from "../../src/modules/post/post.service";
 import { PostDto } from "../../src/modules/post/dto/post.dto";
+import { CommentRepository } from "../../src/modules/post/comment/comment.repository";
+import { CommentService } from "../../src/modules/post/comment/comment.service";
 
 jest.mock("nodemailer");
 
@@ -28,6 +30,8 @@ describe("User route test suite", () => {
     let userRelationService: UserRelationService;
     let postRepo: PostRepository;
     let postService: PostService;
+    let commentRepo: CommentRepository;
+    let commentService: CommentService;
 
     let sendMailMock: jest.Mock;
     let emailContent: string | undefined;
@@ -60,11 +64,16 @@ describe("User route test suite", () => {
         );
         postRepo = new PostRepository(dataSource);
         postService = new PostService(postRepo);
+
+        commentRepo = new CommentRepository(dataSource);
+        commentService = new CommentService(commentRepo, postService);
+
         app = makeApp(
             dataSource,
             userService,
             userRelationService,
-            postService
+            postService,
+            commentService,
         );
 
         await request(app).post("/api/user/signup").send({
