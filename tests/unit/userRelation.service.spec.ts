@@ -1,41 +1,20 @@
-import { EmailService } from "../../src/modules/email/email.service";
-import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword/forgetPassword.repository";
-import { ForgetPasswordService } from "../../src/modules/user/forgetPassword/forgetPassword.service";
-import { UserRepository } from "../../src/modules/user/user.repository";
 import { UserService } from "../../src/modules/user/user.service";
-import { UserRelationRepository } from "../../src/modules/user/userRelation/userRelation.repository";
-import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
-import {
-    BadRequestError,
-    HttpError,
-    NotFoundError,
-} from "../../src/utility/http-errors";
+import { BadRequestError, NotFoundError } from "../../src/utility/http-errors";
 import { createTestDb } from "../../src/utility/test-db";
+import { ServiceFactory } from "../../src/utility/service-factory";
+import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
 
 describe("User relation service test suite", () => {
-    let userRepo: UserRepository;
-    let passwordResetTokenRepo: PasswordResetTokenRepository;
-    let forgetPasswordService: ForgetPasswordService;
-    let userRelationRepo: UserRelationRepository;
+    let serviceFactory: ServiceFactory;
     let userService: UserService;
-    let emailService: EmailService;
     let userRelationService: UserRelationService;
 
     beforeEach(async () => {
         const dataSource = await createTestDb();
-        userRepo = new UserRepository(dataSource);
-        passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
-        forgetPasswordService = new ForgetPasswordService(
-            passwordResetTokenRepo,
-            emailService
-        );
-        userRelationRepo = new UserRelationRepository(dataSource);
-        emailService = new EmailService();
-        userService = new UserService(userRepo, forgetPasswordService);
-        userRelationService = new UserRelationService(
-            userRelationRepo,
-            userService
-        );
+        serviceFactory = new ServiceFactory(dataSource);
+
+        userService = serviceFactory.getUserService();
+        userRelationService = serviceFactory.getUserRelationService();
 
         await userService.createUser({
             username: "test",

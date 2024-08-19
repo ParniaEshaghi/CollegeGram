@@ -16,7 +16,7 @@ export class CommentService {
             throw new UnauthorizedError();
         }
 
-        const post = await this.postService.getPostByPostId(commentDto.postId);
+        const post = await this.postService.getPost(commentDto.postId);
 
         if (!post) {
             throw new NotFoundError();

@@ -39,7 +39,6 @@ export const makePostRouter = (
         handleExpress(
             res,
             async () =>
-                await postService.getPostInfo(req.user, postId, req.base_url)
                 await postLikeService.getPostByPostId(
                     req.user,
                     postId,
@@ -73,16 +72,15 @@ export const makePostRouter = (
     app.post("/comment", auth(userService), (req, res) => {
         const dto = commentDto.parse(req.body);
         handleExpress(res, () => commentService.createComment(req.user, dto));
+    });
 
     app.post("/likepost/:postid", auth(userService), (req, res) => {
         const postid = req.params.postid;
-
         handleExpress(res, () => postLikeService.likePost(req.user, postid));
     });
 
     app.post("/unlikepost/:postid", auth(userService), (req, res) => {
         const postid = req.params.postid;
-
         handleExpress(res, () => postLikeService.unLikePost(req.user, postid));
     });
 
