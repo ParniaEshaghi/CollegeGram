@@ -131,7 +131,7 @@ describe("User route test suite", () => {
     });
 
     describe("Forget password", () => {
-        it.skip("should send forget email", async () => {
+        it("should send forget email", async () => {
             await request(app)
                 .post("/api/user/forgetpassword")
                 .send({ credential: "test@gmail.com" })
@@ -167,17 +167,20 @@ describe("User route test suite", () => {
     });
 
     describe("Reset password", () => {
-        it.skip("should reset password", async () => {
+        it("should reset password", async () => {
             await request(app)
                 .post("/api/user/forgetpassword")
                 .send({ credential: "test" });
-            const emailContent = sendMailMock.mock.calls[0][0].text;
-            const tokenMatch = emailContent.match(
+            const emailContent = sendMailMock.mock.calls[0][0].html;
+            const linkMatch = emailContent.match(
+                /href="([^"]*reset-password\/[a-fA-F0-9-]+~[a-fA-F0-9-]+)"/
+            );
+            const resetLink = linkMatch ? linkMatch[1] : null;
+            const tokenMatch = resetLink?.match(
                 /reset-password\/([a-fA-F0-9-]+~[a-fA-F0-9-]+)$/
             );
-            const token = tokenMatch
-                ? `${tokenMatch[1]}~${tokenMatch[2]}`
-                : null;
+            const token = tokenMatch ? tokenMatch[1] : null;
+
             await request(app)
                 .post("/api/user/resetpassword")
                 .send({ newPass: "newPass", token: token })

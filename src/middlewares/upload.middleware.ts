@@ -45,7 +45,7 @@ const checkFileType = (file: Express.Multer.File, cb: FileFilterCallback) => {
 
 export const profileUpload: RequestHandler = (req, res, next) => {
     const upload = multer({
-        storage: postStorage,
+        storage: profileStorage,
         limits: { fileSize: 2000000 },
         fileFilter: (req, file, cb) => {
             checkFileType(file, cb);
