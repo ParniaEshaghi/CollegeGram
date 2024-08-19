@@ -2,7 +2,8 @@ import { DataSource, Repository } from "typeorm";
 import { UserRelationEntity } from "./entity/userRelation.entity";
 import { User } from "../model/user.model";
 import { UserEntity } from "../entity/user.entity";
-import { UserRelation } from "./model/userRelation.model";
+import { followerFollowing, UserRelation } from "./model/userRelation.model";
+import { toASCII } from "punycode";
 
 export class UserRelationRepository {
     private userRelationRepo: Repository<UserRelationEntity>;
@@ -55,5 +56,35 @@ export class UserRelationRepository {
         });
 
         return reponse;
+    }
+
+    public async getFollowers(
+        user: User,
+        page: number,
+        limit: number
+    ): Promise<followerFollowing> {
+        const [response, total] = await this.userRelationRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: { following: { username: user.username } },
+            relations: ["follower"],
+        });
+
+        return { data: response.map((res) => res.follower), total: total };
+    }
+
+    public async getFollowings(
+        user: User,
+        page: number,
+        limit: number
+    ): Promise<followerFollowing> {
+        const [response, total] = await this.userRelationRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: { follower: { username: user.username } },
+            relations: ["following"],
+        });
+
+        return { data: response.map((res) => res.following), total: total };
     }
 }
