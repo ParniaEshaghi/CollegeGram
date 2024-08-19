@@ -12,12 +12,14 @@ import { PostService } from "./modules/post/post.service";
 import { setBaseUrl } from "./middlewares/setBaseUrl.middleware";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocs from "./swagger-options";
+import { PostLikeService } from "./modules/post/like/like.service";
 
 export const makeApp = (
     dataSource: DataSource,
     userService: UserService,
     userRelationService: UserRelationService,
-    postService: PostService
+    postService: PostService,
+    postLikeService: PostLikeService
 ) => {
     const app = express();
 
@@ -43,7 +45,10 @@ export const makeApp = (
 
     app.use("/api/images", express.static(path.join(__dirname, "../images")));
     app.use("/api/user", makeUserRouter(userService, userRelationService));
-    app.use("/api/post", makePostRouter(postService, userService));
+    app.use(
+        "/api/post",
+        makePostRouter(postService, userService, postLikeService)
+    );
 
     app.use(errorHandler);
 
