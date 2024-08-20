@@ -12,6 +12,8 @@ import { CommentRepository } from "../modules/post/comment/comment.repository";
 import { CommentService } from "../modules/post/comment/comment.service";
 import { PostLikeRepository } from "../modules/post/like/like.repository";
 import { PostLikeService } from "../modules/post/like/like.service";
+import { SavedPostRepository } from "../modules/user/savedPost/savedPost.repository";
+import { SavedPostService } from "../modules/user/savedPost/savedPost.service";
 
 export class ServiceFactory {
     private dataSource: DataSource;
@@ -27,6 +29,8 @@ export class ServiceFactory {
     private postService: PostService;
     private commentRepository: CommentRepository;
     private commentService: CommentService;
+    private savedPostRepo: SavedPostRepository;
+    private savedPostService: SavedPostService;
     private postLikeRepo: PostLikeRepository;
     private postLikeService: PostLikeService;
 
@@ -60,10 +64,18 @@ export class ServiceFactory {
             this.commentRepository,
             this.postService
         );
+
+        this.savedPostRepo = new SavedPostRepository(this.dataSource);
+        this.savedPostService = new SavedPostService(
+            this.savedPostRepo,
+            this.postService
+        );
+
         this.postLikeRepo = new PostLikeRepository(this.dataSource);
         this.postLikeService = new PostLikeService(
             this.postLikeRepo,
-            this.postService
+            this.postService,
+            this.savedPostService
         );
     }
 
@@ -85,5 +97,9 @@ export class ServiceFactory {
 
     getPostLikeService(): PostLikeService {
         return this.postLikeService;
+    }
+
+    getSavedPostService(): SavedPostService {
+        return this.savedPostService;
     }
 }

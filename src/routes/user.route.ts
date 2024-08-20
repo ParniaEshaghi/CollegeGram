@@ -7,10 +7,12 @@ import { auth } from "../middlewares/auth.middleware";
 import { profileUpload } from "../middlewares/upload.middleware";
 import { editProfileDto } from "../modules/user/dto/edit-profile.dto";
 import { UserRelationService } from "../modules/user/userRelation/userRelation.service";
+import { SavedPostService } from "../modules/user/savedPost/savedPost.service";
 
 export const makeUserRouter = (
     userService: UserService,
-    UserRelationService: UserRelationService
+    UserRelationService: UserRelationService,
+    savedPostService: SavedPostService
 ) => {
     const app = Router();
 
@@ -100,7 +102,13 @@ export const makeUserRouter = (
         const limit = parseInt(req.query.limit as string) || 10;
 
         handleExpress(res, () =>
-            UserRelationService.followerList(req.user, username, page, limit)
+            UserRelationService.followerList(
+                req.user,
+                username,
+                page,
+                limit,
+                req.base_url
+            )
         );
     });
 
@@ -110,8 +118,24 @@ export const makeUserRouter = (
         const limit = parseInt(req.query.limit as string) || 10;
 
         handleExpress(res, () =>
-            UserRelationService.followeingList(req.user, username, page, limit)
+            UserRelationService.followeingList(
+                req.user,
+                username,
+                page,
+                limit,
+                req.base_url
+            )
         );
+    });
+
+    app.post("/savepost/:postid", auth(userService), (req, res) => {
+        const postid = req.params.postid;
+        handleExpress(res, () => savedPostService.savePost(req.user, postid));
+    });
+
+    app.post("/unsavepost/:postid", auth(userService), (req, res) => {
+        const postid = req.params.postid;
+        handleExpress(res, () => savedPostService.unSavePost(req.user, postid));
     });
 
     return app;

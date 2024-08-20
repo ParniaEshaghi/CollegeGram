@@ -23,6 +23,7 @@ export type PostWithUsername = Omit<Post, "user"> & {
 
 export type PostPage = PostWithUsername & {
     like_status: boolean;
+    save_status: boolean;
 };
 
 export const toPostWithUsername = (
@@ -42,7 +43,8 @@ export const toPostWithUsername = (
 export const toPostPage = (
     post: Post,
     baseUrl: string,
-    like_status: boolean
+    like_status: boolean,
+    save_status: boolean
 ): PostPage => {
     const { user, images, ...postDetails } = post;
     return {
@@ -52,6 +54,7 @@ export const toPostPage = (
             (image) => `${baseUrl}/api/images/posts/${image}`
         ),
         like_status,
+        save_status,
     };
 };
 
