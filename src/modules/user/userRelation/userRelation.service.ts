@@ -102,7 +102,8 @@ export class UserRelationService {
         session_user: User,
         username: string,
         page: number,
-        limit: number
+        limit: number,
+        baseUrl: string
     ): Promise<followerFollowingListUserResponse | undefined> {
         if (!session_user) {
             throw new UnauthorizedError();
@@ -120,7 +121,7 @@ export class UserRelationService {
 
         return {
             data: followerList.data.map((follower) =>
-                toFollowerFollowingListUser(follower)
+                toFollowerFollowingListUser(follower, baseUrl)
             ),
             meta: {
                 page: page,
@@ -135,7 +136,8 @@ export class UserRelationService {
         session_user: User,
         username: string,
         page: number,
-        limit: number
+        limit: number,
+        baseUrl: string
     ): Promise<followerFollowingListUserResponse | undefined> {
         if (!session_user) {
             throw new UnauthorizedError();
@@ -153,7 +155,7 @@ export class UserRelationService {
 
         return {
             data: followingList.data.map((followeing) =>
-                toFollowerFollowingListUser(followeing)
+                toFollowerFollowingListUser(followeing, baseUrl)
             ),
             meta: {
                 page: page,

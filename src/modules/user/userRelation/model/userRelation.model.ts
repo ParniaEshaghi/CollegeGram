@@ -37,11 +37,14 @@ export type followerFollowingListUser = Omit<
 >;
 
 export const toFollowerFollowingListUser = (
-    user: User
+    user: User,
+    baseUrl: string
 ): followerFollowingListUser => {
     return {
         username: user.username,
-        profilePicture: user.profilePicture,
+        profilePicture: user.profilePicture
+            ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+            : "",
         firstname: user.firstname,
         lastname: user.lastname,
         follower_count: user.follower_count,

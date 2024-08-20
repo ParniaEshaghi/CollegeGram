@@ -25,7 +25,8 @@ const run = async () => {
         serviceFactory.getUserRelationService(),
         serviceFactory.getPostService(),
         serviceFactory.getCommentService(),
-        serviceFactory.getPostLikeService()
+        serviceFactory.getPostLikeService(),
+        serviceFactory.getSavedPostService()
     );
 
     app.listen(PORT, () => {

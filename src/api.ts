@@ -14,6 +14,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerDocs from "./swagger-options";
 import { CommentService } from "./modules/post/comment/comment.service";
 import { PostLikeService } from "./modules/post/like/like.service";
+import { SavedPostService } from "./modules/user/savedPost/savedPost.service";
 
 export const makeApp = (
     dataSource: DataSource,
@@ -21,7 +22,8 @@ export const makeApp = (
     userRelationService: UserRelationService,
     postService: PostService,
     commentService: CommentService,
-    postLikeService: PostLikeService
+    postLikeService: PostLikeService,
+    savedPostService: SavedPostService
 ) => {
     const app = express();
 
@@ -46,7 +48,10 @@ export const makeApp = (
     app.use(setBaseUrl);
 
     app.use("/api/images", express.static(path.join(__dirname, "../images")));
-    app.use("/api/user", makeUserRouter(userService, userRelationService));
+    app.use(
+        "/api/user",
+        makeUserRouter(userService, userRelationService, savedPostService)
+    );
     app.use(
         "/api/post",
         makePostRouter(

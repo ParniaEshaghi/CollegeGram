@@ -4,6 +4,7 @@ import {
     UnauthorizedError,
 } from "../../../utility/http-errors";
 import { User } from "../../user/model/user.model";
+import { SavedPostService } from "../../user/savedPost/savedPost.service";
 import {
     PostWithUsername,
     toPostPage,
@@ -15,7 +16,8 @@ import { PostLikeRepository } from "./like.repository";
 export class PostLikeService {
     constructor(
         private postLikeRepo: PostLikeRepository,
-        private postService: PostService
+        private postService: PostService,
+        private savedPostService: SavedPostService
     ) {}
 
     private async getLikeStatus(user: User, postId: string) {
@@ -92,6 +94,13 @@ export class PostLikeService {
 
         const like = await this.postLikeRepo.checkExistance(user, post);
         const like_status = like ? true : false;
-        return toPostPage(post, baseUrl, like_status);
+
+        const save = await this.savedPostService.getPostSaveStatus(
+            user,
+            post.id
+        );
+        const save_status = save ? true : false;
+
+        return toPostPage(post, baseUrl, like_status, save_status);
     }
 }
