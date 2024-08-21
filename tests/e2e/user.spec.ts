@@ -38,6 +38,7 @@ describe("User route test suite", () => {
             serviceFactory.getPostService(),
             serviceFactory.getCommentService(),
             serviceFactory.getPostLikeService(),
+            serviceFactory.getCommentLikeService(),
         );
 
         await request(app).post("/api/user/signup").send({

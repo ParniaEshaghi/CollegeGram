@@ -12,6 +12,8 @@ import {
 import { PostEntity } from "../../entity/post.entity";
 import { UserEntity } from "../../../user/entity/user.entity";
 import { CommentLikeEntity } from "../../like/entity/like.entity";
+import { CommentLike } from "../../like/model/like.model";
+import { Comment } from "../model/comment.model";
 
 @Entity("comments")
 export class CommentEntity {
@@ -31,13 +33,13 @@ export class CommentEntity {
     like_count!: number;
 
     @OneToMany(() => CommentLikeEntity, (commentLike) => commentLike.comment)
-    likes!: CommentLikeEntity[];
+    likes!: CommentLike[];
 
     @OneToMany(() => CommentEntity, (comment) => comment.parent)
-    children!: CommentEntity[];
+    children!: Comment[];
 
     @ManyToOne(() => CommentEntity, (comment) => comment.children)
-    parent!: CommentEntity;
+    parent!: Comment;
 
     @CreateDateColumn()
     createdAt!: Date;

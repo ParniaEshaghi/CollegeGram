@@ -3,7 +3,10 @@ import { User } from "../../user/model/user.model";
 import { PostService } from "../post.service";
 import { CommentRepository } from "./comment.repository";
 import { CommentDto } from "./dto/comment.dto";
-import { toCommentWithUsername } from "./model/comment.model";
+import {
+    toCommentWithUsername,
+    toPostCommentList,
+} from "./model/comment.model";
 
 export class CommentService {
     constructor(
@@ -43,5 +46,36 @@ export class CommentService {
             throw new NotFoundError();
         }
         return comment;
+    }
+
+    public async commentList(
+        postId: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        const post = this.postService.getPost(postId);
+
+        if (!post) {
+            throw new NotFoundError();
+        }
+
+        const commentList = await this.commentRepo.getComments(
+            postId,
+            page,
+            limit
+        );
+
+        return {
+            data: commentList.data.map((comment) =>
+                toPostCommentList(comment, baseUrl)
+            ),
+            meta: {
+                page: page,
+                limit: limit,
+                total: commentList.total,
+                totalPage: Math.ceil(commentList?.total / limit),
+            },
+        };
     }
 }
