@@ -26,6 +26,7 @@ const run = async () => {
         serviceFactory.getPostService(),
         serviceFactory.getCommentService(),
         serviceFactory.getPostLikeService(),
+        serviceFactory.getCommentLikeService(),
         serviceFactory.getSavedPostService()
     );
 

@@ -7,13 +7,17 @@ import { postDto } from "../modules/post/dto/post.dto";
 import { handleExpress } from "../utility/handle-express";
 import { commentDto } from "../modules/post/comment/dto/comment.dto";
 import { CommentService } from "../modules/post/comment/comment.service";
-import { PostLikeService } from "../modules/post/like/like.service";
+import {
+    CommentLikeService,
+    PostLikeService,
+} from "../modules/post/like/like.service";
 
 export const makePostRouter = (
     postService: PostService,
     userService: UserService,
     commentService: CommentService,
-    postLikeService: PostLikeService
+    postLikeService: PostLikeService,
+    commentLikeService: CommentLikeService
 ) => {
     const app = Router();
 
@@ -82,6 +86,29 @@ export const makePostRouter = (
     app.post("/unlikepost/:postid", auth(userService), (req, res) => {
         const postid = req.params.postid;
         handleExpress(res, () => postLikeService.unLikePost(req.user, postid));
+    });
+
+    app.post("/likecomment/:commentid", auth(userService), (req, res) => {
+        const commentid = req.params.commentid;
+        handleExpress(res, () =>
+            commentLikeService.likeComment(req.user, commentid)
+        );
+    });
+
+    app.post("/unlikepost/:commentid", auth(userService), (req, res) => {
+        const commentid = req.params.commentid;
+        handleExpress(res, () =>
+            commentLikeService.unLikeComment(req.user, commentid)
+        );
+    });
+
+    app.get("/comments/:postid", auth(userService), (req, res) => {
+        const postid = req.params.postid;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        handleExpress(res, () =>
+            commentService.commentList(postid, page, limit, req.baseUrl)
+        );
     });
 
     return app;

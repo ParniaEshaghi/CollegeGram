@@ -1,10 +1,12 @@
 import { DataSource, Repository } from "typeorm";
 import { Post } from "../model/post.model";
 import { User } from "../../user/model/user.model";
-import { PostRepository } from "../post.repository";
-import { PostLikeEntity } from "./entity/like.entity";
+import { CommentLikeEntity, PostLikeEntity } from "./entity/like.entity";
 import { PostEntity } from "../entity/post.entity";
-import { PostLike } from "./model/like.model";
+import { CommentLike, PostLike } from "./model/like.model";
+import { CommentEntity } from "../comment/entity/comment.entity";
+import { CommentRepository } from "../comment/comment.repository";
+import { Comment } from "../comment/model/comment.model";
 
 export class PostLikeRepository {
     private postLikeRepo: Repository<PostLikeEntity>;
@@ -51,6 +53,54 @@ export class PostLikeRepository {
             },
         });
 
+        return response;
+    }
+}
+
+export class CommentLikeRepository {
+    private commentLikeRepo: Repository<CommentLikeEntity>;
+
+    constructor(private appDataSource: DataSource) {
+        this.commentLikeRepo = appDataSource.getRepository(CommentLikeEntity);
+    }
+
+    public async create(user: User, comment: Comment): Promise<void> {
+        await this.appDataSource.manager.transaction(async (manager) => {
+            const commentRepo = manager.getRepository(CommentEntity);
+            const commentLikeRepo = manager.getRepository(CommentLikeEntity);
+            await commentLikeRepo.save({ user, comment });
+            await commentRepo.update(
+                { id: comment.id },
+                { like_count: () => "like_count + 1" }
+            );
+        });
+    }
+
+    public async delete(user: User, comment: Comment): Promise<void> {
+        await this.appDataSource.manager.transaction(async (manager) => {
+            const commentRepo = manager.getRepository(CommentEntity);
+            const commentLikeRepo = manager.getRepository(CommentLikeEntity);
+            await commentLikeRepo.softDelete({
+                user: user,
+                comment: { id: comment.id },
+            });
+            await commentRepo.update(
+                { id: comment.id },
+                { like_count: () => "like_count - 1" }
+            );
+        });
+    }
+
+    public async checkExistance(
+        user: User,
+        comment: Comment
+    ): Promise<CommentLike | null> {
+        const response = await this.commentLikeRepo.findOne({
+            where: {
+                user: { username: user.username },
+                comment: { id: comment.id },
+            },
+        });
         return response;
     }
 }
