@@ -91,11 +91,14 @@ export class UserRelationService {
         if (!user) {
             throw new NotFoundError();
         }
+
+        const posts = await this.userService.getUserPosts(username, baseUrl);
+
         const follow_status = await this.getFollowStatus(
             session_user,
             username
         );
-        return toProfile(user, follow_status, baseUrl);
+        return toProfile(user, follow_status, posts, baseUrl);
     }
 
     public async followerList(
