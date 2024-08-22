@@ -21,7 +21,7 @@ export const toUserWithoutPassword = (user: User): UserWithoutPassword => {
     return userWithoutPassword;
 };
 
-export type ProfileInfo = Omit<User, "password" | "email" | "profileStatus"> & {
+export type ProfileInfo = Omit<User, "password"> & {
     posts: any[];
 };
 
@@ -30,8 +30,7 @@ export const toProfileInfo = (
     posts: PostWithUsername[],
     baseUrl: string
 ): ProfileInfo => {
-    const { password, profileStatus, email, profilePicture, ...profileInfo } =
-        user;
+    const { password, profilePicture, ...profileInfo } = user;
     return {
         ...profileInfo,
         posts,

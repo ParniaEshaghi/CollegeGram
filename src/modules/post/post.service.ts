@@ -5,11 +5,12 @@ import {
     UnauthorizedError,
 } from "../../utility/http-errors";
 import { User } from "../user/model/user.model";
-import { PostDto } from "./entity/dto/post.dto";
+import { PostDto } from "./dto/post.dto";
 import {
     Post,
     PostWithUsername,
     toPostWithUsername,
+    UpdatePost,
 } from "./model/post.model";
 import { CreatePost, PostRepository } from "./post.repository";
 import path from "path";
@@ -34,17 +35,20 @@ export class PostService {
             caption: postDto.caption,
             tags: this.extractTags(postDto.caption),
             mentions: postDto.mentions,
+            like_count: 0,
+            comment_count: 0,
+            saved_count: 0,
         };
 
         const createdPost = await this.postRepo.create(newPost);
-        return toPostWithUsername(createdPost, baseUrl)
+        return toPostWithUsername(createdPost, baseUrl);
     }
 
     private extractTags(caption: string): string[] {
         const tags = caption.match(/#\w+/g);
         return tags ? tags.map((tag) => tag.toLocaleLowerCase()) : [];
     }
-
+    
     public async getPostByPostId(
         user: User,
         postId: string,
@@ -87,7 +91,7 @@ export class PostService {
 
         await this.deleteUnusedImages(post.images);
 
-        const editedPost: Post = {
+        const editedPost: UpdatePost = {
             id: postId,
             user: user,
             images: postImagesFileNames,
@@ -111,5 +115,9 @@ export class PostService {
                 console.error(`Failed to delete image: ${filePath}`);
             });
         }
+    }
+
+    public async getPost(postId: string): Promise<Post | null> {
+        return await this.postRepo.findPostById(postId);
     }
 }

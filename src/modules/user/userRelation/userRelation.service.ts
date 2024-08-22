@@ -3,9 +3,14 @@ import {
     NotFoundError,
     UnauthorizedError,
 } from "../../../utility/http-errors";
+import { UserEntity } from "../entity/user.entity";
 import { User } from "../model/user.model";
 import { UserService } from "../user.service";
-import { toProfile } from "./model/userRelation.model";
+import {
+    followerFollowingListUserResponse,
+    toFollowerFollowingListUser,
+    toProfile,
+} from "./model/userRelation.model";
 import { UserRelationRepository } from "./userRelation.repository";
 
 export class UserRelationService {
@@ -86,10 +91,81 @@ export class UserRelationService {
         if (!user) {
             throw new NotFoundError();
         }
+
+        const posts = await this.userService.getUserPosts(username, baseUrl);
+
         const follow_status = await this.getFollowStatus(
             session_user,
             username
         );
-        return toProfile(user, follow_status, baseUrl);
+        return toProfile(user, follow_status, posts, baseUrl);
+    }
+
+    public async followerList(
+        session_user: User,
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ): Promise<followerFollowingListUserResponse | undefined> {
+        if (!session_user) {
+            throw new UnauthorizedError();
+        }
+        const user = await this.userService.getUserByUsername(username);
+        if (!user) {
+            throw new NotFoundError();
+        }
+
+        const followerList = await this.userRelationRepo.getFollowers(
+            user,
+            page,
+            limit
+        );
+
+        return {
+            data: followerList.data.map((follower) =>
+                toFollowerFollowingListUser(follower, baseUrl)
+            ),
+            meta: {
+                page: page,
+                limit: limit,
+                total: followerList.total,
+                totalPage: Math.ceil(followerList?.total / limit),
+            },
+        };
+    }
+
+    public async followeingList(
+        session_user: User,
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ): Promise<followerFollowingListUserResponse | undefined> {
+        if (!session_user) {
+            throw new UnauthorizedError();
+        }
+        const user = await this.userService.getUserByUsername(username);
+        if (!user) {
+            throw new NotFoundError();
+        }
+
+        const followingList = await this.userRelationRepo.getFollowings(
+            user,
+            page,
+            limit
+        );
+
+        return {
+            data: followingList.data.map((followeing) =>
+                toFollowerFollowingListUser(followeing, baseUrl)
+            ),
+            meta: {
+                page: page,
+                limit: limit,
+                total: followingList.total,
+                totalPage: Math.ceil(followingList?.total / limit),
+            },
+        };
     }
 }

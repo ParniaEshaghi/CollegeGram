@@ -7,10 +7,12 @@ import { auth } from "../middlewares/auth.middleware";
 import { profileUpload } from "../middlewares/upload.middleware";
 import { editProfileDto } from "../modules/user/dto/edit-profile.dto";
 import { UserRelationService } from "../modules/user/userRelation/userRelation.service";
+import { SavedPostService } from "../modules/user/savedPost/savedPost.service";
 
 export const makeUserRouter = (
     userService: UserService,
-    UserRelationService: UserRelationService
+    UserRelationService: UserRelationService,
+    savedPostService: SavedPostService
 ) => {
     const app = Router();
 
@@ -44,23 +46,18 @@ export const makeUserRouter = (
         handleExpress(res, () => userService.resetPassword(newPass, token));
     });
 
-    app.post(
-        "/editprofile",
-        auth(userService),
-        profileUpload,
-        async (req, res) => {
-            const dto = editProfileDto.parse(req.body);
-            const pictureFilename = req.file ? req.file.filename : "";
-            handleExpress(res, () =>
-                userService.editProfile(
-                    req.user,
-                    pictureFilename,
-                    dto,
-                    req.base_url
-                )
-            );
-        }
-    );
+    app.post("/editprofile", auth(userService), profileUpload, (req, res) => {
+        const dto = editProfileDto.parse(req.body);
+        const pictureFilename = req.file ? req.file.filename : "";
+        handleExpress(res, () =>
+            userService.editProfile(
+                req.user,
+                pictureFilename,
+                dto,
+                req.base_url
+            )
+        );
+    });
 
     app.get("/geteditprofile", auth(userService), (req, res) => {
         handleExpress(res, async () =>
@@ -93,6 +90,48 @@ export const makeUserRouter = (
         handleExpress(res, () =>
             UserRelationService.userProfile(req.user, username, req.base_url)
         );
+    });
+
+    app.get("/followers/:username", auth(userService), (req, res) => {
+        const username = req.params.username;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            UserRelationService.followerList(
+                req.user,
+                username,
+                page,
+                limit,
+                req.base_url
+            )
+        );
+    });
+
+    app.get("/followings/:username", auth(userService), (req, res) => {
+        const username = req.params.username;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            UserRelationService.followeingList(
+                req.user,
+                username,
+                page,
+                limit,
+                req.base_url
+            )
+        );
+    });
+
+    app.post("/savepost/:postid", auth(userService), (req, res) => {
+        const postid = req.params.postid;
+        handleExpress(res, () => savedPostService.savePost(req.user, postid));
+    });
+
+    app.post("/unsavepost/:postid", auth(userService), (req, res) => {
+        const postid = req.params.postid;
+        handleExpress(res, () => savedPostService.unSavePost(req.user, postid));
     });
 
     return app;

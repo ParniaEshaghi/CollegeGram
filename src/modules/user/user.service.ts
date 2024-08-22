@@ -120,12 +120,15 @@ export class UserService {
         if (!user) {
             throw new UnauthorizedError();
         }
-        const updatedUser = await this.userRepo.updateProfile(
-            user,
-            pictureFilename,
-            dto
-        );
-        return toEditProfileInfo(updatedUser as User, baseUrl);
+        try {
+            await this.userRepo.updateProfile(user, pictureFilename, dto);
+        } catch (error) {
+            throw new DuplicateError();
+        }
+
+        const updatedUser = await this.getUserByUsername(user.username);
+
+        return toEditProfileInfo(updatedUser!, baseUrl);
     }
 
     public async getProfileInfo(user: User, baseUrl: string) {

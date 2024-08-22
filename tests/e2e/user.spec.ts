@@ -1,33 +1,17 @@
 import { makeApp } from "../../src/api";
 import { Express } from "express";
 import request from "supertest";
-import { UserRepository } from "../../src/modules/user/user.repository";
-import { UserService } from "../../src/modules/user/user.service";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
 import { randomUUID } from "crypto";
-import { UserRelationRepository } from "../../src/modules/user/userRelation/userRelation.repository";
-import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
-import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword/forgetPassword.repository";
-import { EmailService } from "../../src/modules/email/email.service";
-import { ForgetPasswordService } from "../../src/modules/user/forgetPassword/forgetPassword.service";
-import { PostRepository } from "../../src/modules/post/post.repository";
-import { PostService } from "../../src/modules/post/post.service";
-import { PostDto } from "../../src/modules/post/entity/dto/post.dto";
+import { PostDto } from "../../src/modules/post/dto/post.dto";
+import { ServiceFactory } from "../../src/utility/service-factory";
 
 jest.mock("nodemailer");
 
 describe("User route test suite", () => {
     let app: Express;
-    let userRepo: UserRepository;
-    let passwordResetTokenRepo: PasswordResetTokenRepository;
-    let forgetPasswordService: ForgetPasswordService;
-    let userRelationRepo: UserRelationRepository;
-    let userService: UserService;
-    let emailService: EmailService;
-    let userRelationService: UserRelationService;
-    let postRepo: PostRepository;
-    let postService: PostService;
+    let serviceFactory: ServiceFactory;
 
     let sendMailMock: jest.Mock;
     let emailContent: string | undefined;
@@ -45,26 +29,17 @@ describe("User route test suite", () => {
         });
 
         const dataSource = await createTestDb();
-        userRepo = new UserRepository(dataSource);
-        passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
-        forgetPasswordService = new ForgetPasswordService(
-            passwordResetTokenRepo,
-            emailService
-        );
-        userRelationRepo = new UserRelationRepository(dataSource);
-        emailService = new EmailService();
-        userService = new UserService(userRepo, forgetPasswordService);
-        userRelationService = new UserRelationService(
-            userRelationRepo,
-            userService
-        );
-        postRepo = new PostRepository(dataSource);
-        postService = new PostService(postRepo);
+        serviceFactory = new ServiceFactory(dataSource);
+
         app = makeApp(
             dataSource,
-            userService,
-            userRelationService,
-            postService
+            serviceFactory.getUserService(),
+            serviceFactory.getUserRelationService(),
+            serviceFactory.getPostService(),
+            serviceFactory.getCommentService(),
+            serviceFactory.getPostLikeService(),
+            serviceFactory.getCommentLikeService(),
+            serviceFactory.getSavedPostService()
         );
 
         await request(app).post("/api/user/signup").send({
@@ -198,13 +173,16 @@ describe("User route test suite", () => {
             await request(app)
                 .post("/api/user/forgetpassword")
                 .send({ credential: "test" });
-            const emailContent = sendMailMock.mock.calls[0][0].text;
-            const tokenMatch = emailContent.match(
+            const emailContent = sendMailMock.mock.calls[0][0].html;
+            const linkMatch = emailContent.match(
+                /href="([^"]*reset-password\/[a-fA-F0-9-]+~[a-fA-F0-9-]+)"/
+            );
+            const resetLink = linkMatch ? linkMatch[1] : null;
+            const tokenMatch = resetLink?.match(
                 /reset-password\/([a-fA-F0-9-]+~[a-fA-F0-9-]+)$/
             );
-            const token = tokenMatch
-                ? `${tokenMatch[1]}~${tokenMatch[2]}`
-                : null;
+            const token = tokenMatch ? tokenMatch[1] : null;
+
             await request(app)
                 .post("/api/user/resetpassword")
                 .send({ newPass: "newPass", token: token })
@@ -577,6 +555,417 @@ describe("User route test suite", () => {
                 .get("/api/user/follow_test")
                 .set("Cookie", [cookie])
                 .expect(404);
+        });
+    });
+
+    describe("follower, following list", () => {
+        it("should get user followers list", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "user_test1",
+                email: "user_test1@gmail.com",
+                password: "user_test1",
+            });
+
+            await request(app).post("/api/user/signup").send({
+                username: "user_test2",
+                email: "user_test2@gmail.com",
+                password: "user_test2",
+            });
+
+            await request(app).post("/api/user/signup").send({
+                username: "user_test3",
+                email: "user_test3@gmail.com",
+                password: "user_test3",
+            });
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({
+                    credential: "user_test1@gmail.com",
+                    password: "user_test1",
+                })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            await request(app)
+                .post("/api/user/follow/user_test2")
+                .set("Cookie", [cookie]);
+
+            const response2 = await request(app)
+                .post("/api/user/signin")
+                .send({
+                    credential: "user_test3@gmail.com",
+                    password: "user_test3",
+                })
+                .expect(200);
+            const cookies2 = response2.headers["set-cookie"];
+            const cookie2 = cookies2[0];
+
+            await request(app)
+                .post("/api/user/follow/user_test2")
+                .set("Cookie", [cookie2]);
+
+            const follower_list_response1 = await request(app)
+                .get("/api/user/followers/user_test2?page=1&limit=10")
+                .set("Cookie", [cookie2])
+                .expect(200);
+            expect(follower_list_response1.body.data.length).toBe(2);
+            expect(follower_list_response1.body.meta.total).toBe(2);
+            expect(follower_list_response1.body.meta.page).toBe(1);
+            expect(follower_list_response1.body.meta.limit).toBe(10);
+
+            const follower_list_response2 = await request(app)
+                .get("/api/user/followers/user_test2?page=1&limit=1")
+                .set("Cookie", [cookie2])
+                .expect(200);
+            expect(follower_list_response2.body.data.length).toBe(1);
+            expect(follower_list_response2.body.meta.total).toBe(2);
+            expect(follower_list_response2.body.meta.page).toBe(1);
+            expect(follower_list_response2.body.meta.limit).toBe(1);
+
+            const follower_list_response3 = await request(app)
+                .get("/api/user/followers/user_test2?page=2&limit=1")
+                .set("Cookie", [cookie2])
+                .expect(200);
+            expect(follower_list_response3.body.data.length).toBe(1);
+            expect(follower_list_response3.body.meta.total).toBe(2);
+            expect(follower_list_response3.body.meta.page).toBe(2);
+            expect(follower_list_response3.body.meta.limit).toBe(1);
+        });
+
+        it("should get user following list", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "user_test1",
+                email: "user_test1@gmail.com",
+                password: "user_test1",
+            });
+
+            await request(app).post("/api/user/signup").send({
+                username: "user_test2",
+                email: "user_test2@gmail.com",
+                password: "user_test2",
+            });
+
+            await request(app).post("/api/user/signup").send({
+                username: "user_test3",
+                email: "user_test3@gmail.com",
+                password: "user_test3",
+            });
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({
+                    credential: "user_test1@gmail.com",
+                    password: "user_test1",
+                })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            await request(app)
+                .post("/api/user/follow/user_test2")
+                .set("Cookie", [cookie]);
+
+            await request(app)
+                .post("/api/user/follow/user_test3")
+                .set("Cookie", [cookie]);
+
+            const following_list_response1 = await request(app)
+                .get("/api/user/followings/user_test1?page=1&limit=10")
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(following_list_response1.body.data.length).toBe(2);
+            expect(following_list_response1.body.meta.total).toBe(2);
+            expect(following_list_response1.body.meta.page).toBe(1);
+            expect(following_list_response1.body.meta.limit).toBe(10);
+
+            const following_list_response2 = await request(app)
+                .get("/api/user/followings/user_test1?page=1&limit=1")
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(following_list_response2.body.data.length).toBe(1);
+            expect(following_list_response2.body.meta.total).toBe(2);
+            expect(following_list_response2.body.meta.page).toBe(1);
+            expect(following_list_response2.body.meta.limit).toBe(1);
+
+            const following_list_response3 = await request(app)
+                .get("/api/user/followings/user_test1?page=2&limit=1")
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(following_list_response3.body.data.length).toBe(1);
+            expect(following_list_response3.body.meta.total).toBe(2);
+            expect(following_list_response3.body.meta.page).toBe(2);
+            expect(following_list_response3.body.meta.limit).toBe(1);
+        });
+
+        it("should get empty if no follower or no following exist", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "user_test1",
+                email: "user_test1@gmail.com",
+                password: "user_test1",
+            });
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({
+                    credential: "user_test1@gmail.com",
+                    password: "user_test1",
+                })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            const follower_list_response1 = await request(app)
+                .get("/api/user/followers/user_test1?page=1&limit=10")
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(follower_list_response1.body.data.length).toBe(0);
+            expect(follower_list_response1.body.meta.total).toBe(0);
+            expect(follower_list_response1.body.meta.page).toBe(1);
+            expect(follower_list_response1.body.meta.limit).toBe(10);
+
+            const following_list_response1 = await request(app)
+                .get("/api/user/followings/user_test1?page=1&limit=10")
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(following_list_response1.body.data.length).toBe(0);
+            expect(following_list_response1.body.meta.total).toBe(0);
+            expect(following_list_response1.body.meta.page).toBe(1);
+            expect(following_list_response1.body.meta.limit).toBe(10);
+        });
+
+        it("should fail if user not exist", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "user_test1",
+                email: "user_test1@gmail.com",
+                password: "user_test1",
+            });
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({
+                    credential: "user_test1@gmail.com",
+                    password: "user_test1",
+                })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            const follower_list_response1 = await request(app)
+                .get("/api/user/followers/user_test10?page=1&limit=10")
+                .set("Cookie", [cookie])
+                .expect(404);
+
+            const following_list_response1 = await request(app)
+                .get("/api/user/followings/user_test10?page=1&limit=10")
+                .set("Cookie", [cookie])
+                .expect(404);
+        });
+
+        it("should pass if page and limit not specified(user default values)", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "user_test1",
+                email: "user_test1@gmail.com",
+                password: "user_test1",
+            });
+
+            await request(app).post("/api/user/signup").send({
+                username: "user_test2",
+                email: "user_test2@gmail.com",
+                password: "user_test2",
+            });
+
+            await request(app).post("/api/user/signup").send({
+                username: "user_test3",
+                email: "user_test3@gmail.com",
+                password: "user_test3",
+            });
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({
+                    credential: "user_test1@gmail.com",
+                    password: "user_test1",
+                })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            await request(app)
+                .post("/api/user/follow/user_test2")
+                .set("Cookie", [cookie]);
+
+            await request(app)
+                .post("/api/user/follow/user_test3")
+                .set("Cookie", [cookie]);
+
+            const following_list_response1 = await request(app)
+                .get("/api/user/followings/user_test1")
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(following_list_response1.body.data.length).toBe(2);
+            expect(following_list_response1.body.meta.total).toBe(2);
+            expect(following_list_response1.body.meta.page).toBe(1);
+            expect(following_list_response1.body.meta.limit).toBe(10);
+        });
+    });
+
+    describe("Save post, Unsave post", () => {
+        it("should pass save post", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            const create_post_response = await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+
+            const response_post_save = await request(app)
+                .post(`/api/user/savepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(response_post_save.body.message).toBe("Post saved");
+
+            const post = await request(app)
+                .get(`/api/post/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(post.body.save_status).toBe(true);
+        });
+
+        it("should fail save post more than one time", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            const create_post_response = await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+
+            const response_post_save = await request(app)
+                .post(`/api/user/savepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(response_post_save.body.message).toBe("Post saved");
+
+            const post = await request(app)
+                .get(`/api/post/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(post.body.save_status).toBe(true);
+
+            const response_post_save2 = await request(app)
+                .post(`/api/user/savepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(400);
+            expect(response_post_save2.body.message).toBe("Bad Request");
+        });
+
+        it("should fail if unsave post that not saved", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            const create_post_response = await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+
+            const response_post_unsave = await request(app)
+                .post(`/api/user/unsavepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(400);
+            expect(response_post_unsave.body.message).toBe("Bad Request");
+        });
+
+        it("should pass save post and then unsave", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            const create_post_response = await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+
+            const response_post_save = await request(app)
+                .post(`/api/user/savepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(response_post_save.body.message).toBe("Post saved");
+
+            const post = await request(app)
+                .get(`/api/post/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(post.body.save_status).toBe(true);
+
+            const response_post_unsave = await request(app)
+                .post(`/api/user/unsavepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(response_post_unsave.body.message).toBe("Post unsaved");
+
+            const post2 = await request(app)
+                .get(`/api/post/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(post2.body.save_status).toBe(false);
         });
     });
 });

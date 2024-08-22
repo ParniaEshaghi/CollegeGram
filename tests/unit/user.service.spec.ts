@@ -1,33 +1,22 @@
-import { UserRepository } from "../../src/modules/user/user.repository";
 import { UserService } from "../../src/modules/user/user.service";
 import bcrypt from "bcrypt";
 import {
     BadRequestError,
     HttpError,
     InvalidCredentialError,
-    NotFoundError,
     UnauthorizedError,
 } from "../../src/utility/http-errors";
 import { hashGenerator } from "../../src/utility/hash-generator";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
-import { UserRelationRepository } from "../../src/modules/user/userRelation/userRelation.repository";
 import { randomUUID } from "crypto";
-import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
-import { PasswordResetTokenRepository } from "../../src/modules/user/forgetPassword/forgetPassword.repository";
-import { ForgetPasswordService } from "../../src/modules/user/forgetPassword/forgetPassword.service";
-import { EmailService } from "../../src/modules/email/email.service";
+import { ServiceFactory } from "../../src/utility/service-factory";
 
 jest.mock("nodemailer");
 
 describe("User service test suite", () => {
-    let userRepo: UserRepository;
-    let passwordResetTokenRepo: PasswordResetTokenRepository;
-    let forgetPasswordService: ForgetPasswordService;
-    let userRelationRepo: UserRelationRepository;
+    let serviceFactory: ServiceFactory;
     let userService: UserService;
-    let emailService: EmailService;
-    let userRelationService: UserRelationService;
 
     let sendMailMock: jest.Mock;
     let emailContent: string | undefined;
@@ -45,19 +34,9 @@ describe("User service test suite", () => {
         });
 
         const dataSource = await createTestDb();
-        userRepo = new UserRepository(dataSource);
-        passwordResetTokenRepo = new PasswordResetTokenRepository(dataSource);
-        forgetPasswordService = new ForgetPasswordService(
-            passwordResetTokenRepo,
-            emailService
-        );
-        userRelationRepo = new UserRelationRepository(dataSource);
-        emailService = new EmailService();
-        userService = new UserService(userRepo, forgetPasswordService);
-        userRelationService = new UserRelationService(
-            userRelationRepo,
-            userService
-        );
+        serviceFactory = new ServiceFactory(dataSource);
+
+        userService = serviceFactory.getUserService();
 
         await userService.createUser({
             username: "test",
@@ -170,11 +149,16 @@ describe("User service test suite", () => {
 
         it.skip("should reset password", async () => {
             await userService.forgetPassword("test@gmail.com");
-            const emailContent = sendMailMock.mock.calls[0][0].text;
-            const tokenMatch = emailContent.match(
+            const emailContent = sendMailMock.mock.calls[0][0].html;
+            const linkMatch = emailContent.match(
+                /href="([^"]*reset-password\/[a-fA-F0-9-]+~[a-fA-F0-9-]+)"/
+            );
+            const resetLink = linkMatch ? linkMatch[1] : null;
+            const tokenMatch = resetLink?.match(
                 /reset-password\/([a-fA-F0-9-]+~[a-fA-F0-9-]+)$/
             );
             const token = tokenMatch ? tokenMatch[1] : null;
+
             const response = await userService.resetPassword(
                 "reset test",
                 token

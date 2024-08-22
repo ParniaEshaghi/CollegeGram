@@ -5,6 +5,12 @@ import { PasswordResetTokenEntity } from "../modules/user/forgetPassword/entity/
 import { v4 } from "uuid";
 import { PostEntity } from "../modules/post/entity/post.entity";
 import { UserRelationEntity } from "../modules/user/userRelation/entity/userRelation.entity";
+import {
+    CommentLikeEntity,
+    PostLikeEntity,
+} from "../modules/post/like/entity/like.entity";
+import { CommentEntity } from "../modules/post/comment/entity/comment.entity";
+import { SavedPostsEntity } from "../modules/user/savedPost/entity/savedPost.entity";
 
 export const createTestDb = async () => {
     // Create a new in-memory database
@@ -46,6 +52,10 @@ export const createTestDb = async () => {
             PasswordResetTokenEntity,
             PostEntity,
             UserRelationEntity,
+            PostLikeEntity,
+            CommentLikeEntity,
+            CommentEntity,
+            SavedPostsEntity,
         ],
         synchronize: true,
         logging: false,
