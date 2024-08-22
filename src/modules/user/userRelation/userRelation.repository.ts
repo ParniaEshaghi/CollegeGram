@@ -56,8 +56,6 @@ export class UserRelationRepository {
         });
 
         return reponse;
-<<<<<<< HEAD
-=======
     }
 
     public async getFollowers(
@@ -88,6 +86,5 @@ export class UserRelationRepository {
         });
 
         return { data: response.map((res) => res.following), total: total };
->>>>>>> 98e9a266b1bf0b5d75321ce24dfbead5406ae11c
     }
 }

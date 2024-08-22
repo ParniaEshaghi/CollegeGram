@@ -40,16 +40,6 @@ export const toPostWithUsername = (
     };
 };
 
-<<<<<<< HEAD
-export const toProfilePost = (
-    username: string,
-    post: Post,
-    baseUrl: string
-): PostWithUsername => {
-    const { user, images, ...postDetails } = post;
-    return {
-        ...postDetails,
-=======
 export const toPostPage = (
     post: Post,
     baseUrl: string,
@@ -76,7 +66,6 @@ export const toProfilePost = (
     const { user, images, ...postDetails } = post;
     return {
         ...postDetails,
->>>>>>> 98e9a266b1bf0b5d75321ce24dfbead5406ae11c
         username: username,
         images: post.images.map(
             (image) => `${baseUrl}/api/images/posts/${image}`
