@@ -21,6 +21,7 @@ describe("Post route test suite", () => {
             serviceFactory.getCommentService(),
             serviceFactory.getPostLikeService(),
             serviceFactory.getCommentLikeService(),
+            serviceFactory.getSavedPostService()
         );
 
         await request(app).post("/api/user/signup").send({
@@ -296,6 +297,164 @@ describe("Post route test suite", () => {
             expect(response_comment_comment.body.text).toBe(
                 "comment to comment test"
             );
+        });
+    });
+
+    describe("post like and unlike", () => {
+        it("should pass like post and like status of post should be true", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            const create_post_response = await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+
+            const response_post_like = await request(app)
+                .post(`/api/post/likepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(response_post_like.body.message).toBe("Post liked");
+
+            const post = await request(app)
+                .get(`/api/post/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(post.body.like_status).toBe(true);
+        });
+
+        it("should fail like post more than onc time", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            const create_post_response = await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+
+            const response_post_like = await request(app)
+                .post(`/api/post/likepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(response_post_like.body.message).toBe("Post liked");
+
+            const post = await request(app)
+                .get(`/api/post/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(post.body.like_status).toBe(true);
+
+            const response_post_like2 = await request(app)
+                .post(`/api/post/likepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(400);
+            expect(response_post_like2.body.message).toBe("Bad Request");
+        });
+
+        it("should fail if unlike post that not liked", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            const create_post_response = await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+
+            const response_post_unlike = await request(app)
+                .post(`/api/post/unlikepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(400);
+            expect(response_post_unlike.body.message).toBe("Bad Request");
+        });
+
+        it("should pass like post and then unlike", async () => {
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            expect(cookies).toBeDefined();
+            const cookie = cookies[0];
+
+            const postDto: PostDto = {
+                caption: "This is a test post #test",
+                mentions: ["user1", "user2"],
+            };
+
+            const create_post_response = await request(app)
+                .post("/api/post/createpost")
+                .set("Cookie", [cookie])
+                .field("caption", postDto.caption)
+                .field("mentions", postDto.mentions)
+                .attach("postImage", Buffer.from(""), "testFile1.jpg")
+                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .expect(200);
+
+            const response_post_like = await request(app)
+                .post(`/api/post/likepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(response_post_like.body.message).toBe("Post liked");
+
+            const post = await request(app)
+                .get(`/api/post/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(post.body.like_status).toBe(true);
+
+            const response_post_unlike = await request(app)
+                .post(`/api/post/unlikepost/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(response_post_unlike.body.message).toBe("Post unliked");
+
+            const post2 = await request(app)
+                .get(`/api/post/${create_post_response.body.id}`)
+                .set("Cookie", [cookie])
+                .expect(200);
+            expect(post2.body.like_status).toBe(false);
         });
     });
 });
