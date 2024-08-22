@@ -1,3 +1,4 @@
+import { Post, PostWithUsername } from "../../../post/model/post.model";
 import { UserEntity } from "../../entity/user.entity";
 import { User } from "../../model/user.model";
 
@@ -13,11 +14,13 @@ export interface followerFollowing {
 
 export type UserProfile = Omit<User, "password" | "email" | "profileStatus"> & {
     follow_status: boolean;
+    posts: PostWithUsername[];
 };
 
 export const toProfile = (
     user: User,
     follow_status: boolean,
+    posts: PostWithUsername[],
     baseUrl: string
 ): UserProfile => {
     const { password, profileStatus, email, profilePicture, ...profileInfo } =
@@ -27,6 +30,7 @@ export const toProfile = (
         profilePicture: user.profilePicture
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",
+        posts,
         follow_status,
     };
 };

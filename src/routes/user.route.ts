@@ -45,23 +45,18 @@ export const makeUserRouter = (
         handleExpress(res, () => userService.resetPassword(newPass, token));
     });
 
-    app.post(
-        "/editprofile",
-        auth(userService),
-        profileUpload,
-        async (req, res) => {
-            const dto = editProfileDto.parse(req.body);
-            const pictureFilename = req.file ? req.file.filename : "";
-            handleExpress(res, () =>
-                userService.editProfile(
-                    req.user,
-                    pictureFilename,
-                    dto,
-                    req.base_url
-                )
-            );
-        }
-    );
+    app.post("/editprofile", auth(userService), profileUpload, (req, res) => {
+        const dto = editProfileDto.parse(req.body);
+        const pictureFilename = req.file ? req.file.filename : "";
+        handleExpress(res, () =>
+            userService.editProfile(
+                req.user,
+                pictureFilename,
+                dto,
+                req.base_url
+            )
+        );
+    });
 
     app.get("/geteditprofile", auth(userService), (req, res) => {
         handleExpress(res, async () =>

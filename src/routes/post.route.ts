@@ -95,7 +95,7 @@ export const makePostRouter = (
         );
     });
 
-    app.post("/unlikepost/:commentid", auth(userService), (req, res) => {
+    app.post("/unlikecomment/:commentid", auth(userService), (req, res) => {
         const commentid = req.params.commentid;
         handleExpress(res, () =>
             commentLikeService.unLikeComment(req.user, commentid)

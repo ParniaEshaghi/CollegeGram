@@ -28,7 +28,7 @@ export class CommentRepository {
             skip: (page - 1) * limit,
             take: limit,
             where: { post: { id: postId } },
-            relations: ["children"],
+            relations: ["children", "user", "post"],
         });
 
         return { data: response, total: total };

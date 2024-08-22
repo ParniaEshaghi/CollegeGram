@@ -8,7 +8,7 @@ import { RequestHandler } from "express";
 const profileStorage: StorageEngine = multer.diskStorage({
     destination: "./images/profiles/",
     filename: (req, file, cb) => {
-        const username = req.body.username;
+        const username = req.user.username;
         cb(
             null,
             `${username}-profile-${uuidv4()}${path.extname(file.originalname)}`

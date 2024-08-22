@@ -27,7 +27,7 @@ import fs from "fs";
 export class UserService {
     constructor(
         private userRepo: UserRepository,
-        private forgetPasswordService: ForgetPasswordService,
+        private forgetPasswordService: ForgetPasswordService
     ) {}
 
     async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -120,13 +120,13 @@ export class UserService {
         if (!user) {
             throw new UnauthorizedError();
         }
-        await this.userRepo.updateProfile(
-            user,
-            pictureFilename,
-            dto
-        );
+        try {
+            await this.userRepo.updateProfile(user, pictureFilename, dto);
+        } catch (error) {
+            throw new DuplicateError();
+        }
 
-        const updatedUser = await this.getUserByUsername(user.username)
+        const updatedUser = await this.getUserByUsername(user.username);
 
         return toEditProfileInfo(updatedUser!, baseUrl);
     }
