@@ -115,7 +115,7 @@
  *                 enum: [public, private]
  *                 description: User's profile visibility status
  *                 example: public
- *               profilePicture:
+ *               profileImage:
  *                 type: string
  *                 format: binary
  *                 description: Profile picture file (optional)
