@@ -1,5 +1,8 @@
 import { UserService } from "../../src/modules/user/user.service";
-import { BadRequestError, NotFoundError } from "../../src/utility/http-errors";
+import {
+    BadRequestError,
+    NotFoundError,
+} from "../../src/utility/http-errors";
 import { createTestDb } from "../../src/utility/test-db";
 import { ServiceFactory } from "../../src/utility/service-factory";
 import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
@@ -104,6 +107,94 @@ describe("User relation service test suite", () => {
                     "wrong_test"
                 )
             ).rejects.toThrow(new NotFoundError());
+        });
+    });
+
+    describe("User Profile", () => {
+        it("should get user profile with follow status", async () => {
+            const user = await userService.getUserByUsername("test");
+            await userRelationService.follow(user!, "follow_test");
+
+            const profile = await userRelationService.userProfile(
+                user!,
+                "follow_test",
+                "http://localhost:3000"
+            );
+
+            expect(profile.username).toBe("follow_test");
+            expect(profile.follow_status).toBe(true);
+        });
+
+        it("should fail to get user profile if user does not exist", async () => {
+            const user = await userService.getUserByUsername("test");
+
+            await expect(
+                userRelationService.userProfile(
+                    user!,
+                    "non_existent_user",
+                    "http://localhost:3000"
+                )
+            ).rejects.toThrow(NotFoundError);
+        });
+    });
+
+    describe("Follower and Following Lists", () => {
+        it("should get follower list", async () => {
+            const user = await userService.getUserByUsername("test");
+            await userRelationService.follow(user!, "follow_test");
+
+            const followers = await userRelationService.followerList(
+                user!,
+                "follow_test",
+                1,
+                10,
+                "http://localhost:3000"
+            );
+
+            expect(followers?.data.length).toBeGreaterThan(0);
+        });
+
+        it("should get following list", async () => {
+            const user = await userService.getUserByUsername("test");
+            await userRelationService.follow(user!, "follow_test");
+
+            const followings = await userRelationService.followeingList(
+                user!,
+                "test",
+                1,
+                10,
+                "http://localhost:3000"
+            );
+
+            expect(followings?.data.length).toBeGreaterThan(0);
+        });
+
+        it("should fail to get follower list if user does not exist", async () => {
+            const user = await userService.getUserByUsername("test");
+
+            await expect(
+                userRelationService.followerList(
+                    user!,
+                    "non_existent_user",
+                    1,
+                    10,
+                    "http://localhost:3000"
+                )
+            ).rejects.toThrow(NotFoundError);
+        });
+
+        it("should fail to get following list if user does not exist", async () => {
+            const user = await userService.getUserByUsername("test");
+
+            await expect(
+                userRelationService.followeingList(
+                    user!,
+                    "non_existent_user",
+                    1,
+                    10,
+                    "http://localhost:3000"
+                )
+            ).rejects.toThrow(NotFoundError);
         });
     });
 });

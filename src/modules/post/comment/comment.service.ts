@@ -27,8 +27,12 @@ export class CommentService {
         }
 
         const comment = commentDto.commentId
-            ? (await this.getCommentById(commentDto.commentId))!
+            ? await this.getCommentById(commentDto.commentId)
             : undefined;
+
+        if (comment === null) {
+            throw new NotFoundError();
+        }
 
         const createdComment = await this.commentRepo.create({
             post,
@@ -93,5 +97,5 @@ export class CommentService {
 
     public async getComments(postId: string, page: number, limit: number) {
         return await this.commentRepo.getComments(postId, page, limit);
-    };
+    }
 }
