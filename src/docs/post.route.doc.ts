@@ -382,7 +382,7 @@
 
 /**
  * @swagger
- * /comments/{postid}:
+ * /api/post/comments/{postid}:
  *   get:
  *     summary: Get comments for a post
  *     description: Retrieve comments for a specific post, including nested comments.
