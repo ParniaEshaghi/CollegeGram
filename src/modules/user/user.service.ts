@@ -2,6 +2,7 @@ import {
     BadRequestError,
     DuplicateError,
     InvalidCredentialError,
+    NotFoundError,
     UnauthorizedError,
 } from "../../utility/http-errors";
 import { hashGenerator } from "../../utility/hash-generator";
@@ -140,9 +141,13 @@ export class UserService {
     }
 
     public async getUserPosts(username: string, baseUrl: string) {
+        const user = await this.userRepo.findByUsername(username);
+        if (!user) {
+            throw new NotFoundError();
+        }
         const posts = await this.userRepo.getUserPosts(username);
         const profilePosts: PostWithUsername[] = posts.map((post) =>
-            toProfilePost(username, post, baseUrl)
+            toProfilePost(user, post, baseUrl)
         );
         return profilePosts;
     }

@@ -19,6 +19,7 @@ export type UpdatePost = Omit<
 
 export type PostWithUsername = Omit<Post, "user"> & {
     username: string;
+    profilePicture: string;
 };
 
 export type PostPage = PostWithUsername & {
@@ -34,6 +35,9 @@ export const toPostWithUsername = (
     return {
         ...postDetails,
         username: user.username,
+        profilePicture: user.profilePicture
+            ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+            : "",
         images: post.images.map(
             (image) => `${baseUrl}/api/images/posts/${image}`
         ),
@@ -50,6 +54,9 @@ export const toPostPage = (
     return {
         ...postDetails,
         username: user.username,
+        profilePicture: user.profilePicture
+            ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+            : "",
         images: post.images.map(
             (image) => `${baseUrl}/api/images/posts/${image}`
         ),
@@ -59,14 +66,17 @@ export const toPostPage = (
 };
 
 export const toProfilePost = (
-    username: string,
+    post_user: User,
     post: Post,
     baseUrl: string
 ): PostWithUsername => {
     const { user, images, ...postDetails } = post;
     return {
         ...postDetails,
-        username: username,
+        username: post_user.username,
+        profilePicture: post_user.profilePicture
+            ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+            : "",
         images: post.images.map(
             (image) => `${baseUrl}/api/images/posts/${image}`
         ),

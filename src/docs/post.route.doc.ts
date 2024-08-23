@@ -44,6 +44,8 @@
  *                   type: string
  *                 username:
  *                   type: string
+ *                 profilePicture:
+ *                   type: string
  *                 images:
  *                   type: array
  *                   items:
@@ -92,6 +94,8 @@
  *                   type: string
  *                 username:
  *                   type: string
+ *                 profilePicture:
+ *                   type: string
  *                 images:
  *                   type: array
  *                   items:
@@ -106,6 +110,10 @@
  *                   type: array
  *                   items:
  *                     type: string
+ *                 like_status:
+ *                   type: boolean
+ *                 save_status:
+ *                   type: boolean
  *       400:
  *         description: Bad request
  *       401:
@@ -165,6 +173,8 @@
  *                   description: ID of the updated post.
  *                 username:
  *                   type: string
+ *                 profilePicture:
+ *                   type: string
  *                 images:
  *                   type: array
  *                   items:
@@ -189,4 +199,136 @@
  *         description: Post not found
  *       500:
  *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /likepost/{postid}:
+ *   post:
+ *     tags: [Posts]
+ *     summary: Like a Post
+ *     description: Likes a post for the authenticated user.
+ *     parameters:
+ *       - name: postid
+ *         in: path
+ *         required: true
+ *         description: The ID of the post to be liked.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Post successfully liked.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Post liked"
+ *       '401':
+ *         description: Unauthorized.
+ *       '404':
+ *         description: Not Found.
+ *       '400':
+ *         description: Bad Request. Post is already liked.
+ */
+
+/**
+ * @swagger
+ * /unlikepost/{postid}:
+ *   post:
+ *     tags: [Posts]
+ *     summary: Unlike a Post
+ *     description: Removes a like from a post for the authenticated user.
+ *     parameters:
+ *       - name: postid
+ *         in: path
+ *         required: true
+ *         description: The ID of the post to be unliked.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Post successfully unliked.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Post unliked"
+ *       '401':
+ *         description: Unauthorized
+ *       '404':
+ *         description: Not Found.
+ *       '400':
+ *         description: Bad Request. Post is not liked.
+ */
+
+/**
+ * @swagger
+ * /likecomment/{commentid}:
+ *   post:
+ *     tags: [Posts]
+ *     summary: Like a Comment
+ *     description: Likes a comment for the authenticated user.
+ *     parameters:
+ *       - name: commentid
+ *         in: path
+ *         required: true
+ *         description: The ID of the comment to be liked.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Comment successfully liked.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Comment liked"
+ *       '401':
+ *         description: Unauthorized.
+ *       '404':
+ *         description: Not Found.
+ *       '400':
+ *         description: Bad Request. Comment is already liked.
+ */
+
+/**
+ * @swagger
+ * /unlikecomment/{commentid}:
+ *   post:
+ *     tags: [Posts]
+ *     summary: Unlike a Comment
+ *     description: Removes a like from a comment for the authenticated user.
+ *     parameters:
+ *       - name: commentid
+ *         in: path
+ *         required: true
+ *         description: The ID of the comment to be unliked.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Comment successfully unliked.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Comment unliked"
+ *       '401':
+ *         description: Unauthorized.
+ *       '404':
+ *         description: Not Found.
+ *       '400':
+ *         description: Bad Request. Comment is not liked.
  */
