@@ -88,12 +88,8 @@ export class ServiceFactory {
         this.commentLikeRepo = new CommentLikeRepository(this.dataSource);
         this.commentLikeService = new CommentLikeService(
             this.commentLikeRepo,
-            this.commentService
-        );
-        this.commentLikeRepo = new CommentLikeRepository(this.dataSource);
-        this.commentLikeService = new CommentLikeService(
-            this.commentLikeRepo,
-            this.commentService
+            this.commentService,
+            this.postService
         );
     }
 
