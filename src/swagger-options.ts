@@ -15,6 +15,9 @@ const swaggerOptions = {
             {
                 url: "http://37.32.6.230",
             },
+            {
+                url: "http://collegegram.outofmatrixxx.ir",
+            },
         ],
     },
     apis: ["./src/docs/*.ts"],
