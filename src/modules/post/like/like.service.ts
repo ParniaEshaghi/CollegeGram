@@ -13,6 +13,7 @@ import {
 } from "../model/post.model";
 import { PostService } from "../post.service";
 import { CommentLikeRepository, PostLikeRepository } from "./like.repository";
+import { Comment, toPostCommentList } from "../comment/model/comment.model";
 
 export class PostLikeService {
     constructor(
@@ -109,7 +110,8 @@ export class PostLikeService {
 export class CommentLikeService {
     constructor(
         private commentLikeRepo: CommentLikeRepository,
-        private commentService: CommentService
+        private commentService: CommentService,
+        private postService: PostService
     ) {}
 
     private async getLikeStatus(user: User, commentId: string) {
@@ -168,5 +170,62 @@ export class CommentLikeService {
         await this.commentLikeRepo.delete(user, comment);
 
         return { message: "Comment unliked" };
+    }
+
+    public async commentList(
+        user: User,
+        postId: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        const post = this.postService.getPost(postId);
+
+        if (!post) {
+            throw new NotFoundError();
+        }
+
+        const commentList = await this.commentService.getComments(
+            postId,
+            page,
+            limit
+        );
+
+        return {
+            data: await this.transformComments(user, commentList.data, baseUrl),
+            meta: {
+                page: page,
+                limit: limit,
+                total: commentList.total,
+                totalPage: Math.ceil(commentList?.total / limit),
+            },
+        };
+    }
+
+    private async transformComments(
+        user: User,
+        comments: Comment[],
+        baseUrl: string
+    ): Promise<any[]> {
+        return Promise.all(
+            comments.map(async (comment) => {
+                const likeStatus = await this.getLikeStatus(user, comment.id);
+                const transformedComment = toPostCommentList(
+                    comment,
+                    likeStatus,
+                    baseUrl
+                );
+
+                if (comment.children && comment.children.length > 0) {
+                    transformedComment.children = await this.transformComments(
+                        user,
+                        comment.children,
+                        baseUrl
+                    );
+                }
+
+                return transformedComment;
+            })
+        );
     }
 }

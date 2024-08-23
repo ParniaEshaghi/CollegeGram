@@ -496,7 +496,7 @@
 
 /**
  * @swagger
- * /followers/{username}:
+ * /api/user/followers/{username}:
  *   get:
  *     tags: [User]
  *     summary: Get Followers
@@ -566,7 +566,7 @@
 
 /**
  * @swagger
- * /followings/{username}:
+ * /api/user/followings/{username}:
  *   get:
  *     tags: [User]
  *     summary: Get Followings
@@ -636,7 +636,7 @@
 
 /**
  * @swagger
- * /savepost/{postid}:
+ * /api/user/savepost/{postid}:
  *   post:
  *     tags: [User]
  *     summary: Save a Post
@@ -669,7 +669,7 @@
 
 /**
  * @swagger
- * /unsavepost/{postid}:
+ * /api/user/unsavepost/{postid}:
  *   post:
  *     tags: [User]
  *     summary: Unsave a Post

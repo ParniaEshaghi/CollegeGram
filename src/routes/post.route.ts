@@ -107,7 +107,13 @@ export const makePostRouter = (
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
         handleExpress(res, () =>
-            commentService.commentList(postid, page, limit, req.baseUrl)
+            commentLikeService.commentList(
+                req.user,
+                postid,
+                page,
+                limit,
+                req.base_url
+            )
         );
     });
 

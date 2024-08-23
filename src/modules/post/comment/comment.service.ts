@@ -4,6 +4,7 @@ import { PostService } from "../post.service";
 import { CommentRepository } from "./comment.repository";
 import { CommentDto } from "./dto/comment.dto";
 import {
+    Comment,
     toCommentWithUsername,
     toPostCommentList,
 } from "./model/comment.model";
@@ -48,34 +49,49 @@ export class CommentService {
         return comment;
     }
 
-    public async commentList(
-        postId: string,
-        page: number,
-        limit: number,
-        baseUrl: string
-    ) {
-        const post = this.postService.getPost(postId);
+    // public async commentList(
+    //     postId: string,
+    //     page: number,
+    //     limit: number,
+    //     baseUrl: string
+    // ) {
+    //     const post = this.postService.getPost(postId);
 
-        if (!post) {
-            throw new NotFoundError();
-        }
+    //     if (!post) {
+    //         throw new NotFoundError();
+    //     }
 
-        const commentList = await this.commentRepo.getComments(
-            postId,
-            page,
-            limit
-        );
+    //     const commentList = await this.commentRepo.getComments(
+    //         postId,
+    //         page,
+    //         limit
+    //     );
 
-        return {
-            data: commentList.data.map((comment) =>
-                toPostCommentList(comment, baseUrl)
-            ),
-            meta: {
-                page: page,
-                limit: limit,
-                total: commentList.total,
-                totalPage: Math.ceil(commentList?.total / limit),
-            },
-        };
-    }
+    //     return {
+    //         data: this.transformComments(commentList.data, baseUrl),
+    //         meta: {
+    //             page: page,
+    //             limit: limit,
+    //             total: commentList.total,
+    //             totalPage: Math.ceil(commentList?.total / limit),
+    //         },
+    //     };
+    // }
+
+    // transformComments = (comments: Comment[], baseUrl: string): any[] => {
+    //     return comments.map((comment) => {
+    //         const transformedComment = toPostCommentList(comment, baseUrl);
+    //         if (comment.children) {
+    //             transformedComment.children = this.transformComments(
+    //                 comment.children,
+    //                 baseUrl
+    //             );
+    //         }
+    //         return transformedComment;
+    //     });
+    // };
+
+    public async getComments(postId: string, page: number, limit: number) {
+        return await this.commentRepo.getComments(postId, page, limit);
+    };
 }

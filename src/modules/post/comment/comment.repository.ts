@@ -1,8 +1,6 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, IsNull, Repository } from "typeorm";
 import { CommentEntity } from "./entity/comment.entity";
 import { Comment, CommentsList, CreateComment } from "./model/comment.model";
-import { Post } from "../model/post.model";
-import { User } from "../../user/model/user.model";
 
 export class CommentRepository {
     private commentRepo: Repository<CommentEntity>;
@@ -27,10 +25,27 @@ export class CommentRepository {
         const [response, total] = await this.commentRepo.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
-            where: { post: { id: postId } },
-            relations: ["children", "user", "post"],
+            where: { post: { id: postId }, parent: IsNull() },
+            relations: ["children", "user"],
         });
 
+        await Promise.all(
+            response.map(async (comment) => {
+                comment.children = await this.getChildren(comment.id);
+            })
+        );
+
         return { data: response, total: total };
+    }
+
+    public async getChildren(parentId: string): Promise<Comment[]> {
+        const children = await this.commentRepo.find({
+            where: { parent: { id: parentId } },
+            relations: ["children", "user"],
+        });
+        for (const child of children) {
+            child.children = await this.getChildren(child.id);
+        }
+        return children;
     }
 }
