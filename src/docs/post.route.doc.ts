@@ -203,11 +203,7 @@
 
 /**
  * @swagger
-<<<<<<< src/docs/post.route.doc.ts
  * /api/post/likepost/{postid}:
-=======
- * /likepost/{postid}:
->>>>>>> src/docs/post.route.doc.ts
  *   post:
  *     tags: [Posts]
  *     summary: Like a Post
