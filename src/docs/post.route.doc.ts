@@ -203,7 +203,11 @@
 
 /**
  * @swagger
+<<<<<<< src/docs/post.route.doc.ts
+ * /api/post/likepost/{postid}:
+=======
  * /likepost/{postid}:
+>>>>>>> src/docs/post.route.doc.ts
  *   post:
  *     tags: [Posts]
  *     summary: Like a Post
@@ -236,7 +240,7 @@
 
 /**
  * @swagger
- * /unlikepost/{postid}:
+ * /api/post/unlikepost/{postid}:
  *   post:
  *     tags: [Posts]
  *     summary: Unlike a Post
@@ -269,7 +273,7 @@
 
 /**
  * @swagger
- * /likecomment/{commentid}:
+ * /api/post/likecomment/{commentid}:
  *   post:
  *     tags: [Posts]
  *     summary: Like a Comment
@@ -302,7 +306,7 @@
 
 /**
  * @swagger
- * /unlikecomment/{commentid}:
+ * /api/post/unlikecomment/{commentid}:
  *   post:
  *     tags: [Posts]
  *     summary: Unlike a Comment
@@ -331,4 +335,129 @@
  *         description: Not Found.
  *       '400':
  *         description: Bad Request. Comment is not liked.
+ */
+
+/**
+ * @swagger
+ * /api/post/comment:
+ *   post:
+ *     tags: [Posts]
+ *     summary: Create a new comment
+ *     description: Creates a new comment for a specified post.
+ *     requestBody:
+ *       description: Comment object that needs to be added
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               postId:
+ *                 type: string
+ *               text:
+ *                 type: string
+ *               commentId:
+ *                 type: string
+ *                 example: Id of the parent comment (optional)
+ *             required:
+ *               - postId
+ *               - text
+ *     responses:
+ *       200:
+ *         description: Successfully created comment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 like_count:
+ *                   type: integer
+ *                 text:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized.
+ *       404:
+ *         description: Not Found.
+ */
+
+/**
+ * @swagger
+ * /comments/{postid}:
+ *   get:
+ *     summary: Get comments for a post
+ *     description: Retrieve comments for a specific post, including nested comments.
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: path
+ *         name: postid
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the post to retrieve comments for
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of comments per page
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved comments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: ID of the comment
+ *                       text:
+ *                         type: string
+ *                         description: Content of the comment
+ *                       like_count:
+ *                         type: integer
+ *                       username:
+ *                         type: string
+ *                         description: Username of the comment author
+ *                       children:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           example: 'nested comments'
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       description: Current page number
+ *                     limit:
+ *                       type: integer
+ *                       description: Number of comments per page
+ *                     total:
+ *                       type: integer
+ *                       description: Total number of comments
+ *                     totalPage:
+ *                       type: integer
+ *                       description: Total number of pages
+ *       401:
+ *         description: Unauthorized.
+ *       404:
+ *         description: Not Found
  */
