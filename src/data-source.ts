@@ -1,16 +1,14 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { UserEntity } from "./modules/user/entity/user.entity";
-import { PasswordResetTokenEntity } from "./modules/user/forgetPassword/entity/forgetPassword.entity";
-import { PostEntity } from "./modules/post/entity/post.entity";
-import { UserRelationEntity } from "./modules/user/userRelation/entity/userRelation.entity";
+import { UserEntity } from "./modules/userHandler/user/entity/user.entity";
+import { PasswordResetTokenEntity } from "./modules/userHandler/forgetPassword/entity/forgetPassword.entity";
+import { PostEntity } from "./modules/postHandler/post/entity/post.entity";
+import { UserRelationEntity } from "./modules/userHandler/userRelation/entity/userRelation.entity";
 import { RenameFirstNameLastName1723636558559 } from "../migrations/1723636558559-RenameFirstNameLastName";
-import {
-    CommentLikeEntity,
-    PostLikeEntity,
-} from "./modules/post/like/entity/like.entity";
-import { CommentEntity } from "./modules/post/comment/entity/comment.entity";
-import { SavedPostsEntity } from "./modules/user/savedPost/entity/savedPost.entity";
+import { PostLikeEntity } from "./modules/postHandler/postLike/entity/postLike.entity";
+import { CommentEntity } from "./modules/postHandler/comment/entity/comment.entity";
+import { SavedPostsEntity } from "./modules/userHandler/savedPost/entity/savedPost.entity";
+import { CommentLikeEntity } from "./modules/postHandler/commentLike/entity/commentLike.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",

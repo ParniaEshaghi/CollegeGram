@@ -1,25 +1,23 @@
 import { DataSource } from "typeorm";
-import { UserRepository } from "../modules/user/user.repository";
-import { PasswordResetTokenRepository } from "../modules/user/forgetPassword/forgetPassword.repository";
+import { UserRepository } from "../modules/userHandler/user/user.repository";
+import { PasswordResetTokenRepository } from "../modules/userHandler/forgetPassword/forgetPassword.repository";
 import { EmailService } from "../modules/email/email.service";
-import { ForgetPasswordService } from "../modules/user/forgetPassword/forgetPassword.service";
-import { UserRelationRepository } from "../modules/user/userRelation/userRelation.repository";
-import { UserService } from "../modules/user/user.service";
-import { UserRelationService } from "../modules/user/userRelation/userRelation.service";
-import { PostRepository } from "../modules/post/post.repository";
-import { PostService } from "../modules/post/post.service";
-import { CommentRepository } from "../modules/post/comment/comment.repository";
-import { CommentService } from "../modules/post/comment/comment.service";
-import {
-    CommentLikeRepository,
-    PostLikeRepository,
-} from "../modules/post/like/like.repository";
-import {
-    CommentLikeService,
-    PostLikeService,
-} from "../modules/post/like/like.service";
-import { SavedPostRepository } from "../modules/user/savedPost/savedPost.repository";
-import { SavedPostService } from "../modules/user/savedPost/savedPost.service";
+import { ForgetPasswordService } from "../modules/userHandler/forgetPassword/forgetPassword.service";
+import { UserRelationRepository } from "../modules/userHandler/userRelation/userRelation.repository";
+import { UserService } from "../modules/userHandler/user/user.service";
+import { UserRelationService } from "../modules/userHandler/userRelation/userRelation.service";
+import { SavedPostRepository } from "../modules/userHandler/savedPost/savedPost.repository";
+import { SavedPostService } from "../modules/userHandler/savedPost/savedPost.service";
+import { PostRepository } from "../modules/postHandler/post/post.repository";
+import { PostService } from "../modules/postHandler/post/post.service";
+import { CommentRepository } from "../modules/postHandler/comment/comment.repository";
+import { CommentService } from "../modules/postHandler/comment/comment.service";
+import { PostLikeRepository } from "../modules/postHandler/postLike/postLike.repository";
+import { PostLikeService } from "../modules/postHandler/postLike/postLike.service";
+import { CommentLikeRepository } from "../modules/postHandler/commentLike/commentLike.repository";
+import { CommentLikeService } from "../modules/postHandler/commentLike/commentLike.service";
+import { PostHandler } from "../modules/postHandler/postHandler";
+import { UserHandler } from "../modules/userHandler/userHandler";
 
 export class ServiceFactory {
     private dataSource: DataSource;
@@ -41,6 +39,9 @@ export class ServiceFactory {
     private postLikeService: PostLikeService;
     private commentLikeRepo: CommentLikeRepository;
     private commentLikeService: CommentLikeService;
+
+    private postHandler: PostHandler;
+    private userHandler: UserHandler;
 
     constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
@@ -82,14 +83,26 @@ export class ServiceFactory {
         this.postLikeRepo = new PostLikeRepository(this.dataSource);
         this.postLikeService = new PostLikeService(
             this.postLikeRepo,
-            this.postService,
-            this.savedPostService
+            this.postService
         );
         this.commentLikeRepo = new CommentLikeRepository(this.dataSource);
         this.commentLikeService = new CommentLikeService(
             this.commentLikeRepo,
+            this.commentService
+        );
+
+        this.postHandler = new PostHandler(
+            this.postService,
+            this.savedPostService,
             this.commentService,
-            this.postService
+            this.postLikeService,
+            this.commentLikeService
+        );
+
+        this.userHandler = new UserHandler(
+            this.userService,
+            this.userRelationService,
+            this.savedPostService
         );
     }
 
@@ -119,5 +132,13 @@ export class ServiceFactory {
 
     getSavedPostService(): SavedPostService {
         return this.savedPostService;
+    }
+
+    getPostHandler(): PostHandler {
+        return this.postHandler;
+    }
+
+    getUserHandler(): UserHandler {
+        return this.userHandler;
     }
 }

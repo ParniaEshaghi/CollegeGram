@@ -27,7 +27,7 @@
  *                 items:
  *                   type: string
  *                 example: ["@mention1", "@mention2"]
- *               postImage:
+ *               images:
  *                 type: array
  *                 items:
  *                   type: string
@@ -155,7 +155,7 @@
  *                 items:
  *                   type: string
  *                 example: ["@newmention1", "@newmention2"]
- *               postImage:
+ *               images:
  *                 type: array
  *                 items:
  *                   type: string

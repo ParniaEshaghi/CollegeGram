@@ -1,8 +1,8 @@
-import { UserService } from "../../src/modules/user/user.service";
+import { UserService } from "../../src/modules/userHandler/user/user.service";
 import { createTestDb } from "../../src/utility/test-db";
 import { ServiceFactory } from "../../src/utility/service-factory";
-import { PostService } from "../../src/modules/post/post.service";
-import { CommentService } from "../../src/modules/post/comment/comment.service";
+import { PostService } from "../../src/modules/postHandler/post/post.service";
+import { CommentService } from "../../src/modules/postHandler/comment/comment.service";
 import { NotFoundError } from "../../src/utility/http-errors";
 import { randomUUID } from "crypto";
 

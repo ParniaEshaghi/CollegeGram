@@ -115,7 +115,7 @@
  *                 enum: [public, private]
  *                 description: User's profile visibility status
  *                 example: public
- *               profileImage:
+ *               profilePicture:
  *                 type: string
  *                 format: binary
  *                 description: Profile picture file (optional)
@@ -163,8 +163,6 @@
  *       500:
  *         description: Internal server error
  */
-
-
 
 /**
  * @swagger
@@ -293,7 +291,6 @@
  *       500:
  *         description: Internal server error
  */
-
 
 /**
  * @swagger

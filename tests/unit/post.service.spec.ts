@@ -1,11 +1,8 @@
-import { PostService } from "../../src/modules/post/post.service";
-import { UserService } from "../../src/modules/user/user.service";
+import { PostService } from "../../src/modules/postHandler/post/post.service";
+import { UserService } from "../../src/modules/userHandler/user/user.service";
 import { createTestDb } from "../../src/utility/test-db";
 import { ServiceFactory } from "../../src/utility/service-factory";
-import {
-    NotFoundError,
-    ForbiddenError,
-} from "../../src/utility/http-errors";
+import { NotFoundError, ForbiddenError } from "../../src/utility/http-errors";
 import { randomUUID } from "crypto";
 
 describe("PostService test suite", () => {
@@ -58,11 +55,7 @@ describe("PostService test suite", () => {
         const user = await userService.getUserByUsername("test");
 
         await expect(
-            postService.getPostByPostId(
-                user!,
-                randomUUID(),
-                "localhost:3000"
-            )
+            postService.getPostByPostId(user!, randomUUID(), "localhost:3000")
         ).rejects.toThrow(NotFoundError);
     });
 
@@ -113,7 +106,7 @@ describe("PostService test suite", () => {
             "localhost:3000"
         );
 
-        const anotherUser = await userService.getUserByUsername("anotherUser")
+        const anotherUser = await userService.getUserByUsername("anotherUser");
 
         const updatedPostDto = {
             caption: "Updated caption",
