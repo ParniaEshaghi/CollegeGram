@@ -128,7 +128,7 @@ describe("User route test suite", () => {
     });
 
     describe("Forget password", () => {
-        it.skip("should send forget email", async () => {
+        it("should send forget email", async () => {
             await request(app)
                 .post("/api/user/forgetpassword")
                 .send({ credential: "test@gmail.com" })
@@ -164,7 +164,7 @@ describe("User route test suite", () => {
     });
 
     describe("Reset password", () => {
-        it.skip("should reset password", async () => {
+        it("should reset password", async () => {
             await request(app)
                 .post("/api/user/forgetpassword")
                 .send({ credential: "test" });
@@ -319,8 +319,8 @@ describe("User route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_profile_info = await request(app)
@@ -405,7 +405,7 @@ describe("User route test suite", () => {
                 .field("profileStatus", "private")
                 .field("bio", "test")
                 .field("password", "newpass")
-                .attach("profileImage", Buffer.from(""), "testFile.jpg");
+                .attach("profilePicture", Buffer.from(""), "testFile.jpg");
 
             expect(response_editprofile.status).toBe(200);
             expect(response_editprofile.body.email).toBe(
@@ -433,7 +433,7 @@ describe("User route test suite", () => {
                 .field("profileStatus", "private")
                 .field("bio", "test")
                 .field("password", "newpass")
-                .attach("profileImage", Buffer.from(""), "testFile.txt")
+                .attach("profilePicture", Buffer.from(""), "testFile.txt")
                 .expect(400);
         });
     });
@@ -826,8 +826,8 @@ describe("User route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_post_save = await request(app)
@@ -862,8 +862,8 @@ describe("User route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_post_save = await request(app)
@@ -904,8 +904,8 @@ describe("User route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_post_unsave = await request(app)
@@ -934,8 +934,8 @@ describe("User route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_post_save = await request(app)

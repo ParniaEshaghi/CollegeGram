@@ -120,7 +120,7 @@ describe("User service test suite", () => {
     });
 
     describe("Reset password", () => {
-        it.skip("should send reset password email", async () => {
+        it("should send reset password email", async () => {
             const response = await userService.forgetPassword("test@gmail.com");
 
             expect(sendMailMock).toHaveBeenCalledTimes(1);
@@ -148,7 +148,7 @@ describe("User service test suite", () => {
             );
         });
 
-        it.skip("should reset password", async () => {
+        it("should reset password", async () => {
             await userService.forgetPassword("test@gmail.com");
             const emailContent = sendMailMock.mock.calls[0][0].html;
             const linkMatch = emailContent.match(

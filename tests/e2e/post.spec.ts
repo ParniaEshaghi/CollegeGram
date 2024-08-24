@@ -49,8 +49,8 @@ describe("Post route test suite", () => {
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
 
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
             expect(create_post_response.body.caption).toBe(postDto.caption);
             expect(create_post_response.body.mentions).toEqual(
@@ -97,8 +97,8 @@ describe("Post route test suite", () => {
                 ])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(401);
         });
     });
@@ -126,8 +126,8 @@ describe("Post route test suite", () => {
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
 
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_getPostByPostId = await request(app)
@@ -180,8 +180,8 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const updatedPostDto: PostDto = {
@@ -194,9 +194,9 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", updatedPostDto.caption)
                 .field("mentions", updatedPostDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
-                .attach("postImage", Buffer.from(""), "testFile3.jpg")
-                .attach("postImage", Buffer.from(""), "testFile4.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile3.jpg")
+                .attach("images", Buffer.from(""), "testFile4.jpg")
                 .expect(200);
             expect(response_editpost.body.caption).toBe(updatedPostDto.caption);
             expect(response_editpost.body.mentions).toEqual(
@@ -231,8 +231,8 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_comment = await request(app)
@@ -266,8 +266,8 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_post_comment = await request(app)
@@ -315,8 +315,8 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_post_like = await request(app)
@@ -351,8 +351,8 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_post_like = await request(app)
@@ -393,8 +393,8 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_post_unlike = await request(app)
@@ -423,8 +423,8 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-                .attach("postImage", Buffer.from(""), "testFile1.jpg")
-                .attach("postImage", Buffer.from(""), "testFile2.jpg")
+                .attach("images", Buffer.from(""), "testFile1.jpg")
+                .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_post_like = await request(app)
