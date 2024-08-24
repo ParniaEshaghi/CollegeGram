@@ -4,7 +4,7 @@ import request from "supertest";
 import { createTestDb } from "../../src/utility/test-db";
 import nodemailer from "nodemailer";
 import { randomUUID } from "crypto";
-import { PostDto } from "../../src/modules/post/dto/post.dto";
+import { PostDto } from "../../src/modules/postHandler/post/dto/post.dto";
 import { ServiceFactory } from "../../src/utility/service-factory";
 
 jest.mock("nodemailer");
@@ -33,13 +33,8 @@ describe("User route test suite", () => {
 
         app = makeApp(
             dataSource,
-            serviceFactory.getUserService(),
-            serviceFactory.getUserRelationService(),
-            serviceFactory.getPostService(),
-            serviceFactory.getCommentService(),
-            serviceFactory.getPostLikeService(),
-            serviceFactory.getCommentLikeService(),
-            serviceFactory.getSavedPostService()
+            serviceFactory.getUserHandler(),
+            serviceFactory.getPostHandler()
         );
 
         await request(app).post("/api/user/signup").send({

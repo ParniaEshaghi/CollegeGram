@@ -1,16 +1,14 @@
 import { DataType, newDb } from "pg-mem";
 import { DataSource } from "typeorm";
-import { UserEntity } from "../modules/user/entity/user.entity";
-import { PasswordResetTokenEntity } from "../modules/user/forgetPassword/entity/forgetPassword.entity";
+import { UserEntity } from "../modules/userHandler/user/entity/user.entity";
+import { PasswordResetTokenEntity } from "../modules/userHandler/forgetPassword/entity/forgetPassword.entity";
 import { v4 } from "uuid";
-import { PostEntity } from "../modules/post/entity/post.entity";
-import { UserRelationEntity } from "../modules/user/userRelation/entity/userRelation.entity";
-import {
-    CommentLikeEntity,
-    PostLikeEntity,
-} from "../modules/post/like/entity/like.entity";
-import { CommentEntity } from "../modules/post/comment/entity/comment.entity";
-import { SavedPostsEntity } from "../modules/user/savedPost/entity/savedPost.entity";
+import { PostEntity } from "../modules/postHandler/post/entity/post.entity";
+import { UserRelationEntity } from "../modules/userHandler/userRelation/entity/userRelation.entity";
+import { PostLikeEntity } from "../modules/postHandler/postLike/entity/postLike.entity";
+import { CommentEntity } from "../modules/postHandler/comment/entity/comment.entity";
+import { SavedPostsEntity } from "../modules/userHandler/savedPost/entity/savedPost.entity";
+import { CommentLikeEntity } from "../modules/postHandler/commentLike/entity/commentLike.entity";
 
 export const createTestDb = async () => {
     // Create a new in-memory database

@@ -1,6 +1,6 @@
 import { makeApp } from "./api";
 import { AppDataSource } from "./data-source";
-import { User } from "./modules/user/model/user.model";
+import { User } from "./modules/userHandler/user/model/user.model";
 import { ServiceFactory } from "./utility/service-factory";
 
 const PORT = 3000;
@@ -21,13 +21,8 @@ const run = async () => {
 
     const app = makeApp(
         dataSource,
-        serviceFactory.getUserService(),
-        serviceFactory.getUserRelationService(),
-        serviceFactory.getPostService(),
-        serviceFactory.getCommentService(),
-        serviceFactory.getPostLikeService(),
-        serviceFactory.getCommentLikeService(),
-        serviceFactory.getSavedPostService()
+        serviceFactory.getUserHandler(),
+        serviceFactory.getPostHandler()
     );
 
     app.listen(PORT, () => {
