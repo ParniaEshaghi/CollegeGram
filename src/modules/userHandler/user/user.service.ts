@@ -122,6 +122,9 @@ export class UserService {
         if (!user) {
             throw new UnauthorizedError();
         }
+
+        pictureFilename = pictureFilename ? pictureFilename : user.profilePicture;
+
         try {
             await this.userRepo.updateProfile(user, pictureFilename, dto);
         } catch (error) {
