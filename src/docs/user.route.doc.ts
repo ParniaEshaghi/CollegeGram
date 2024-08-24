@@ -116,6 +116,7 @@
  *                 description: User's profile visibility status
  *                 example: public
  *               profilePicture:
+ *                 type: string
  *                 format: binary
  *                 description: Profile picture file (optional)
  *               password:
