@@ -2,6 +2,7 @@ import { UserService } from "../../src/modules/user/user.service";
 import bcrypt from "bcrypt";
 import {
     BadRequestError,
+    DuplicateError,
     HttpError,
     InvalidCredentialError,
     UnauthorizedError,
@@ -196,6 +197,34 @@ describe("User service test suite", () => {
             expect(response.email).toBe("changedemail@gmail.com");
             expect(response.firstname).toBe("test");
             expect(response.profileStatus).toBe("private");
+        });
+
+        it("should fail if profile update causes a duplicate error", async () => {
+            const user = await userService.getUserByUsername("test");
+
+            // Simulate a duplicate email scenario
+            jest.spyOn(
+                userService["userRepo"],
+                "updateProfile"
+            ).mockImplementation(() => {
+                throw new DuplicateError();
+            });
+
+            await expect(
+                userService.editProfile(
+                    user!,
+                    "",
+                    {
+                        email: "test@gmail.com",
+                        firstname: "test",
+                        lastname: "test",
+                        profileStatus: "private",
+                        bio: "test",
+                        password: "newpass",
+                    },
+                    "http://localhost:3000"
+                )
+            ).rejects.toThrow(DuplicateError);
         });
     });
 });

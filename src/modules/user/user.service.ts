@@ -21,9 +21,7 @@ import jwt from "jsonwebtoken";
 import { LoginDto } from "./dto/login.dto";
 import { EditProfileDto } from "./dto/edit-profile.dto";
 import { ForgetPasswordService } from "./forgetPassword/forgetPassword.service";
-import { EmailService } from "../email/email.service";
 import { PostWithUsername, toProfilePost } from "../post/model/post.model";
-import fs from "fs";
 
 export class UserService {
     constructor(

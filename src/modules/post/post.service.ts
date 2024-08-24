@@ -63,9 +63,9 @@ export class PostService {
             throw new NotFoundError();
         }
 
-        if (post.user.username !== user.username) {
-            throw new ForbiddenError();
-        }
+        // if (post.user.username !== user.username) {
+        //     throw new ForbiddenError();
+        // }
 
         return toPostWithUsername(post, baseUrl);
     }
