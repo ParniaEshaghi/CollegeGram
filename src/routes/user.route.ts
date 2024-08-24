@@ -1,24 +1,18 @@
 import { Router } from "express";
-import { UserService } from "../modules/user/user.service";
-import { signUpDto } from "../modules/user/dto/signup.dto";
+import { signUpDto } from "../modules/userHandler/user/dto/signup.dto";
 import { handleExpress } from "../utility/handle-express";
-import { loginDto } from "../modules/user/dto/login.dto";
+import { loginDto } from "../modules/userHandler/user/dto/login.dto";
 import { auth } from "../middlewares/auth.middleware";
 import { profileUpload } from "../middlewares/upload.middleware";
-import { editProfileDto } from "../modules/user/dto/edit-profile.dto";
-import { UserRelationService } from "../modules/user/userRelation/userRelation.service";
-import { SavedPostService } from "../modules/user/savedPost/savedPost.service";
+import { editProfileDto } from "../modules/userHandler/user/dto/edit-profile.dto";
+import { UserHandler } from "../modules/userHandler/userHandler";
 
-export const makeUserRouter = (
-    userService: UserService,
-    UserRelationService: UserRelationService,
-    savedPostService: SavedPostService
-) => {
+export const makeUserRouter = (userHandler: UserHandler) => {
     const app = Router();
 
     app.post("/signup", (req, res) => {
         const dto = signUpDto.parse(req.body);
-        handleExpress(res, () => userService.createUser(dto));
+        handleExpress(res, () => userHandler.createUser(dto));
     });
 
     app.post("/signin", (req, res) => {
@@ -26,7 +20,7 @@ export const makeUserRouter = (
         handleExpress(
             res,
             async () => {
-                const { message, token } = await userService.login(dto);
+                const { message, token } = await userHandler.login(dto);
                 return { message, token };
             },
             ({ token }) => {
@@ -37,19 +31,19 @@ export const makeUserRouter = (
 
     app.post("/forgetpassword", (req, res) => {
         const { credential } = req.body;
-        handleExpress(res, () => userService.forgetPassword(credential));
+        handleExpress(res, () => userHandler.forgetPassword(credential));
     });
 
     app.post("/resetpassword", (req, res) => {
         const { newPass, token } = req.body;
-        handleExpress(res, () => userService.resetPassword(newPass, token));
+        handleExpress(res, () => userHandler.resetPassword(newPass, token));
     });
 
-    app.post("/editprofile", auth(userService), profileUpload, (req, res) => {
+    app.post("/editprofile", auth(userHandler), profileUpload, (req, res) => {
         const dto = editProfileDto.parse(req.body);
         const pictureFilename = req.file ? req.file.filename : "";
         handleExpress(res, () =>
-            userService.editProfile(
+            userHandler.editProfile(
                 req.user,
                 pictureFilename,
                 dto,
@@ -58,46 +52,42 @@ export const makeUserRouter = (
         );
     });
 
-    app.get("/geteditprofile", auth(userService), (req, res) => {
+    app.get("/geteditprofile", auth(userHandler), (req, res) => {
         handleExpress(res, async () =>
-            userService.getEditProfile(req.user, req.base_url)
+            userHandler.getEditProfile(req.user, req.base_url)
         );
     });
 
-    app.get("/profileInfo", auth(userService), (req, res) => {
+    app.get("/profileInfo", auth(userHandler), (req, res) => {
         handleExpress(res, async () =>
-            userService.getProfileInfo(req.user, req.base_url)
+            userHandler.getProfileInfo(req.user, req.base_url)
         );
     });
 
-    app.post("/follow/:username", auth(userService), (req, res) => {
+    app.post("/follow/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () => userHandler.follow(req.user, username));
+    });
+
+    app.post("/unfollow/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () => userHandler.unfollow(req.user, username));
+    });
+
+    app.get("/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
-            UserRelationService.follow(req.user, username)
+            userHandler.userProfile(req.user, username, req.base_url)
         );
     });
 
-    app.post("/unfollow/:username", auth(userService), (req, res) => {
-        const username = req.params.username;
-        handleExpress(res, () =>
-            UserRelationService.unfollow(req.user, username)
-        );
-    });
-
-    app.get("/:username", auth(userService), (req, res) => {
-        const username = req.params.username;
-        handleExpress(res, () =>
-            UserRelationService.userProfile(req.user, username, req.base_url)
-        );
-    });
-
-    app.get("/followers/:username", auth(userService), (req, res) => {
+    app.get("/followers/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
 
         handleExpress(res, () =>
-            UserRelationService.followerList(
+            userHandler.followerList(
                 req.user,
                 username,
                 page,
@@ -107,13 +97,13 @@ export const makeUserRouter = (
         );
     });
 
-    app.get("/followings/:username", auth(userService), (req, res) => {
+    app.get("/followings/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
 
         handleExpress(res, () =>
-            UserRelationService.followeingList(
+            userHandler.followeingList(
                 req.user,
                 username,
                 page,
@@ -123,14 +113,14 @@ export const makeUserRouter = (
         );
     });
 
-    app.post("/savepost/:postid", auth(userService), (req, res) => {
+    app.post("/savepost/:postid", auth(userHandler), (req, res) => {
         const postid = req.params.postid;
-        handleExpress(res, () => savedPostService.savePost(req.user, postid));
+        handleExpress(res, () => userHandler.savePost(req.user, postid));
     });
 
-    app.post("/unsavepost/:postid", auth(userService), (req, res) => {
+    app.post("/unsavepost/:postid", auth(userHandler), (req, res) => {
         const postid = req.params.postid;
-        handleExpress(res, () => savedPostService.unSavePost(req.user, postid));
+        handleExpress(res, () => userHandler.unSavePost(req.user, postid));
     });
 
     return app;

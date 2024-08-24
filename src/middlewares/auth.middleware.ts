@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { UserService } from "../modules/user/user.service";
+import { UserService } from "../modules/userHandler/user/user.service";
 import { AuthenticationFailError, HttpError } from "../utility/http-errors";
+import { UserHandler } from "../modules/userHandler/userHandler";
 
 export interface DecodedToken {
     username: string;
@@ -20,7 +21,7 @@ const getToken = (req: Request): string | undefined => {
 };
 
 export const auth =
-    (userService: UserService) =>
+    (userHandler: UserHandler) =>
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const token = getToken(req);
@@ -29,7 +30,7 @@ export const auth =
                 throw new AuthenticationFailError();
             }
             const decoded = jwt.verify(token, "10") as DecodedToken;
-            const user = await userService.getUserByUsername(decoded.username);
+            const user = await userHandler.getUserByUsername(decoded.username);
             if (!user) {
                 throw new AuthenticationFailError();
             }

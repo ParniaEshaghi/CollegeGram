@@ -1,10 +1,7 @@
-import { SavedPostService } from "../../src/modules/user/savedPost/savedPost.service";
-import { UserService } from "../../src/modules/user/user.service";
-import { PostService } from "../../src/modules/post/post.service";
-import {
-    NotFoundError,
-    BadRequestError,
-} from "../../src/utility/http-errors";
+import { SavedPostService } from "../../src/modules/userHandler/savedPost/savedPost.service";
+import { UserService } from "../../src/modules/userHandler/user/user.service";
+import { PostService } from "../../src/modules/postHandler/post/post.service";
+import { NotFoundError, BadRequestError } from "../../src/utility/http-errors";
 import { createTestDb } from "../../src/utility/test-db";
 import { ServiceFactory } from "../../src/utility/service-factory";
 import { randomUUID } from "crypto";
@@ -78,7 +75,7 @@ describe("SavedPostService test suite", () => {
             ["testfile.jpg"],
             "localhost:3000"
         );
- 
+
         await savedPostService.savePost(user!, post.id);
 
         await expect(savedPostService.savePost(user!, post.id)).rejects.toThrow(

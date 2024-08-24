@@ -1,33 +1,24 @@
 import { DataSource } from "typeorm";
 import express from "express";
 import { makeUserRouter } from "./routes/user.route";
-import { UserService } from "./modules/user/user.service";
+import { UserService } from "./modules/userHandler/user/user.service";
 import { errorHandler } from "./middlewares/error-handler.middleware";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
-import { UserRelationService } from "./modules/user/userRelation/userRelation.service";
-import { makePostRouter } from "./routes/post.route";
-import { PostService } from "./modules/post/post.service";
+import { PostHandler } from "./modules/postHandler/postHandler";
 import { setBaseUrl } from "./middlewares/setBaseUrl.middleware";
+import { UserRelationService } from "./modules/userHandler/userRelation/userRelation.service";
+import { SavedPostService } from "./modules/userHandler/savedPost/savedPost.service";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocs from "./swagger-options";
-import { CommentService } from "./modules/post/comment/comment.service";
-import {
-    CommentLikeService,
-    PostLikeService,
-} from "./modules/post/like/like.service";
-import { SavedPostService } from "./modules/user/savedPost/savedPost.service";
+import { makePostRouter } from "./routes/post.route";
+import { UserHandler } from "./modules/userHandler/userHandler";
 
 export const makeApp = (
     dataSource: DataSource,
-    userService: UserService,
-    userRelationService: UserRelationService,
-    postService: PostService,
-    commentService: CommentService,
-    postLikeService: PostLikeService,
-    commentLikeService: CommentLikeService,
-    savedPostService: SavedPostService
+    userHandler: UserHandler,
+    postHandler: PostHandler
 ) => {
     const app = express();
 
@@ -52,20 +43,8 @@ export const makeApp = (
     app.use(setBaseUrl);
 
     app.use("/api/images", express.static(path.join(__dirname, "../images")));
-    app.use(
-        "/api/user",
-        makeUserRouter(userService, userRelationService, savedPostService)
-    );
-    app.use(
-        "/api/post",
-        makePostRouter(
-            postService,
-            userService,
-            commentService,
-            postLikeService,
-            commentLikeService
-        )
-    );
+    app.use("/api/user", makeUserRouter(userHandler));
+    app.use("/api/post", makePostRouter(userHandler, postHandler));
 
     app.use(errorHandler);
 

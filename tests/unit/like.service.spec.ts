@@ -1,5 +1,5 @@
-import { UserService } from "../../src/modules/user/user.service";
-import { PostService } from "../../src/modules/post/post.service";
+import { UserService } from "../../src/modules/userHandler/user/user.service";
+import { PostService } from "../../src/modules/postHandler/post/post.service";
 import {
     UnauthorizedError,
     NotFoundError,
@@ -10,8 +10,8 @@ import { ServiceFactory } from "../../src/utility/service-factory";
 import {
     CommentLikeService,
     PostLikeService,
-} from "../../src/modules/post/like/like.service";
-import { CommentService } from "../../src/modules/post/comment/comment.service";
+} from "../../src/modules/postHandler/postLike/postLike.service";
+import { CommentService } from "../../src/modules/postHandler/comment/comment.service";
 import { randomUUID } from "crypto";
 
 describe("PostLikeService test suite", () => {

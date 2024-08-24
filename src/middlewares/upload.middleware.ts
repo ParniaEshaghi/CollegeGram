@@ -50,7 +50,7 @@ export const profileUpload: RequestHandler = (req, res, next) => {
         fileFilter: (req, file, cb) => {
             checkFileType(file, cb);
         },
-    }).single("profileImage"); //TODO: update after getting name tag from frontend team
+    }).single("profilePicture"); //TODO: update after getting name tag from frontend team
 
     upload(req, res, (err) => {
         if (err) {
@@ -67,7 +67,7 @@ export const postUpload: RequestHandler = (req, res, next) => {
         fileFilter: (req, file, cb) => {
             checkFileType(file, cb);
         },
-    }).array("postImage");
+    }).array("images");
 
     upload(req, res, (err) => {
         if (err) {

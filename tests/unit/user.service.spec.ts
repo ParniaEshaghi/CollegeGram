@@ -1,4 +1,4 @@
-import { UserService } from "../../src/modules/user/user.service";
+import { UserService } from "../../src/modules/userHandler/user/user.service";
 import bcrypt from "bcrypt";
 import {
     BadRequestError,

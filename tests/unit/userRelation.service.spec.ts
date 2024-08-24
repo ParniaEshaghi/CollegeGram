@@ -1,11 +1,8 @@
-import { UserService } from "../../src/modules/user/user.service";
-import {
-    BadRequestError,
-    NotFoundError,
-} from "../../src/utility/http-errors";
+import { UserService } from "../../src/modules/userHandler/user/user.service";
+import { BadRequestError, NotFoundError } from "../../src/utility/http-errors";
 import { createTestDb } from "../../src/utility/test-db";
 import { ServiceFactory } from "../../src/utility/service-factory";
-import { UserRelationService } from "../../src/modules/user/userRelation/userRelation.service";
+import { UserRelationService } from "../../src/modules/userHandler/userRelation/userRelation.service";
 
 describe("User relation service test suite", () => {
     let serviceFactory: ServiceFactory;
