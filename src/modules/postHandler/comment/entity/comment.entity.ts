@@ -14,6 +14,7 @@ import { UserEntity } from "../../../userHandler/user/entity/user.entity";
 import { Comment } from "../model/comment.model";
 import { CommentLike } from "../../commentLike/model/commentLike.model";
 import { CommentLikeEntity } from "../../commentLike/entity/commentLike.entity";
+import { NotificationEntity } from "../../../userHandler/notification/entity/notification.entity";
 
 @Entity("comments")
 export class CommentEntity {
@@ -40,6 +41,9 @@ export class CommentEntity {
 
     @ManyToOne(() => CommentEntity, (comment) => comment.children)
     parent!: Comment;
+
+    @ManyToOne(() => NotificationEntity, (notification) => notification.comment)
+    notifications!: NotificationEntity;
 
     @CreateDateColumn()
     createdAt!: Date;
