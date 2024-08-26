@@ -25,6 +25,18 @@ describe("Comment service test suite", () => {
             email: "test@gmail.com",
             password: "test",
         });
+
+        await userService.createUser({
+            username: "test2",
+            email: "test2@gmail.com",
+            password: "test2",
+        });
+
+        await userService.createUser({
+            username: "test3",
+            email: "test3@gmail.com",
+            password: "test3",
+        });
     });
 
     it("should throw NotFoundError if post is not found", async () => {
@@ -45,7 +57,7 @@ describe("Comment service test suite", () => {
             user!,
             {
                 caption: "test caption",
-                mentions: ["test_mention"],
+                mentions: ["test2", "test3"],
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -68,7 +80,7 @@ describe("Comment service test suite", () => {
             user!,
             {
                 caption: "test caption",
-                mentions: ["test_mention"],
+                mentions: ["test2", "test3"],
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -90,7 +102,7 @@ describe("Comment service test suite", () => {
             user!,
             {
                 caption: "test caption",
-                mentions: ["test_mention"],
+                mentions: ["test2", "test3"],
             },
             ["testfile.jpg"],
             "localhost:3000"

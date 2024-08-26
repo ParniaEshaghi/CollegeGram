@@ -22,6 +22,16 @@ describe("PostService test suite", () => {
             email: "test@gmail.com",
             password: "test",
         });
+        await userService.createUser({
+            username: "test2",
+            email: "test2@gmail.com",
+            password: "test2",
+        });
+        await userService.createUser({
+            username: "test3",
+            email: "test3@gmail.com",
+            password: "test3",
+        });
 
         await userService.createUser({
             username: "anotherUser",
@@ -35,7 +45,7 @@ describe("PostService test suite", () => {
 
         const postDto = {
             caption: "Test caption",
-            mentions: ["test_mention"],
+            mentions: ["test2", "test3"],
         };
 
         const result = await postService.createPost(
@@ -63,7 +73,7 @@ describe("PostService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const postDto = {
             caption: "Test caption",
-            mentions: ["test_mention"],
+            mentions: ["test2", "test3"],
         };
 
         const post = await postService.createPost(
@@ -75,7 +85,7 @@ describe("PostService test suite", () => {
 
         const updatedPostDto = {
             caption: "Updated caption",
-            mentions: ["updated_mention"],
+            mentions: ["test2", "test3"],
         };
 
         const updatedPost = await postService.updatePost(
@@ -96,7 +106,7 @@ describe("PostService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const postDto = {
             caption: "Test caption",
-            mentions: ["test_mention"],
+            mentions: ["test2", "test3"],
         };
 
         const post = await postService.createPost(
@@ -110,7 +120,7 @@ describe("PostService test suite", () => {
 
         const updatedPostDto = {
             caption: "Updated caption",
-            mentions: ["updated_mention"],
+            mentions: ["test2", "test3"],
         };
 
         await expect(
@@ -129,7 +139,7 @@ describe("PostService test suite", () => {
 
         const updatedPostDto = {
             caption: "Updated caption",
-            mentions: ["updated_mention"],
+            mentions: ["test2", "test3"],
         };
 
         await expect(

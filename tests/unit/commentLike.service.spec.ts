@@ -28,6 +28,16 @@ describe("CommentLikeService test suite", () => {
             email: "test@gmail.com",
             password: "test",
         });
+        await userService.createUser({
+            username: "test2",
+            email: "test2@gmail.com",
+            password: "test2",
+        });
+        await userService.createUser({
+            username: "test3",
+            email: "test3@gmail.com",
+            password: "test3",
+        });
     });
 
     it("should throw NotFoundError if comment is not found when liking a comment", async () => {
@@ -42,7 +52,7 @@ describe("CommentLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test_mention"] },
+            { caption: "test caption", mentions: ["test2", "test3"] },
             ["testfile.jpg"],
             "localhost:3000"
         );
@@ -62,7 +72,7 @@ describe("CommentLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test_mention"] },
+            { caption: "test caption", mentions: ["test2", "test3"] },
             ["testfile.jpg"],
             "localhost:3000"
         );
@@ -80,7 +90,7 @@ describe("CommentLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test_mention"] },
+            { caption: "test caption", mentions: ["test2", "test3"] },
             ["testfile.jpg"],
             "localhost:3000"
         );
@@ -97,7 +107,7 @@ describe("CommentLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test_mention"] },
+            { caption: "test caption", mentions: ["test2", "test3"] },
             ["testfile.jpg"],
             "localhost:3000"
         );
