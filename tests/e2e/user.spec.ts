@@ -42,6 +42,16 @@ describe("User route test suite", () => {
             email: "test@gmail.com",
             password: "test",
         });
+        await request(app).post("/api/user/signup").send({
+            username: "test2",
+            email: "test2@gmail.com",
+            password: "test2",
+        });
+        await request(app).post("/api/user/signup").send({
+            username: "test3",
+            email: "test3@gmail.com",
+            password: "test3",
+        });
     });
 
     describe("Signing up", () => {
@@ -311,7 +321,7 @@ describe("User route test suite", () => {
 
             const postDto: PostDto = {
                 caption: "This is a test post #test",
-                mentions: ["user1", "user2"],
+                mentions: ["test2", "test3"],
             };
 
             await request(app)
@@ -818,7 +828,7 @@ describe("User route test suite", () => {
 
             const postDto: PostDto = {
                 caption: "This is a test post #test",
-                mentions: ["user1", "user2"],
+                mentions: ["test2", "test3"],
             };
 
             const create_post_response = await request(app)
@@ -854,7 +864,7 @@ describe("User route test suite", () => {
 
             const postDto: PostDto = {
                 caption: "This is a test post #test",
-                mentions: ["user1", "user2"],
+                mentions: ["test2", "test3"],
             };
 
             const create_post_response = await request(app)
@@ -896,7 +906,7 @@ describe("User route test suite", () => {
 
             const postDto: PostDto = {
                 caption: "This is a test post #test",
-                mentions: ["user1", "user2"],
+                mentions: ["test2", "test3"],
             };
 
             const create_post_response = await request(app)
@@ -926,7 +936,7 @@ describe("User route test suite", () => {
 
             const postDto: PostDto = {
                 caption: "This is a test post #test",
-                mentions: ["user1", "user2"],
+                mentions: ["test2", "test3"],
             };
 
             const create_post_response = await request(app)

@@ -1,4 +1,5 @@
 import {
+    BadRequestError,
     ForbiddenError,
     HttpError,
     NotFoundError,
@@ -15,9 +16,13 @@ import {
 import { CreatePost, PostRepository } from "./post.repository";
 import path from "path";
 import { promises as fs } from "fs";
+import { UserService } from "../../userHandler/user/user.service";
 
 export class PostService {
-    constructor(private postRepo: PostRepository) {}
+    constructor(
+        private postRepo: PostRepository,
+        private userService: UserService
+    ) {}
 
     public async createPost(
         user: User,
@@ -27,6 +32,11 @@ export class PostService {
     ): Promise<PostWithUsername> {
         if (!user) {
             throw new UnauthorizedError();
+        }
+
+        const mentionResult = await this.checkMentions(postDto.mentions);
+        if (!mentionResult) {
+            throw new NotFoundError();
         }
 
         const newPost: CreatePost = {
@@ -42,6 +52,18 @@ export class PostService {
 
         const createdPost = await this.postRepo.create(newPost);
         return toPostWithUsername(createdPost, baseUrl);
+    }
+
+    private async checkMentions(mentions: string[]): Promise<boolean> {
+        const results = await Promise.all(
+            mentions.map(async (mention) => {
+                const check = await this.userService.getUserByUsername(mention);
+                return check !== null;
+            })
+        );
+
+        // All mentions must return true, otherwise the result is false
+        return results.every((result) => result === true);
     }
 
     private extractTags(caption: string): string[] {
@@ -87,6 +109,11 @@ export class PostService {
 
         if (post.user.username !== user.username) {
             throw new ForbiddenError();
+        }
+
+        const mentionResult = await this.checkMentions(postDto.mentions);
+        if (!mentionResult) {
+            throw new NotFoundError();
         }
 
         await this.deleteUnusedImages(post.images);
