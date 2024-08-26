@@ -9,6 +9,7 @@ import {
     followerFollowingListUserResponse,
     toFollowerFollowingListUser,
     toProfile,
+    UserRelation,
 } from "./model/userRelation.model";
 import { UserRelationRepository } from "./userRelation.repository";
 
@@ -32,8 +33,28 @@ export class UserRelationService {
             user,
             following
         );
-        const follow_status = relation ? true : false;
-        return follow_status;
+        const followStatus = relation ? relation.followStatus : "not followed";
+        return followStatus;
+    }
+
+    async getRequestStatus(user: User, follower_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const follower = await this.userService.getUserByUsername(
+            follower_username
+        );
+        if (!follower) {
+            throw new NotFoundError();
+        }
+        const relation = await this.userRelationRepo.checkExistance(
+            follower,
+            user
+        );
+        if (!relation) {
+            throw new BadRequestError();
+        }
+        return relation.followStatus;
     }
 
     public async follow(user: User, following_username: string) {
@@ -46,15 +67,37 @@ export class UserRelationService {
         if (!following) {
             throw new NotFoundError();
         }
-        const follow_status = await this.getFollowStatus(
+        const followStatus = await this.getFollowStatus(
             user,
             following.username
         );
-        if (follow_status) {
+        if (followStatus === "accepted") {
             throw new BadRequestError();
         }
-        await this.userRelationRepo.create(user, following);
-        return { message: "User followed" };
+        const type = "follow";
+
+        if (following.profileStatus === "public") {
+            const relation: UserRelation = {
+                follower: user,
+                following,
+                type,
+                followStatus: "accepted",
+            };
+            await this.userRelationRepo.createFollow(relation);
+            return { message: "User followed" };
+        } else {
+            if (followStatus === "pending") {
+                throw new BadRequestError();
+            }
+            const relation: UserRelation = {
+                follower: user,
+                following,
+                type,
+                followStatus: "pending",
+            };
+            await this.userRelationRepo.createFollowRequest(relation);
+            return { message: "Follow request sent" };
+        }
     }
 
     public async unfollow(user: User, following_username: string) {
@@ -67,15 +110,86 @@ export class UserRelationService {
         if (!following) {
             throw new NotFoundError();
         }
-        const follow_status = await this.getFollowStatus(
+        const followStatus = await this.getFollowStatus(
             user,
             following.username
         );
-        if (!follow_status) {
+        if (followStatus === ("not followed" || "rejected")) {
             throw new BadRequestError();
         }
-        await this.userRelationRepo.delete(user, following);
-        return { message: "User unfollowed" };
+        const type = "follow";
+        if (followStatus === "accepted") {
+            await this.userRelationRepo.deleteFollow(user, following, type);
+            return { message: "User unfollowed" };
+        } else {
+            if (followStatus !== "pending") {
+                throw new BadRequestError();
+            }
+            await this.userRelationRepo.deleteFollowRequest(
+                user,
+                following,
+                type
+            );
+            return { message: "Follow request rescinded" };
+        }
+    }
+
+    public async acceptFollowRequest(user: User, follower_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const follower = await this.userService.getUserByUsername(
+            follower_username
+        );
+        if (!follower) {
+            throw new NotFoundError();
+        }
+        const requestStatus = await this.getRequestStatus(
+            user,
+            follower_username
+        );
+
+        if (requestStatus !== "pending") {
+            throw new BadRequestError();
+        }
+
+        const relation: UserRelation = {
+            follower,
+            following: user,
+            type: "follow",
+            followStatus: "accepted",
+        };
+        await this.userRelationRepo.createFollowAccepted(relation);
+        return { message: "Follow request accepted" };
+    }
+
+    public async rejectFollowRequest(user: User, follower_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const follower = await this.userService.getUserByUsername(
+            follower_username
+        );
+        if (!follower) {
+            throw new NotFoundError();
+        }
+        const requestStatus = await this.getRequestStatus(
+            user,
+            follower_username
+        );
+
+        if (requestStatus !== "pending") {
+            throw new BadRequestError();
+        }
+
+        const relation: UserRelation = {
+            follower,
+            following: user,
+            type: "follow",
+            followStatus: "rejected",
+        };
+        await this.userRelationRepo.createFollowRejected(relation);
+        return { message: "Follow request rejected" };
     }
 
     public async userProfile(
@@ -93,11 +207,8 @@ export class UserRelationService {
 
         const posts = await this.userService.getUserPosts(username, baseUrl);
 
-        const follow_status = await this.getFollowStatus(
-            session_user,
-            username
-        );
-        return toProfile(user, follow_status, posts, baseUrl);
+        const followStatus = await this.getFollowStatus(session_user, username);
+        return toProfile(user, followStatus, posts, baseUrl);
     }
 
     public async followerList(

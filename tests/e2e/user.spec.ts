@@ -498,6 +498,157 @@ describe("User route test suite", () => {
         });
     });
 
+    describe("Follow request", () => {
+        it("should send a follow request to a private user", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "private_user",
+                email: "private_user@gmail.com",
+                password: "private_user",
+            });
+            const privateUserResponse = await request(app)
+                .post("/api/user/signin")
+                .send({
+                    credential: "private_user@gmail.com",
+                    password: "private_user",
+                })
+                .expect(200);
+            const privateUserCookies =
+                privateUserResponse.headers["set-cookie"];
+            const privateUserCookie = privateUserCookies[0];
+
+            await request(app)
+                .post("/api/user/editprofile")
+                .set("Cookie", [privateUserCookie])
+                .send({
+                    password: "",
+                    email: "private_user@gmail.com",
+                    firstname: "",
+                    lastname: "",
+                    profileStatus: "private",
+                    bio: "",
+                })
+                .expect(200);
+
+            const response = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = response.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            const follow_response = await request(app)
+                .post("/api/user/follow/private_user")
+                .set("Cookie", [cookie])
+                .expect(200);
+
+            expect(follow_response.body.message).toBe("Follow request sent");
+        });
+
+        it("should accept a follow request", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "private_user",
+                email: "private_user@gmail.com",
+                password: "private_user",
+            });
+            const privateUserResponse = await request(app)
+                .post("/api/user/signin")
+                .send({
+                    credential: "private_user@gmail.com",
+                    password: "private_user",
+                })
+                .expect(200);
+            const privateUserCookies =
+                privateUserResponse.headers["set-cookie"];
+            const privateUserCookie = privateUserCookies[0];
+
+            await request(app)
+                .post("/api/user/editprofile")
+                .set("Cookie", [privateUserCookie])
+                .send({
+                    password: "",
+                    email: "private_user@gmail.com",
+                    firstname: "",
+                    lastname: "",
+                    profileStatus: "private",
+                    bio: "",
+                })
+                .expect(200);
+            
+            const userResponse = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = userResponse.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            await request(app)
+                .post("/api/user/follow/private_user")
+                .set("Cookie", [cookie])
+                .expect(200);
+
+            const accept_response = await request(app)
+                .post("/api/user/acceptrequest/test")
+                .set("Cookie", [privateUserCookie])
+                .expect(200);
+
+            expect(accept_response.body.message).toBe(
+                "Follow request accepted"
+            );
+        });
+
+        it("should reject a follow request", async () => {
+            await request(app).post("/api/user/signup").send({
+                username: "private_user",
+                email: "private_user@gmail.com",
+                password: "private_user",
+            });
+            const privateUserResponse = await request(app)
+                .post("/api/user/signin")
+                .send({
+                    credential: "private_user@gmail.com",
+                    password: "private_user",
+                })
+                .expect(200);
+            const privateUserCookies =
+                privateUserResponse.headers["set-cookie"];
+            const privateUserCookie = privateUserCookies[0];
+
+            await request(app)
+                .post("/api/user/editprofile")
+                .set("Cookie", [privateUserCookie])
+                .send({
+                    password: "",
+                    email: "private_user@gmail.com",
+                    firstname: "",
+                    lastname: "",
+                    profileStatus: "private",
+                    bio: "",
+                })
+                .expect(200);
+
+            const userResponse = await request(app)
+                .post("/api/user/signin")
+                .send({ credential: "test@gmail.com", password: "test" })
+                .expect(200);
+            const cookies = userResponse.headers["set-cookie"];
+            const cookie = cookies[0];
+
+            await request(app)
+                .post("/api/user/follow/private_user")
+                .set("Cookie", [cookie])
+                .expect(200);
+
+            const reject_response = await request(app)
+                .post("/api/user/rejectrequest/test")
+                .set("Cookie", [privateUserCookie])
+                .expect(200);
+
+            expect(reject_response.body.message).toBe(
+                "Follow request rejected"
+            );
+        });
+    });
+
     describe("Get another user profile", () => {
         it("should get user profile / not followed", async () => {
             await request(app).post("/api/user/signup").send({
@@ -519,7 +670,7 @@ describe("User route test suite", () => {
                 .expect(200);
 
             expect(profile_response.body.username).toBe("follow_test");
-            expect(profile_response.body.follow_status).toBe(false);
+            expect(profile_response.body.followStatus).toBe("not followed");
         });
 
         it("should get user profile / followed", async () => {
@@ -546,7 +697,7 @@ describe("User route test suite", () => {
                 .expect(200);
 
             expect(profile_response.body.username).toBe("follow_test");
-            expect(profile_response.body.follow_status).toBe(true);
+            expect(profile_response.body.followStatus).toBe("accepted");
         });
 
         it("should fail to get profile if username is wrong", async () => {

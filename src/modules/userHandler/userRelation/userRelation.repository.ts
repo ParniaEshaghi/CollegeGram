@@ -1,6 +1,10 @@
 import { DataSource, Repository } from "typeorm";
 import { UserRelationEntity } from "./entity/userRelation.entity";
-import { followerFollowing, UserRelation } from "./model/userRelation.model";
+import {
+    followerFollowing,
+    Type,
+    UserRelation,
+} from "./model/userRelation.model";
 import { User } from "../user/model/user.model";
 import { UserEntity } from "../user/entity/user.entity";
 
@@ -11,27 +15,31 @@ export class UserRelationRepository {
         this.userRelationRepo = appDataSource.getRepository(UserRelationEntity);
     }
 
-    public async create(follower: User, following: User): Promise<void> {
+    public async createFollow(relation: UserRelation): Promise<void> {
         await this.appDataSource.manager.transaction(async (manager) => {
             const userRepo = manager.getRepository(UserEntity);
             const userRelationRepo = manager.getRepository(UserRelationEntity);
-            await userRelationRepo.save({ follower, following });
+            await userRelationRepo.save(relation);
             await userRepo.update(
-                { username: follower.username },
+                { username: relation.follower.username },
                 { following_count: () => "following_count + 1" }
             );
             await userRepo.update(
-                { username: following.username },
+                { username: relation.following.username },
                 { follower_count: () => "follower_count + 1" }
             );
         });
     }
 
-    public async delete(follower: User, following: User): Promise<void> {
+    public async deleteFollow(
+        follower: User,
+        following: User,
+        type: Type
+    ): Promise<void> {
         await this.appDataSource.manager.transaction(async (manager) => {
             const userRepo = manager.getRepository(UserEntity);
             const userRelationRepo = manager.getRepository(UserRelationEntity);
-            await userRelationRepo.softDelete({ follower, following });
+            await userRelationRepo.softDelete({ follower, following, type });
             await userRepo.update(
                 { username: follower.username },
                 { following_count: () => "following_count - 1" }
@@ -41,6 +49,36 @@ export class UserRelationRepository {
                 { follower_count: () => "follower_count - 1" }
             );
         });
+    }
+
+    public async createFollowRequest(relation: UserRelation): Promise<void> {
+        await this.userRelationRepo.save(relation);
+    }
+
+    public async deleteFollowRequest(
+        follower: User,
+        following: User,
+        type: Type
+    ): Promise<void> {
+        await this.userRelationRepo.softDelete({ follower, following, type });
+    }
+
+    public async createFollowAccepted(relation: UserRelation): Promise<void> {
+        await this.deleteFollowRequest(
+            relation.follower,
+            relation.following,
+            relation.type
+        );
+        await this.createFollow(relation);
+    }
+
+    public async createFollowRejected(relation: UserRelation): Promise<void> {
+        await this.deleteFollowRequest(
+            relation.follower,
+            relation.following,
+            relation.type
+        );
+        await this.userRelationRepo.save(relation);
     }
 
     public async checkExistance(

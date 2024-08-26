@@ -1,4 +1,5 @@
 import {
+    Column,
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
@@ -6,6 +7,7 @@ import {
     PrimaryGeneratedColumn,
 } from "typeorm";
 import { UserEntity } from "../../user/entity/user.entity";
+import { FollowStatus, Type } from "../model/userRelation.model";
 
 @Entity("userRelations")
 export class UserRelationEntity {
@@ -17,6 +19,18 @@ export class UserRelationEntity {
 
     @ManyToOne(() => UserEntity, (user) => user.followings)
     following!: UserEntity;
+
+    @Column({
+        type: "enum",
+        enum: ["follow", "close", "block"],
+    })
+    type!: Type;
+
+    @Column({
+        type: "enum",
+        enum: ["pending", "accepted", "rejected"],
+    })
+    followStatus!: FollowStatus;
 
     @CreateDateColumn()
     createdAt!: Date;

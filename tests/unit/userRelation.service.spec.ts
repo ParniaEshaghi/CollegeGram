@@ -29,7 +29,7 @@ describe("User relation service test suite", () => {
         });
     });
 
-    describe("Follow", () => {
+    describe("Follow public user", () => {
         it("should follow a user", async () => {
             const user = await userService.getUserByUsername("test");
             const response = await userRelationService.follow(
@@ -107,6 +107,171 @@ describe("User relation service test suite", () => {
         });
     });
 
+    describe("Follow request", () => {
+        it("should send a follow request to a private account", async () => {
+            const user = await userService.getUserByUsername("test");
+            const privateUser = await userService.getUserByUsername(
+                "follow_test"
+            );
+
+            await userService.editProfile(
+                privateUser!,
+                "",
+                {
+                    email: "follow_test@gmail.com",
+                    firstname: "",
+                    lastname: "",
+                    profileStatus: "private",
+                    bio: "",
+                    password: "",
+                },
+                "http://localhost:3000"
+            );
+
+            const response = await userRelationService.follow(
+                user!,
+                "follow_test"
+            );
+
+            expect(response.message).toBe("Follow request sent");
+        });
+
+        it("should rescind a follow request to a private account", async () => {
+            const user = await userService.getUserByUsername("test");
+            const privateUser = await userService.getUserByUsername(
+                "follow_test"
+            );
+
+            await userService.editProfile(
+                privateUser!,
+                "",
+                {
+                    email: "follow_test@gmail.com",
+                    firstname: "",
+                    lastname: "",
+                    profileStatus: "private",
+                    bio: "",
+                    password: "",
+                },
+                "http://localhost:3000"
+            );
+
+            const response = await userRelationService.follow(
+                user!,
+                "follow_test"
+            );
+
+            const response_rescinded = await userRelationService.unfollow(
+                user!,
+                "follow_test"
+            );
+
+            expect(response.message).toBe("Follow request sent");
+            expect(response_rescinded.message).toBe("Follow request rescinded");
+        });
+
+        it("should accept a follow request", async () => {
+            const user = await userService.getUserByUsername("test");
+            const privateUser = await userService.getUserByUsername(
+                "follow_test"
+            );
+
+            await userService.editProfile(
+                privateUser!,
+                "",
+                {
+                    email: "follow_test@gmail.com",
+                    firstname: "",
+                    lastname: "",
+                    profileStatus: "private",
+                    bio: "",
+                    password: "",
+                },
+                "http://localhost:3000"
+            );
+            await userRelationService.follow(user!, "follow_test");
+
+            const response = await userRelationService.acceptFollowRequest(
+                privateUser!,
+                "test"
+            );
+
+            expect(response.message).toBe("Follow request accepted");
+            const followStatus = await userRelationService.getFollowStatus(
+                user!,
+                "follow_test"
+            );
+            expect(followStatus).toBe("accepted");
+        });
+
+        it("should reject a follow request", async () => {
+            const user = await userService.getUserByUsername("test");
+            const privateUser = await userService.getUserByUsername(
+                "follow_test"
+            );
+
+            await userService.editProfile(
+                privateUser!,
+                "",
+                {
+                    email: "follow_test@gmail.com",
+                    firstname: "",
+                    lastname: "",
+                    profileStatus: "private",
+                    bio: "",
+                    password: "",
+                },
+                "http://localhost:3000"
+            );
+
+            await userRelationService.follow(user!, "follow_test");
+
+            const response = await userRelationService.rejectFollowRequest(
+                privateUser!,
+                "test"
+            );
+
+            expect(response.message).toBe("Follow request rejected");
+            const followStatus = await userRelationService.getFollowStatus(
+                user!,
+                "follow_test"
+            );
+            expect(followStatus).toBe("rejected");
+        });
+
+        it("should fail to accept a follow request if not pending", async () => {
+            const user = await userService.getUserByUsername("test");
+            const publicUser = await userService.getUserByUsername(
+                "follow_test"
+            );
+
+            await userRelationService.follow(user!, "follow_test");
+
+            await expect(
+                userRelationService.acceptFollowRequest(
+                    publicUser!,
+                    user!.username
+                )
+            ).rejects.toThrow(BadRequestError);
+        });
+
+        it("should fail to reject a follow request if not pending", async () => {
+            const user = await userService.getUserByUsername("test");
+            const publicUser = await userService.getUserByUsername(
+                "follow_test"
+            );
+
+            await userRelationService.follow(user!, "follow_test");
+
+            await expect(
+                userRelationService.rejectFollowRequest(
+                    publicUser!,
+                    user!.username
+                )
+            ).rejects.toThrow(BadRequestError);
+        });
+    });
+
     describe("User Profile", () => {
         it("should get user profile with follow status", async () => {
             const user = await userService.getUserByUsername("test");
@@ -119,7 +284,7 @@ describe("User relation service test suite", () => {
             );
 
             expect(profile.username).toBe("follow_test");
-            expect(profile.follow_status).toBe(true);
+            expect(profile.followStatus).toBe("accepted");
         });
 
         it("should fail to get user profile if user does not exist", async () => {

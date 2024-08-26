@@ -75,6 +75,16 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         handleExpress(res, () => userHandler.unfollow(req.user, username));
     });
 
+    app.post("/acceptrequest/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () => userHandler.acceptFollowRequest(req.user, username));
+    });
+
+    app.post("/rejectrequest/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () => userHandler.rejectFollowRequest(req.user, username));
+    });
+
     app.get("/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
