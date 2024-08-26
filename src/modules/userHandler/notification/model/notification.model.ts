@@ -3,7 +3,7 @@ import { Post } from "../../../postHandler/post/model/post.model";
 import { User } from "../../user/model/user.model";
 
 type NotificationTypes =
-    | "tage"
+    | "tags"
     | "likePost"
     | "followAccept"
     | "followRequest"

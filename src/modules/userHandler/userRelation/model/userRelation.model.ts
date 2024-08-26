@@ -5,9 +5,14 @@ import {
 import { UserEntity } from "../../user/entity/user.entity";
 import { User } from "../../user/model/user.model";
 
+export type Type = "follow" | "close" | "block";
+export type FollowStatus = "pending" | "accepted" | "rejected" | "not followed";
+
 export interface UserRelation {
     follower: User;
     following: User;
+    type: Type;
+    followStatus: FollowStatus;
 }
 
 export interface followerFollowing {
@@ -16,13 +21,13 @@ export interface followerFollowing {
 }
 
 export type UserProfile = Omit<User, "password" | "email" | "profileStatus"> & {
-    follow_status: boolean;
+    followStatus: FollowStatus;
     posts: PostWithUsername[];
 };
 
 export const toProfile = (
     user: User,
-    follow_status: boolean,
+    followStatus: FollowStatus,
     posts: PostWithUsername[],
     baseUrl: string
 ): UserProfile => {
@@ -34,7 +39,7 @@ export const toProfile = (
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",
         posts,
-        follow_status,
+        followStatus,
     };
 };
 

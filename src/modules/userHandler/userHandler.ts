@@ -65,6 +65,20 @@ export class UserHandler {
         return this.userRelationService.unfollow(user, following_username);
     }
 
+    public async acceptFollowRequest(user: User, following_username: string) {
+        return this.userRelationService.acceptFollowRequest(
+            user,
+            following_username
+        );
+    }
+
+    public async rejectFollowRequest(user: User, following_username: string) {
+        return this.userRelationService.rejectFollowRequest(
+            user,
+            following_username
+        );
+    }
+
     public async userProfile(
         session_user: User,
         username: string,
