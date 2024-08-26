@@ -1,6 +1,7 @@
 import { DataSource, IsNull, Repository } from "typeorm";
 import { CommentEntity } from "./entity/comment.entity";
 import { Comment, CommentsList, CreateComment } from "./model/comment.model";
+import { PostEntity } from "../post/entity/post.entity";
 
 export class CommentRepository {
     private commentRepo: Repository<CommentEntity>;
@@ -9,8 +10,17 @@ export class CommentRepository {
         this.commentRepo = appDataSource.getRepository(CommentEntity);
     }
 
-    public create(comment: CreateComment): Promise<Comment> {
-        return this.commentRepo.save(comment);
+    public async create(comment: CreateComment): Promise<Comment> {
+        return await this.appDataSource.manager.transaction(async (manager) => {
+            const commentRepo = manager.getRepository(CommentEntity);
+            const postRepo = manager.getRepository(PostEntity);
+            const newComment = await commentRepo.save(comment);
+            await postRepo.update(
+                { id: comment.post.id },
+                { comment_count: () => "comment_count + 1" }
+            );
+            return newComment;
+        });
     }
 
     public async findById(id: string): Promise<Comment | null> {
