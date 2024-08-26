@@ -12,6 +12,7 @@ import { UserEntity } from "../../../userHandler/user/entity/user.entity";
 import { CommentEntity } from "../../comment/entity/comment.entity";
 import { PostLikeEntity } from "../../postLike/entity/postLike.entity";
 import { SavedPostsEntity } from "../../../userHandler/savedPost/entity/savedPost.entity";
+import { NotificationEntity } from "../../../userHandler/notification/entity/notification.entity";
 
 @Entity("Posts")
 export class PostEntity {
@@ -41,6 +42,9 @@ export class PostEntity {
 
     @OneToMany(() => SavedPostsEntity, (savedPost) => savedPost.post)
     saves!: SavedPostsEntity[];
+
+    @OneToMany(() => NotificationEntity, (notification) => notification.post)
+    notifications!: NotificationEntity[];
 
     @Column()
     like_count!: number;
