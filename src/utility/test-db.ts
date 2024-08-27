@@ -59,6 +59,7 @@ export const createTestDb = async () => {
         ],
         synchronize: true,
         logging: false,
+        subscribers: [],
     });
 
     // Initialize the DataSource

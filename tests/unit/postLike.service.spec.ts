@@ -9,12 +9,14 @@ import { createTestDb } from "../../src/utility/test-db";
 import { ServiceFactory } from "../../src/utility/service-factory";
 import { PostLikeService } from "../../src/modules/postHandler/postLike/postLike.service";
 import { randomUUID } from "crypto";
+import { NotificationService } from "../../src/modules/userHandler/notification/notification.service";
 
 describe("PostLikeService test suite", () => {
     let serviceFactory: ServiceFactory;
     let postLikeService: PostLikeService;
     let userService: UserService;
     let postService: PostService;
+    let notificationService: NotificationService;
 
     beforeEach(async () => {
         const dataSource = await createTestDb();
@@ -23,6 +25,7 @@ describe("PostLikeService test suite", () => {
         postLikeService = serviceFactory.getPostLikeService();
         userService = serviceFactory.getUserService();
         postService = serviceFactory.getPostService();
+        notificationService = serviceFactory.getNotificationService();
 
         await userService.createUser({
             username: "test",
@@ -79,8 +82,15 @@ describe("PostLikeService test suite", () => {
         );
 
         const result = await postLikeService.likePost(user!, post.id);
-
         expect(result.message).toEqual("Post liked");
+
+        const notifications = await notificationService.findByType("likePost")
+
+        const notification = notifications[0];
+        expect(notification.recipient).toEqual(user);
+        expect(notification.sender).toEqual(user);
+        expect(notification.type).toEqual("likePost");
+        expect(notification.isRead).toEqual(false);
     });
 
     it("should throw BadRequestError if post is not liked but trying to unlike", async () => {

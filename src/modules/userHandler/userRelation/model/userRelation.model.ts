@@ -5,13 +5,13 @@ import {
 import { UserEntity } from "../../user/entity/user.entity";
 import { User } from "../../user/model/user.model";
 
-export type Type = "follow" | "close" | "block";
+export type RelationTypes = "follow" | "close" | "block";
 export type FollowStatus = "pending" | "accepted" | "rejected" | "not followed";
 
 export interface UserRelation {
     follower: User;
     following: User;
-    type: Type;
+    type: RelationTypes;
     followStatus: FollowStatus;
 }
 

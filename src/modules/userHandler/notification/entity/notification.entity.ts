@@ -39,7 +39,7 @@ export class NotificationEntity {
         ],
     })
     type!:
-        | "tage"
+        | "tags"
         | "likePost"
         | "followAccept"
         | "followRequest"
