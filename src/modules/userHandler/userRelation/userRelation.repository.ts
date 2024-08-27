@@ -2,7 +2,7 @@ import { DataSource, Repository } from "typeorm";
 import { UserRelationEntity } from "./entity/userRelation.entity";
 import {
     followerFollowing,
-    Type,
+    RelationTypes,
     UserRelation,
 } from "./model/userRelation.model";
 import { User } from "../user/model/user.model";
@@ -34,7 +34,7 @@ export class UserRelationRepository {
     public async deleteFollow(
         follower: User,
         following: User,
-        type: Type
+        type: RelationTypes
     ): Promise<void> {
         await this.appDataSource.manager.transaction(async (manager) => {
             const userRepo = manager.getRepository(UserEntity);
@@ -58,7 +58,7 @@ export class UserRelationRepository {
     public async deleteFollowRequest(
         follower: User,
         following: User,
-        type: Type
+        type: RelationTypes
     ): Promise<void> {
         await this.userRelationRepo.softDelete({ follower, following, type });
     }

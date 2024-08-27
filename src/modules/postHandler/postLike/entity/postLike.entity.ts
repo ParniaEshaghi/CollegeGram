@@ -1,4 +1,5 @@
 import {
+    AfterInsert,
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
@@ -24,4 +25,7 @@ export class PostLikeEntity {
 
     @DeleteDateColumn()
     deletedAt!: Date;
+
+    @AfterInsert()
+    handleAfterInsert() {}
 }

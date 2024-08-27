@@ -7,7 +7,7 @@ import {
     PrimaryGeneratedColumn,
 } from "typeorm";
 import { UserEntity } from "../../user/entity/user.entity";
-import { FollowStatus, Type } from "../model/userRelation.model";
+import { FollowStatus, RelationTypes } from "../model/userRelation.model";
 
 @Entity("userRelations")
 export class UserRelationEntity {
@@ -24,7 +24,7 @@ export class UserRelationEntity {
         type: "enum",
         enum: ["follow", "close", "block"],
     })
-    type!: Type;
+    type!: RelationTypes;
 
     @Column({
         type: "enum",

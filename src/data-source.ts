@@ -10,6 +10,7 @@ import { CommentEntity } from "./modules/postHandler/comment/entity/comment.enti
 import { SavedPostsEntity } from "./modules/userHandler/savedPost/entity/savedPost.entity";
 import { CommentLikeEntity } from "./modules/postHandler/commentLike/entity/commentLike.entity";
 import { NotificationEntity } from "./modules/userHandler/notification/entity/notification.entity";
+import { PostLikeSubscriber } from "./modules/userHandler/notification/subscribers/postLike.subscriber";
 
 export const AppDataSource = new DataSource({
     type: "postgres",

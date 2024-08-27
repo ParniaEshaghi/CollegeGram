@@ -1,5 +1,6 @@
 import { makeApp } from "./api";
 import { AppDataSource } from "./data-source";
+import { PostLikeSubscriber } from "./modules/userHandler/notification/subscribers/postLike.subscriber";
 import { User } from "./modules/userHandler/user/model/user.model";
 import { ServiceFactory } from "./utility/service-factory";
 
