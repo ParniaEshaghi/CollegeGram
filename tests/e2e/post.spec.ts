@@ -47,11 +47,14 @@ describe("Post route test suite", () => {
                 .post("/api/post/createpost")
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
-                .field("mentions", postDto.mentions)
-
+                .field("mentions0", "user1")
+                .field("mentions1", "user2")
                 .attach("images", Buffer.from(""), "testFile1.jpg")
                 .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
+
+            console.log(create_post_response.body.mentions);
+
             expect(create_post_response.body.caption).toBe(postDto.caption);
             expect(create_post_response.body.mentions).toEqual(
                 postDto.mentions
@@ -124,10 +127,9 @@ describe("Post route test suite", () => {
                 .post("/api/post/createpost")
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
-                .field("mentions", postDto.mentions)
-
-                .attach("images", Buffer.from(""), "testFile1.jpg")
-                .attach("images", Buffer.from(""), "testFile2.jpg")
+                .field("mentions0", postDto.mentions)
+                .attach("images0", Buffer.from(""), "testFile1.jpg")
+                .attach("images1", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_getPostByPostId = await request(app)
@@ -193,7 +195,9 @@ describe("Post route test suite", () => {
                 .post(`/api/post/updatepost/${create_post_response.body.id}`)
                 .set("Cookie", [cookie])
                 .field("caption", updatedPostDto.caption)
-                .field("mentions", updatedPostDto.mentions)
+                .field("mentions0", "user1")
+                .field("mentions1", "user2")
+                .field("mentions2", "user3")
                 .attach("images", Buffer.from(""), "testFile2.jpg")
                 .attach("images", Buffer.from(""), "testFile3.jpg")
                 .attach("images", Buffer.from(""), "testFile4.jpg")

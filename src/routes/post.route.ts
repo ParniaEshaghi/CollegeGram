@@ -6,6 +6,7 @@ import { handleExpress } from "../utility/handle-express";
 import { commentDto } from "../modules/postHandler/comment/dto/comment.dto";
 import { PostHandler } from "../modules/postHandler/postHandler";
 import { UserHandler } from "../modules/userHandler/userHandler";
+import { extractNumberedFields } from "../utility/extract-numbered-fields";
 
 export const makePostRouter = (
     userHandler: UserHandler,
@@ -14,10 +15,16 @@ export const makePostRouter = (
     const app = Router();
 
     app.post("/createpost", auth(userHandler), postUpload, (req, res) => {
-        const dto = postDto.parse(req.body);
-        const postImageFilenames = (req.files as Express.Multer.File[]).map(
-            (file) => file.filename
+        const mentions = extractNumberedFields<string>(req.body, "mentions");
+
+        const files = req.files as Express.Multer.File[];
+        const images = files.filter((file) =>
+            file.fieldname.startsWith("images")
         );
+
+        const dto = postDto.parse({ caption: req.body.caption, mentions });
+        const postImageFilenames = images.map((file) => file.filename);
+
         handleExpress(
             res,
             async () =>
@@ -49,10 +56,20 @@ export const makePostRouter = (
         postUpload,
         (req, res) => {
             const postid = req.params.postid;
-            const dto = postDto.parse(req.body);
-            const postImageFilenames = (req.files as Express.Multer.File[]).map(
-                (file) => file.filename
+
+            const mentions = extractNumberedFields<string>(
+                req.body,
+                "mentions"
             );
+
+            const files = req.files as Express.Multer.File[];
+            const images = files.filter((file) =>
+                file.fieldname.startsWith("images")
+            );
+
+            const dto = postDto.parse({ caption: req.body.caption, mentions });
+            const postImageFilenames = images.map((file) => file.filename);
+
             handleExpress(res, () =>
                 postHandlerService.updatePost(
                     req.user,

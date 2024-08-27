@@ -67,7 +67,7 @@ export const postUpload: RequestHandler = (req, res, next) => {
         fileFilter: (req, file, cb) => {
             checkFileType(file, cb);
         },
-    }).array("images");
+    }).any();
 
     upload(req, res, (err) => {
         if (err) {
