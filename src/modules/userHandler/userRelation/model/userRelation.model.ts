@@ -5,13 +5,21 @@ import {
 import { UserEntity } from "../../user/entity/user.entity";
 import { User } from "../../user/model/user.model";
 
-export type RelationTypes = "follow" | "close" | "block";
-export type FollowStatus = "pending" | "accepted" | "rejected" | "not followed";
+export type FollowStatus =
+    | "request pending"
+    | "followed"
+    | "unfollowed"
+    | "request accepted"
+    | "request rejected"
+    | "close"
+    | "blocked"
+    | "unblocked"
+    | "request rescinded"
+    | "not followed";
 
 export interface UserRelation {
     follower: User;
     following: User;
-    type: RelationTypes;
     followStatus: FollowStatus;
 }
 
@@ -21,13 +29,46 @@ export interface followerFollowing {
 }
 
 export type UserProfile = Omit<User, "password" | "email" | "profileStatus"> & {
-    followStatus: FollowStatus;
+    followStatus: ProfileFollowStatus;
     posts: PostWithUsername[];
+};
+
+export type ProfileFollowStatus =
+    | "followed"
+    | "requested"
+    | "not followed"
+    | "blocked";
+
+export const toProfileFollowStatus = (
+    followStatus: FollowStatus
+): ProfileFollowStatus => {
+    if (
+        followStatus === "not followed" ||
+        followStatus === "unfollowed" ||
+        followStatus === "request rejected" ||
+        followStatus === "request rescinded"
+    ) {
+        return "not followed";
+    }
+    if (
+        followStatus === "followed" ||
+        followStatus === "request accepted" ||
+        followStatus === "close"
+    ) {
+        return "followed";
+    }
+    if (followStatus === "request pending") {
+        return "requested";
+    }
+    if (followStatus === "blocked") {
+        return "blocked";
+    }
+    return "not followed";
 };
 
 export const toProfile = (
     user: User,
-    followStatus: FollowStatus,
+    followStatus: ProfileFollowStatus,
     posts: PostWithUsername[],
     baseUrl: string
 ): UserProfile => {

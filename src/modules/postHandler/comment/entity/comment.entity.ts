@@ -1,4 +1,5 @@
 import {
+    AfterInsert,
     Column,
     CreateDateColumn,
     DeleteDateColumn,
@@ -53,4 +54,7 @@ export class CommentEntity {
 
     @DeleteDateColumn()
     deletedAt!: Date;
+
+    @AfterInsert()
+    handleAfterInsert() {}
 }
