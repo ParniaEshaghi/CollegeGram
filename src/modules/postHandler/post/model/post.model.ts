@@ -75,7 +75,7 @@ export const toProfilePost = (
         ...postDetails,
         username: post_user.username,
         profilePicture: post_user.profilePicture
-            ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+            ? `${baseUrl}/api/images/profiles/${post_user.profilePicture}`
             : "",
         images: post.images.map(
             (image) => `${baseUrl}/api/images/posts/${image}`
