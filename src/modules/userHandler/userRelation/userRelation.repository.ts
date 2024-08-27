@@ -2,7 +2,6 @@ import { DataSource, Repository } from "typeorm";
 import { UserRelationEntity } from "./entity/userRelation.entity";
 import {
     followerFollowing,
-    RelationTypes,
     UserRelation,
 } from "./model/userRelation.model";
 import { User } from "../user/model/user.model";
@@ -31,53 +30,50 @@ export class UserRelationRepository {
         });
     }
 
-    public async deleteFollow(
-        follower: User,
-        following: User,
-        type: RelationTypes
-    ): Promise<void> {
+    public async deleteFollow(userRelation: UserRelation): Promise<void> {
         await this.appDataSource.manager.transaction(async (manager) => {
             const userRepo = manager.getRepository(UserEntity);
             const userRelationRepo = manager.getRepository(UserRelationEntity);
-            await userRelationRepo.softDelete({ follower, following, type });
+            await userRelationRepo.softDelete({
+                follower: userRelation.follower,
+                following: userRelation.following,
+            });
+            await userRelationRepo.save(userRelation);
             await userRepo.update(
-                { username: follower.username },
+                { username: userRelation.follower.username },
                 { following_count: () => "following_count - 1" }
             );
             await userRepo.update(
-                { username: following.username },
+                { username: userRelation.following.username },
                 { follower_count: () => "follower_count - 1" }
             );
         });
     }
 
-    public async createFollowRequest(relation: UserRelation): Promise<void> {
-        await this.userRelationRepo.save(relation);
+    public async createFollowRequest(
+        userRelation: UserRelation
+    ): Promise<void> {
+        await this.userRelationRepo.save(userRelation);
     }
 
     public async deleteFollowRequest(
-        follower: User,
-        following: User,
-        type: RelationTypes
+        userRelation: UserRelation
     ): Promise<void> {
-        await this.userRelationRepo.softDelete({ follower, following, type });
+        await this.userRelationRepo.softDelete({
+            follower: userRelation.follower,
+            following: userRelation.following,
+        });
     }
 
-    public async createFollowAccepted(relation: UserRelation): Promise<void> {
-        await this.deleteFollowRequest(
-            relation.follower,
-            relation.following,
-            relation.type
-        );
-        await this.createFollow(relation);
+    public async createFollowAccepted(
+        userRelation: UserRelation
+    ): Promise<void> {
+        await this.deleteFollowRequest(userRelation);
+        await this.createFollow(userRelation);
     }
 
     public async createFollowRejected(relation: UserRelation): Promise<void> {
-        await this.deleteFollowRequest(
-            relation.follower,
-            relation.following,
-            relation.type
-        );
+        await this.deleteFollowRequest(relation);
         await this.userRelationRepo.save(relation);
     }
 

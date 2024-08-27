@@ -9,6 +9,7 @@ import {
     followerFollowingListUserResponse,
     toFollowerFollowingListUser,
     toProfile,
+    toProfileFollowStatus,
     UserRelation,
 } from "./model/userRelation.model";
 import { UserRelationRepository } from "./userRelation.repository";
@@ -37,26 +38,6 @@ export class UserRelationService {
         return followStatus;
     }
 
-    async getRequestStatus(user: User, follower_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-        const follower = await this.userService.getUserByUsername(
-            follower_username
-        );
-        if (!follower) {
-            throw new NotFoundError();
-        }
-        const relation = await this.userRelationRepo.checkExistance(
-            follower,
-            user
-        );
-        if (!relation) {
-            throw new BadRequestError();
-        }
-        return relation.followStatus;
-    }
-
     public async follow(user: User, following_username: string) {
         if (!user) {
             throw new UnauthorizedError();
@@ -71,29 +52,28 @@ export class UserRelationService {
             user,
             following.username
         );
-        if (followStatus === "accepted") {
+        if (
+            followStatus !== "unfollowed" &&
+            followStatus !== "not followed" &&
+            followStatus !== "request rejected" &&
+            followStatus !== "request rescinded"
+        ) {
             throw new BadRequestError();
         }
-        const type = "follow";
 
         if (following.profileStatus === "public") {
             const relation: UserRelation = {
                 follower: user,
                 following,
-                type,
-                followStatus: "accepted",
+                followStatus: "followed",
             };
             await this.userRelationRepo.createFollow(relation);
             return { message: "User followed" };
         } else {
-            if (followStatus === "pending") {
-                throw new BadRequestError();
-            }
             const relation: UserRelation = {
                 follower: user,
                 following,
-                type,
-                followStatus: "pending",
+                followStatus: "request pending",
             };
             await this.userRelationRepo.createFollowRequest(relation);
             return { message: "Follow request sent" };
@@ -114,22 +94,33 @@ export class UserRelationService {
             user,
             following.username
         );
-        if (followStatus === ("not followed" || "rejected")) {
+        if (
+            followStatus === "not followed" ||
+            followStatus === "request rejected" ||
+            followStatus === "unfollowed" ||
+            followStatus === "blocked" ||
+            followStatus === "request rescinded"
+        ) {
             throw new BadRequestError();
         }
-        const type = "follow";
-        if (followStatus === "accepted") {
-            await this.userRelationRepo.deleteFollow(user, following, type);
+        if (
+            followStatus === "request accepted" ||
+            followStatus === "followed"
+        ) {
+            const relation: UserRelation = {
+                follower: user,
+                following,
+                followStatus: "unfollowed",
+            };
+            await this.userRelationRepo.deleteFollow(relation);
             return { message: "User unfollowed" };
         } else {
-            if (followStatus !== "pending") {
-                throw new BadRequestError();
-            }
-            await this.userRelationRepo.deleteFollowRequest(
-                user,
+            const relation: UserRelation = {
+                follower: user,
                 following,
-                type
-            );
+                followStatus: "request rescinded",
+            };
+            await this.userRelationRepo.deleteFollowRequest(relation);
             return { message: "Follow request rescinded" };
         }
     }
@@ -144,20 +135,20 @@ export class UserRelationService {
         if (!follower) {
             throw new NotFoundError();
         }
-        const requestStatus = await this.getRequestStatus(
-            user,
-            follower_username
+    
+        const followStatus = await this.getFollowStatus(
+            follower,
+            user.username
         );
 
-        if (requestStatus !== "pending") {
+        if (followStatus !== "request pending") {
             throw new BadRequestError();
         }
 
         const relation: UserRelation = {
             follower,
             following: user,
-            type: "follow",
-            followStatus: "accepted",
+            followStatus: "request accepted",
         };
         await this.userRelationRepo.createFollowAccepted(relation);
         return { message: "Follow request accepted" };
@@ -173,20 +164,19 @@ export class UserRelationService {
         if (!follower) {
             throw new NotFoundError();
         }
-        const requestStatus = await this.getRequestStatus(
-            user,
-            follower_username
+        const followStatus = await this.getFollowStatus(
+            follower,
+            user.username
         );
 
-        if (requestStatus !== "pending") {
+        if (followStatus !== "request pending") {
             throw new BadRequestError();
         }
 
         const relation: UserRelation = {
             follower,
             following: user,
-            type: "follow",
-            followStatus: "rejected",
+            followStatus: "request rejected",
         };
         await this.userRelationRepo.createFollowRejected(relation);
         return { message: "Follow request rejected" };
@@ -208,7 +198,8 @@ export class UserRelationService {
         const posts = await this.userService.getUserPosts(username, baseUrl);
 
         const followStatus = await this.getFollowStatus(session_user, username);
-        return toProfile(user, followStatus, posts, baseUrl);
+        const profileFollowStatus = toProfileFollowStatus(followStatus);
+        return toProfile(user, profileFollowStatus, posts, baseUrl);
     }
 
     public async followerList(

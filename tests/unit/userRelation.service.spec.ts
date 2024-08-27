@@ -3,11 +3,13 @@ import { BadRequestError, NotFoundError } from "../../src/utility/http-errors";
 import { createTestDb } from "../../src/utility/test-db";
 import { ServiceFactory } from "../../src/utility/service-factory";
 import { UserRelationService } from "../../src/modules/userHandler/userRelation/userRelation.service";
+import { NotificationService } from "../../src/modules/userHandler/notification/notification.service";
 
 describe("User relation service test suite", () => {
     let serviceFactory: ServiceFactory;
     let userService: UserService;
     let userRelationService: UserRelationService;
+    let notificationService: NotificationService;
 
     beforeEach(async () => {
         const dataSource = await createTestDb();
@@ -15,6 +17,7 @@ describe("User relation service test suite", () => {
 
         userService = serviceFactory.getUserService();
         userRelationService = serviceFactory.getUserRelationService();
+        notificationService = serviceFactory.getNotificationService();
 
         await userService.createUser({
             username: "test",
@@ -43,6 +46,15 @@ describe("User relation service test suite", () => {
             expect(response.message).toBe("User followed");
             expect(follower!.following_count).toBe(1);
             expect(following!.follower_count).toBe(1);
+
+            const notifications = await notificationService.findByType(
+                "followed"
+            );
+
+            const notification = notifications[0];
+            expect(notification.recipient.username).toBe(following!.username);
+            expect(notification.sender.username).toBe(follower!.username);
+            expect(notification.type).toEqual("followed");
         });
 
         it("should fail to follow a user if user is already followed", async () => {
@@ -201,7 +213,7 @@ describe("User relation service test suite", () => {
                 user!,
                 "follow_test"
             );
-            expect(followStatus).toBe("accepted");
+            expect(followStatus).toBe("request accepted");
         });
 
         it("should reject a follow request", async () => {
@@ -236,7 +248,7 @@ describe("User relation service test suite", () => {
                 user!,
                 "follow_test"
             );
-            expect(followStatus).toBe("rejected");
+            expect(followStatus).toBe("request rejected");
         });
 
         it("should fail to accept a follow request if not pending", async () => {
@@ -270,6 +282,47 @@ describe("User relation service test suite", () => {
                 )
             ).rejects.toThrow(BadRequestError);
         });
+
+        it("should send a follow back notification", async () => {
+            const user = await userService.getUserByUsername("test");
+            const privateUser = await userService.getUserByUsername(
+                "follow_test"
+            );
+
+            await userService.editProfile(
+                privateUser!,
+                "",
+                {
+                    email: "follow_test@gmail.com",
+                    firstname: "",
+                    lastname: "",
+                    profileStatus: "private",
+                    bio: "",
+                    password: "",
+                },
+                "http://localhost:3000"
+            );
+
+            await userRelationService.follow(privateUser!, "test");
+
+            const notifications = await notificationService.findByType(
+                "followed"
+            );
+            const notification = notifications[0];
+            expect(notification.recipient.username).toBe("test");
+            expect(notification.sender.username).toBe("follow_test");
+            expect(notification.type).toEqual("followed");
+
+            await userRelationService.follow(user!, "follow_test");
+
+            const followBackNotifications =
+                await notificationService.findByType("followBack");
+
+            const followBackNotification = followBackNotifications[0];
+            expect(followBackNotification.recipient.username).toBe("test");
+            expect(followBackNotification.sender.username).toBe("follow_test");
+            expect(followBackNotification.type).toEqual("followBack");
+        });
     });
 
     describe("User Profile", () => {
@@ -284,7 +337,7 @@ describe("User relation service test suite", () => {
             );
 
             expect(profile.username).toBe("follow_test");
-            expect(profile.followStatus).toBe("accepted");
+            expect(profile.followStatus).toBe("followed");
         });
 
         it("should fail to get user profile if user does not exist", async () => {

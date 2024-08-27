@@ -21,6 +21,8 @@ import { UserHandler } from "../modules/userHandler/userHandler";
 import { NotificationRepository } from "../modules/userHandler/notification/notification.repository";
 import { NotificationService } from "../modules/userHandler/notification/notification.service";
 import { PostLikeSubscriber } from "../modules/userHandler/notification/subscribers/postLike.subscriber";
+import { CommentSubscriber } from "../modules/userHandler/notification/subscribers/comment.subscriber";
+import { UserRelationSubscriber } from "../modules/userHandler/notification/subscribers/userRelation.subscriber";
 
 export class ServiceFactory {
     private dataSource: DataSource;
@@ -50,7 +52,9 @@ export class ServiceFactory {
     private userHandler: UserHandler;
 
     private postLikeSub: PostLikeSubscriber;
-
+    private commentSub: CommentSubscriber;
+    private userRelationSub: UserRelationSubscriber;
+    
     constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
 
@@ -120,8 +124,17 @@ export class ServiceFactory {
         this.notificationService = new NotificationService(
             this.notificationRepo
         );
-        this.postLikeSub = new PostLikeSubscriber(this.notificationService)
-        dataSource.subscribers.push(this.postLikeSub)
+
+        this.postLikeSub = new PostLikeSubscriber(this.notificationService);
+        dataSource.subscribers.push(this.postLikeSub);
+
+        this.commentSub = new CommentSubscriber(this.notificationService);
+        dataSource.subscribers.push(this.commentSub);
+
+        this.userRelationSub = new UserRelationSubscriber(
+            this.notificationService
+        );
+        dataSource.subscribers.push(this.userRelationSub);
     }
 
     getUserService(): UserService {

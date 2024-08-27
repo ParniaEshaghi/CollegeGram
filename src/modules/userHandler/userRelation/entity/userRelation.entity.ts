@@ -1,4 +1,5 @@
 import {
+    AfterInsert,
     Column,
     CreateDateColumn,
     DeleteDateColumn,
@@ -7,7 +8,7 @@ import {
     PrimaryGeneratedColumn,
 } from "typeorm";
 import { UserEntity } from "../../user/entity/user.entity";
-import { FollowStatus, RelationTypes } from "../model/userRelation.model";
+import { FollowStatus } from "../model/userRelation.model";
 
 @Entity("userRelations")
 export class UserRelationEntity {
@@ -22,13 +23,17 @@ export class UserRelationEntity {
 
     @Column({
         type: "enum",
-        enum: ["follow", "close", "block"],
-    })
-    type!: RelationTypes;
-
-    @Column({
-        type: "enum",
-        enum: ["pending", "accepted", "rejected"],
+        enum: [
+            "request pending",
+            "followed",
+            "unfollowed",
+            "request accepted",
+            "request rejected",
+            "close",
+            "blocked",
+            "request rescinded",
+            "not followed",
+        ],
     })
     followStatus!: FollowStatus;
 
@@ -37,4 +42,7 @@ export class UserRelationEntity {
 
     @DeleteDateColumn()
     deletedAt!: Date;
+
+    @AfterInsert()
+    handleAfterInsert() {}
 }
