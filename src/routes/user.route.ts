@@ -15,7 +15,6 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         handleExpress(res, () => userHandler.createUser(dto));
     });
 
-
     app.post("/signin", (req, res) => {
         const dto = loginDto.parse(req.body);
         handleExpress(
@@ -75,14 +74,25 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         handleExpress(res, () => userHandler.unfollow(req.user, username));
     });
 
+    app.post("/deletefollower/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () =>
+            userHandler.deleteFollower(req.user, username)
+        );
+    });
+
     app.post("/acceptrequest/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
-        handleExpress(res, () => userHandler.acceptFollowRequest(req.user, username));
+        handleExpress(res, () =>
+            userHandler.acceptFollowRequest(req.user, username)
+        );
     });
 
     app.post("/rejectrequest/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
-        handleExpress(res, () => userHandler.rejectFollowRequest(req.user, username));
+        handleExpress(res, () =>
+            userHandler.rejectFollowRequest(req.user, username)
+        );
     });
 
     app.get("/:username", auth(userHandler), (req, res) => {

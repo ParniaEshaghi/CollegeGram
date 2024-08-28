@@ -32,7 +32,7 @@ export class UserRelationEntity {
             "close",
             "blocked",
             "request rescinded",
-            "not followed",
+            "follower deleted",
         ],
     })
     followStatus!: FollowStatus;

@@ -412,4 +412,42 @@ describe("User relation service test suite", () => {
             ).rejects.toThrow(NotFoundError);
         });
     });
+
+    describe("Delete follower", () => {
+        it("should delete a follower", async () => {
+            await userRelationService.follow(
+                (await userService.getUserByUsername("test"))!,
+                "follow_test"
+            );
+            const user = await userService.getUserByUsername("follow_test");
+            const response = await userRelationService.deleteFollower(
+                user!,
+                "test"
+            );
+            const follower = await userService.getUserByUsername("test");
+            const following = await userService.getUserByUsername(
+                "follow_test"
+            );
+            expect(response.message).toBe("Follower deleted");
+            expect(following!.follower_count).toBe(0);
+        });
+
+        it("should fail to delete a follower if not followed by", async () => {
+            expect(
+                userRelationService.deleteFollower(
+                    (await userService.getUserByUsername("test"))!,
+                    "follow_test"
+                )
+            ).rejects.toThrow(new BadRequestError());
+        });
+
+        it("should fail to unfollow someone that does not exist", async () => {
+            expect(
+                userRelationService.deleteFollower(
+                    (await userService.getUserByUsername("test"))!,
+                    "wrong_test"
+                )
+            ).rejects.toThrow(new NotFoundError());
+        });
+    });
 });

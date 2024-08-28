@@ -4,7 +4,6 @@ import {
     Notification,
     NotificationTypes,
 } from "./model/notification.model";
-import { CreateNotification, Notification, NotificationTypes } from "./model/notification.model";
 import { NotificationRepository } from "./notification.repository";
 
 export class NotificationService {
@@ -18,7 +17,7 @@ export class NotificationService {
     public findByType(type: NotificationTypes): Promise<Notification[]> {
         return this.notificationRepo.findByType(type);
     }
-    
+
     public getFollowedNotification(recipient: User, sender: User) {
         return this.notificationRepo.getFollowedNotification(recipient, sender);
     }
