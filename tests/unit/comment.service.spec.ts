@@ -136,9 +136,6 @@ describe("Comment service test suite", () => {
         expect(result.like_count).toBe(0);
 
         const notifications = await notificationService.findByType("comment");
-
-        console.log(notifications);
-
         expect(notifications.length).toEqual(1);
     });
 });

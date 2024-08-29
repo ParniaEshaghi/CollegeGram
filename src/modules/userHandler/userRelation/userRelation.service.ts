@@ -56,7 +56,8 @@ export class UserRelationService {
             followStatus !== "unfollowed" &&
             followStatus !== "not followed" &&
             followStatus !== "request rejected" &&
-            followStatus !== "request rescinded"
+            followStatus !== "request rescinded" &&
+            followStatus !== "follower deleted"
         ) {
             throw new BadRequestError();
         }
@@ -99,7 +100,8 @@ export class UserRelationService {
             followStatus === "request rejected" ||
             followStatus === "unfollowed" ||
             followStatus === "blocked" ||
-            followStatus === "request rescinded"
+            followStatus === "request rescinded" ||
+            followStatus === "follower deleted"
         ) {
             throw new BadRequestError();
         }
@@ -125,6 +127,35 @@ export class UserRelationService {
         }
     }
 
+    public async deleteFollower(user: User, follower_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const follower = await this.userService.getUserByUsername(
+            follower_username
+        );
+        if (!follower) {
+            throw new NotFoundError();
+        }
+        const followStatus = await this.getFollowStatus(
+            follower,
+            user.username
+        );
+        if (
+            followStatus !== "followed" &&
+            followStatus !== "request accepted"
+        ) {
+            throw new BadRequestError();
+        }
+        const relation: UserRelation = {
+            follower,
+            following: user,
+            followStatus: "follower deleted",
+        };
+        await this.userRelationRepo.deleteFollow(relation);
+        return { message: "Follower deleted" };
+    }
+
     public async acceptFollowRequest(user: User, follower_username: string) {
         if (!user) {
             throw new UnauthorizedError();
@@ -135,7 +166,7 @@ export class UserRelationService {
         if (!follower) {
             throw new NotFoundError();
         }
-    
+
         const followStatus = await this.getFollowStatus(
             follower,
             user.username

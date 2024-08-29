@@ -15,7 +15,8 @@ export type FollowStatus =
     | "blocked"
     | "unblocked"
     | "request rescinded"
-    | "not followed";
+    | "not followed"
+    | "follower deleted";
 
 export interface UserRelation {
     follower: User;
@@ -46,7 +47,8 @@ export const toProfileFollowStatus = (
         followStatus === "not followed" ||
         followStatus === "unfollowed" ||
         followStatus === "request rejected" ||
-        followStatus === "request rescinded"
+        followStatus === "request rescinded" ||
+        followStatus === "follower deleted"
     ) {
         return "not followed";
     }

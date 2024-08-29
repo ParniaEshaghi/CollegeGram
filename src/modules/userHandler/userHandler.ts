@@ -65,17 +65,17 @@ export class UserHandler {
         return this.userRelationService.unfollow(user, following_username);
     }
 
-    public async acceptFollowRequest(user: User, following_username: string) {
+    public async acceptFollowRequest(user: User, follower_username: string) {
         return this.userRelationService.acceptFollowRequest(
             user,
-            following_username
+            follower_username
         );
     }
 
-    public async rejectFollowRequest(user: User, following_username: string) {
+    public async rejectFollowRequest(user: User, follower_username: string) {
         return this.userRelationService.rejectFollowRequest(
             user,
-            following_username
+            follower_username
         );
     }
 
@@ -133,5 +133,9 @@ export class UserHandler {
 
     public async getUserByUsername(username: string) {
         return this.userService.getUserByUsername(username);
+    }
+
+    public async deleteFollower(user: User, follower_username: string) {
+        return this.userRelationService.deleteFollower(user, follower_username);
     }
 }
