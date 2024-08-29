@@ -31,6 +31,7 @@ export class UserRelationEntity {
             "request rejected",
             "close",
             "blocked",
+            "unblocked",
             "request rescinded",
             "follower deleted",
         ],

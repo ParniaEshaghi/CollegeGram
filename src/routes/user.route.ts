@@ -95,6 +95,16 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         );
     });
 
+    app.post("/block/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () => userHandler.block(req.user, username));
+    });
+
+    app.post("/unblock/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () => userHandler.unblock(req.user, username));
+    });
+
     app.get("/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
