@@ -51,6 +51,7 @@ export class PostService {
         };
 
         const createdPost = await this.postRepo.create(newPost);
+
         return toPostWithUsername(createdPost, baseUrl);
     }
 
@@ -61,8 +62,6 @@ export class PostService {
                 return check !== null;
             })
         );
-
-        // All mentions must return true, otherwise the result is false
         return results.every((result) => result === true);
     }
 

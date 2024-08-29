@@ -29,7 +29,7 @@ export class NotificationEntity {
     @Column({
         type: "enum",
         enum: [
-            "tage",
+            "tags",
             "likePost",
             "followAccept",
             "followRequest",

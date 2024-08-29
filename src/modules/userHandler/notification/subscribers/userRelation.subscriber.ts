@@ -38,6 +38,24 @@ export class UserRelationSubscriber
                 );
             }
         }
+
+        if (event.entity.followStatus == "request accepted") {
+            const notification: CreateNotification = {
+                recipient: event.entity.follower,
+                sender: event.entity.following,
+                type: "followAccept",
+            };
+            await this.notificationService.createNotification(notification);
+        }
+
+        if (event.entity.followStatus == "request pending") {
+            const notification: CreateNotification = {
+                recipient: event.entity.follower,
+                sender: event.entity.following,
+                type: "followRequest",
+            };
+            await this.notificationService.createNotification(notification);
+        }
     }
 
     followedNotification(event: InsertEvent<UserRelationEntity>) {
