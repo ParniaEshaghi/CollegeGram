@@ -158,6 +158,32 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         );
     });
 
+    app.get("/closefriendlist/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.closeFriendList(
+                req.user,
+                username,
+                page,
+                limit,
+                req.base_url
+            )
+        );
+    });
+
+    app.get("/blocklist/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.blockList(req.user, username, page, limit, req.base_url)
+        );
+    });
+
     app.post("/savepost/:postid", auth(userHandler), (req, res) => {
         const postid = req.params.postid;
         handleExpress(res, () => userHandler.savePost(req.user, postid));

@@ -157,4 +157,36 @@ export class UserHandler {
             follower_username
         );
     }
+
+    public async closeFriendList(
+        session_user: User,
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ): Promise<followerFollowingListUserResponse | undefined> {
+        return this.userRelationService.closeFriendList(
+            session_user,
+            username,
+            page,
+            limit,
+            baseUrl
+        );
+    }
+
+    public async blockList(
+        session_user: User,
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ): Promise<followerFollowingListUserResponse | undefined> {
+        return this.userRelationService.blockList(
+            session_user,
+            username,
+            page,
+            limit,
+            baseUrl
+        );
+    }
 }
