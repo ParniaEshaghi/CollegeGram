@@ -259,6 +259,65 @@ export class UserRelationService {
         return { message: "User unblocked" };
     }
 
+    public async addCloseFriend(user: User, follower_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const follower = await this.userService.getUserByUsername(
+            follower_username
+        );
+        if (!follower) {
+            throw new NotFoundError();
+        }
+
+        const followStatus = await this.getFollowStatus(
+            follower,
+            user.username
+        );
+        if (
+            followStatus !== "followed" &&
+            followStatus !== "request accepted"
+        ) {
+            throw new BadRequestError();
+        }
+
+        const relation: UserRelation = {
+            follower,
+            following: user,
+            followStatus: "close",
+        };
+        await this.userRelationRepo.createCloseFriend(relation);
+        return { message: "User added to close friends" };
+    }
+
+    public async removeCloseFriend(user: User, follower_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const follower = await this.userService.getUserByUsername(
+            follower_username
+        );
+        if (!follower) {
+            throw new NotFoundError();
+        }
+
+        const followStatus = await this.getFollowStatus(
+            follower,
+            user.username
+        );
+        if (followStatus !== "close") {
+            throw new BadRequestError();
+        }
+
+        const relation: UserRelation = {
+            follower,
+            following: user,
+            followStatus: "followed",
+        };
+        await this.userRelationRepo.deleteCloseFriend(relation);
+        return { message: "User removed from close friends" };
+    }
+
     public async userProfile(
         session_user: User,
         username: string,

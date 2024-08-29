@@ -146,4 +146,15 @@ export class UserHandler {
     public async unblock(user: User, following_username: string) {
         return this.userRelationService.unblock(user, following_username);
     }
+
+    public async addCloseFriend(user: User, follower_username: string) {
+        return this.userRelationService.addCloseFriend(user, follower_username);
+    }
+
+    public async removeCloseFriend(user: User, follower_username: string) {
+        return this.userRelationService.removeCloseFriend(
+            user,
+            follower_username
+        );
+    }
 }

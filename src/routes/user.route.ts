@@ -105,6 +105,20 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         handleExpress(res, () => userHandler.unblock(req.user, username));
     });
 
+    app.post("/addclosefriend/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () =>
+            userHandler.addCloseFriend(req.user, username)
+        );
+    });
+
+    app.post("/removeclosefriend/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () =>
+            userHandler.removeCloseFriend(req.user, username)
+        );
+    });
+
     app.get("/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>

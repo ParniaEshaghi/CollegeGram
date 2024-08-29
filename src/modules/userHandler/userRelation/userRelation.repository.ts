@@ -94,6 +94,22 @@ export class UserRelationRepository {
         await this.userRelationRepo.save(userRelation);
     }
 
+    public async createCloseFriend(userRelation: UserRelation): Promise<void> {
+        await this.userRelationRepo.softDelete({
+            follower: userRelation.follower,
+            following: userRelation.following,
+        });
+        await this.userRelationRepo.save(userRelation);
+    }
+
+    public async deleteCloseFriend(userRelation: UserRelation): Promise<void> {
+        await this.userRelationRepo.softDelete({
+            follower: userRelation.follower,
+            following: userRelation.following,
+        });
+        await this.userRelationRepo.save(userRelation);
+    }
+
     public async checkExistance(
         follower: User,
         following: User
