@@ -450,4 +450,64 @@ describe("User relation service test suite", () => {
             ).rejects.toThrow(new NotFoundError());
         });
     });
+
+    describe("Block and unblock", () => {
+        it("should block a user", async () => {
+            const response = await userRelationService.block(
+                (await userService.getUserByUsername("test"))!,
+                "follow_test"
+            );
+            expect(response.message).toBe("User blocked");
+        });
+
+        it("should fail to follow someone if blocked", async () => {
+            await userRelationService.block(
+                (await userService.getUserByUsername("test"))!,
+                "follow_test"
+            );
+            expect(
+                userRelationService.follow(
+                    (await userService.getUserByUsername("follow_test"))!,
+                    "test"
+                )
+            ).rejects.toThrow(new BadRequestError());
+        });
+
+        it("should fail to block someone that does not exist", async () => {
+            expect(
+                userRelationService.block(
+                    (await userService.getUserByUsername("test"))!,
+                    "wrong_test"
+                )
+            ).rejects.toThrow(new NotFoundError());
+        });
+
+        it("should unblock a user", async () => {
+            await userRelationService.block(
+                (await userService.getUserByUsername("test"))!,
+                "follow_test"
+            );
+            const response = await userRelationService.unblock(
+                (await userService.getUserByUsername("test"))!,
+                "follow_test"
+            );
+            expect(response.message).toBe("User unblocked");
+        });
+
+        it("should follow someone if unblocked", async () => {
+            await userRelationService.block(
+                (await userService.getUserByUsername("test"))!,
+                "follow_test"
+            );
+            await userRelationService.unblock(
+                (await userService.getUserByUsername("test"))!,
+                "follow_test"
+            );
+            const response = await userRelationService.follow(
+                (await userService.getUserByUsername("follow_test"))!,
+                "test"
+            );
+            expect(response.message).toBe("User followed");
+        });
+    });
 });

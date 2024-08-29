@@ -1,9 +1,6 @@
 import { DataSource, Repository } from "typeorm";
 import { UserRelationEntity } from "./entity/userRelation.entity";
-import {
-    followerFollowing,
-    UserRelation,
-} from "./model/userRelation.model";
+import { followerFollowing, UserRelation } from "./model/userRelation.model";
 import { User } from "../user/model/user.model";
 import { UserEntity } from "../user/entity/user.entity";
 
@@ -75,6 +72,26 @@ export class UserRelationRepository {
     public async createFollowRejected(relation: UserRelation): Promise<void> {
         await this.deleteFollowRequest(relation);
         await this.userRelationRepo.save(relation);
+    }
+
+    public async createBlocked(userRelation: UserRelation): Promise<void> {
+        await this.userRelationRepo.softDelete({
+            follower: userRelation.follower,
+            following: userRelation.following,
+        });
+        await this.userRelationRepo.softDelete({
+            follower: userRelation.following,
+            following: userRelation.follower,
+        });
+        await this.userRelationRepo.save(userRelation);
+    }
+
+    public async createUnBlocked(userRelation: UserRelation): Promise<void> {
+        await this.userRelationRepo.softDelete({
+            follower: userRelation.follower,
+            following: userRelation.following,
+        });
+        await this.userRelationRepo.save(userRelation);
     }
 
     public async checkExistance(

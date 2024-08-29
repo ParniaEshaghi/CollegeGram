@@ -138,4 +138,12 @@ export class UserHandler {
     public async deleteFollower(user: User, follower_username: string) {
         return this.userRelationService.deleteFollower(user, follower_username);
     }
+
+    public async block(user: User, following_username: string) {
+        return this.userRelationService.block(user, following_username);
+    }
+
+    public async unblock(user: User, following_username: string) {
+        return this.userRelationService.unblock(user, following_username);
+    }
 }

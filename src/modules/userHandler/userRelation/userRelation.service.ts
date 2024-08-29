@@ -52,12 +52,18 @@ export class UserRelationService {
             user,
             following.username
         );
+        const reverse_followStatus = await this.getFollowStatus(
+            following,
+            user.username
+        );
         if (
-            followStatus !== "unfollowed" &&
-            followStatus !== "not followed" &&
-            followStatus !== "request rejected" &&
-            followStatus !== "request rescinded" &&
-            followStatus !== "follower deleted"
+            (followStatus !== "unfollowed" &&
+                followStatus !== "not followed" &&
+                followStatus !== "request rejected" &&
+                followStatus !== "request rescinded" &&
+                followStatus !== "follower deleted" &&
+                followStatus !== "unblocked") ||
+            reverse_followStatus === "blocked"
         ) {
             throw new BadRequestError();
         }
@@ -211,6 +217,46 @@ export class UserRelationService {
         };
         await this.userRelationRepo.createFollowRejected(relation);
         return { message: "Follow request rejected" };
+    }
+
+    public async block(user: User, following_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const following = await this.userService.getUserByUsername(
+            following_username
+        );
+        if (!following) {
+            throw new NotFoundError();
+        }
+
+        const relation: UserRelation = {
+            follower: user,
+            following,
+            followStatus: "blocked",
+        };
+        await this.userRelationRepo.createBlocked(relation);
+        return { message: "User blocked" };
+    }
+
+    public async unblock(user: User, following_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const following = await this.userService.getUserByUsername(
+            following_username
+        );
+        if (!following) {
+            throw new NotFoundError();
+        }
+
+        const relation: UserRelation = {
+            follower: user,
+            following,
+            followStatus: "unblocked",
+        };
+        await this.userRelationRepo.createUnBlocked(relation);
+        return { message: "User unblocked" };
     }
 
     public async userProfile(
