@@ -9,6 +9,7 @@ import { PostDto } from "./post/dto/post.dto";
 import { PostWithUsername, toPostPage } from "./post/model/post.model";
 import { PostService } from "./post/post.service";
 import { PostLikeService } from "./postLike/postLike.service";
+import { UpdatePostDto } from "./post/dto/updatePost.dto";
 
 export class PostHandler {
     constructor(
@@ -35,7 +36,7 @@ export class PostHandler {
     public async updatePost(
         user: User,
         postId: string,
-        postDto: PostDto,
+        postDto: UpdatePostDto,
         postImagesFileNames: string[],
         baseUrl: string
     ): Promise<PostWithUsername> {

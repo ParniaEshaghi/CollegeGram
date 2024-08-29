@@ -1,4 +1,5 @@
 import {
+    BadRequestError,
     ForbiddenError,
     HttpError,
     NotFoundError,
@@ -15,6 +16,7 @@ import {
 import { CreatePost, PostRepository } from "./post.repository";
 import path from "path";
 import { promises as fs } from "fs";
+import { UpdatePostDto } from "./dto/updatePost.dto";
 
 export class PostService {
     constructor(private postRepo: PostRepository) {}
@@ -73,7 +75,7 @@ export class PostService {
     public async updatePost(
         user: User,
         postId: string,
-        postDto: PostDto,
+        postDto: UpdatePostDto,
         postImagesFileNames: string[],
         baseUrl: string
     ): Promise<PostWithUsername> {
@@ -89,12 +91,28 @@ export class PostService {
             throw new ForbiddenError();
         }
 
-        await this.deleteUnusedImages(post.images);
+        const deletedImagesFilenames = postDto.deletedImages.map(
+            (deletedImageLink) => {
+                const deletedImagesFilename = deletedImageLink.match(
+                    /[^/]+\.(jpg|jpeg|png|gif)$/i
+                );
+                if (!deletedImagesFilename) {
+                    throw new BadRequestError();
+                }
+                return deletedImagesFilename[0];
+            }
+        );
+
+        const postImages = post.images.filter(
+            (image) => !deletedImagesFilenames.includes(image)
+        );
+
+        postImages.push(...postImagesFileNames);
 
         const editedPost: UpdatePost = {
             id: postId,
             user: user,
-            images: postImagesFileNames,
+            images: postImages,
             caption: postDto.caption,
             tags: this.extractTags(postDto.caption),
             mentions: postDto.mentions,
@@ -102,19 +120,6 @@ export class PostService {
         const updatedPost = await this.postRepo.update(editedPost);
 
         return toPostWithUsername(updatedPost, baseUrl);
-    }
-
-    public async deleteUnusedImages(images: string[]) {
-        for (const img of images) {
-            const filePath = path.join(
-                __dirname,
-                "../../../images/posts/",
-                img
-            );
-            await fs.unlink(filePath).catch(() => {
-                console.error(`Failed to delete image: ${filePath}`);
-            });
-        }
     }
 
     public async getPost(postId: string): Promise<Post | null> {

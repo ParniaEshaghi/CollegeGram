@@ -1,4 +1,3 @@
-import { ForgetPasswordService } from "./forgetPassword/forgetPassword.service";
 import { SavedPostService } from "./savedPost/savedPost.service";
 import { EditProfileDto } from "./user/dto/edit-profile.dto";
 import { LoginDto } from "./user/dto/login.dto";

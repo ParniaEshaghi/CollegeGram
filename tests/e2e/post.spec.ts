@@ -4,6 +4,7 @@ import request from "supertest";
 import { createTestDb } from "../../src/utility/test-db";
 import { PostDto } from "../../src/modules/postHandler/post/dto/post.dto";
 import { ServiceFactory } from "../../src/utility/service-factory";
+import { UpdatePostDto } from "../../src/modules/postHandler/post/dto/updatePost.dto";
 
 describe("Post route test suite", () => {
     let app: Express;
@@ -186,19 +187,20 @@ describe("Post route test suite", () => {
                 .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
-            const updatedPostDto: PostDto = {
+            const updatedPostDto: UpdatePostDto = {
                 caption: "This #is a test #post #test",
                 mentions: ["user1", "user2", "user3"],
+                deletedImages: [create_post_response.body.images[0]],
             };
+
+            console.log(create_post_response.body.images[0]);
 
             const response_editpost = await request(app)
                 .post(`/api/post/updatepost/${create_post_response.body.id}`)
                 .set("Cookie", [cookie])
                 .field("caption", updatedPostDto.caption)
-                .field("mentions0", "user1")
-                .field("mentions1", "user2")
-                .field("mentions2", "user3")
-                .attach("images", Buffer.from(""), "testFile2.jpg")
+                .field("mentions", updatedPostDto.mentions)
+                .field("deletedImages", updatedPostDto.deletedImages)
                 .attach("images", Buffer.from(""), "testFile3.jpg")
                 .attach("images", Buffer.from(""), "testFile4.jpg")
                 .expect(200);

@@ -26,7 +26,8 @@
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: ["@mention1", "@mention2"]
+ *                   example: "mention1"
+ *                 example: ["mention1", "mention2"]
  *               images:
  *                 type: array
  *                 items:
@@ -154,7 +155,12 @@
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: ["@newmention1", "@newmention2"]
+ *                 example: ["newmention1", "newmention2"]
+ *               deletedImages:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["staticimagelink", "staticimagelink"]
  *               images:
  *                 type: array
  *                 items:

@@ -4,6 +4,7 @@ import { createTestDb } from "../../src/utility/test-db";
 import { ServiceFactory } from "../../src/utility/service-factory";
 import { NotFoundError, ForbiddenError } from "../../src/utility/http-errors";
 import { randomUUID } from "crypto";
+import { UpdatePostDto } from "../../src/modules/postHandler/post/dto/updatePost.dto";
 
 describe("PostService test suite", () => {
     let serviceFactory: ServiceFactory;
@@ -76,6 +77,7 @@ describe("PostService test suite", () => {
         const updatedPostDto = {
             caption: "Updated caption",
             mentions: ["updated_mention"],
+            deletedImages: [],
         };
 
         const updatedPost = await postService.updatePost(
@@ -108,9 +110,10 @@ describe("PostService test suite", () => {
 
         const anotherUser = await userService.getUserByUsername("anotherUser");
 
-        const updatedPostDto = {
+        const updatedPostDto: UpdatePostDto = {
             caption: "Updated caption",
             mentions: ["updated_mention"],
+            deletedImages: [],
         };
 
         await expect(
@@ -130,6 +133,7 @@ describe("PostService test suite", () => {
         const updatedPostDto = {
             caption: "Updated caption",
             mentions: ["updated_mention"],
+            deletedImages: [],
         };
 
         await expect(
