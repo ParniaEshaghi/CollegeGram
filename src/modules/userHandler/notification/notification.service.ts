@@ -1,4 +1,4 @@
-import { date } from "zod";
+import { date, number } from "zod";
 import { UnauthorizedError } from "../../../utility/http-errors";
 import { User } from "../user/model/user.model";
 
@@ -76,12 +76,12 @@ export class NotificationService {
 
     private filterFollowingnotif(
         userFollowings: UserRelationEntity[],
-        userNotifs: notificationData
+        userNotifs: NotificationEntity[]
     ): NotificationEntity[] {
         const filteredData: NotificationEntity[] = [];
 
         userFollowings.forEach((userFollowing) => {
-            userNotifs.data.forEach((userNotif) => {
+            userNotifs.forEach((userNotif) => {
                 if (userFollowing.following.id == userNotif.sender.id) {
                     if (userFollowing.createdAt < userNotif.createdAt) {
                         filteredData.push(userNotif);
@@ -167,7 +167,7 @@ export class NotificationService {
 
         const filteredData = this.filterFollowingnotif(
             userFollowings,
-            userNotifs
+            userNotifs.data
         );
 
         for (const fData of filteredData) {
@@ -196,5 +196,72 @@ export class NotificationService {
         };
 
         return response;
+    }
+
+    public async getAllUserUnreadNotifications(user: User): Promise<number> {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+
+        let totalUserUnreadNotifications = 0;
+
+        const userAllNotifs = await this.notificationRepo.getUserAllNotifs(
+            user
+        );
+
+        for (const userNotif of userAllNotifs) {
+            const notif =
+                await this.userNotificationsService.findByUserAndNotification(
+                    userNotif.recipient,
+                    userNotif
+                );
+
+            if (notif) {
+                if (notif.isRead == false) {
+                    totalUserUnreadNotifications += 1;
+                }
+            }
+        }
+
+        return totalUserUnreadNotifications;
+    }
+
+    public async getAllUserFollowingsUnreadNotifications(
+        user: User
+    ): Promise<number> {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+
+        let totalUserFollowingsUnreadNotifications = 0;
+
+        const userFollowings = await this.userRelationService.allFolloweingList(
+            user.username
+        );
+        const userNotifs =
+            await this.notificationRepo.getAllUserFollowingsNotifs(
+                userFollowings
+            );
+
+        const filteredData = this.filterFollowingnotif(
+            userFollowings,
+            userNotifs
+        );
+
+        for (const fData of filteredData) {
+            const notif =
+                await this.userNotificationsService.findByUserAndNotification(
+                    user,
+                    fData
+                );
+
+            if (notif) {
+                if (notif.isRead == false) {
+                    totalUserFollowingsUnreadNotifications += 1;
+                }
+            }
+        }
+
+        return totalUserFollowingsUnreadNotifications;
     }
 }
