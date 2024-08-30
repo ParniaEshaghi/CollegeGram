@@ -510,4 +510,46 @@ describe("User relation service test suite", () => {
             expect(response.message).toBe("User followed");
         });
     });
+
+    describe("Close friends", () => {
+        it("should add user to close friends", async () => {
+            await userRelationService.follow(
+                (await userService.getUserByUsername("test"))!,
+                "follow_test"
+            );
+
+            const response = await userRelationService.addCloseFriend(
+                (await userService.getUserByUsername("follow_test"))!,
+                "test"
+            );
+            expect(response.message).toBe("User added to close friends");
+        });
+
+        it("should fail to add to close friends if not followed", async () => {
+            expect(
+                userRelationService.addCloseFriend(
+                    (await userService.getUserByUsername("follow_test"))!,
+                    "test"
+                )
+            ).rejects.toThrow(new BadRequestError());
+        });
+
+        it("should remove a user from close friends", async () => {
+            await userRelationService.follow(
+                (await userService.getUserByUsername("test"))!,
+                "follow_test"
+            );
+
+            await userRelationService.addCloseFriend(
+                (await userService.getUserByUsername("follow_test"))!,
+                "test"
+            );
+
+            const response = await userRelationService.removeCloseFriend(
+                (await userService.getUserByUsername("follow_test"))!,
+                "test"
+            );
+            expect(response.message).toBe("User removed from close friends");
+        });
+    });
 });

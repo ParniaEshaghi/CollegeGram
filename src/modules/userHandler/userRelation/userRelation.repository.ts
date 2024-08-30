@@ -94,6 +94,22 @@ export class UserRelationRepository {
         await this.userRelationRepo.save(userRelation);
     }
 
+    public async createCloseFriend(userRelation: UserRelation): Promise<void> {
+        await this.userRelationRepo.softDelete({
+            follower: userRelation.follower,
+            following: userRelation.following,
+        });
+        await this.userRelationRepo.save(userRelation);
+    }
+
+    public async deleteCloseFriend(userRelation: UserRelation): Promise<void> {
+        await this.userRelationRepo.softDelete({
+            follower: userRelation.follower,
+            following: userRelation.following,
+        });
+        await this.userRelationRepo.save(userRelation);
+    }
+
     public async checkExistance(
         follower: User,
         following: User
@@ -116,7 +132,10 @@ export class UserRelationRepository {
         const [response, total] = await this.userRelationRepo.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
-            where: { following: { username: user.username } },
+            where: {
+                following: { username: user.username },
+                followStatus: "followed" || "request accepted" || "close",
+            },
             relations: ["follower"],
         });
 
@@ -131,7 +150,46 @@ export class UserRelationRepository {
         const [response, total] = await this.userRelationRepo.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
-            where: { follower: { username: user.username } },
+            where: {
+                follower: { username: user.username },
+                followStatus: "followed" || "request accepted" || "close",
+            },
+            relations: ["following"],
+        });
+
+        return { data: response.map((res) => res.following), total: total };
+    }
+
+    public async getCloseFriends(
+        user: User,
+        page: number,
+        limit: number
+    ): Promise<followerFollowing> {
+        const [response, total] = await this.userRelationRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: {
+                following: { username: user.username },
+                followStatus: "close",
+            },
+            relations: ["follower"],
+        });
+
+        return { data: response.map((res) => res.follower), total: total };
+    }
+
+    public async getBlockList(
+        user: User,
+        page: number,
+        limit: number
+    ): Promise<followerFollowing> {
+        const [response, total] = await this.userRelationRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: {
+                follower: { username: user.username },
+                followStatus: "blocked",
+            },
             relations: ["following"],
         });
 
