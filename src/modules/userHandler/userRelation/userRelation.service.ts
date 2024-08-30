@@ -355,6 +355,7 @@ export class UserRelationService {
     public async allFolloweList(user: User) {
         return await this.userRelationRepo.getAllFollowers(user);
     }
+
     public async followerList(
         session_user: User,
         username: string,
@@ -431,7 +432,6 @@ export class UserRelationService {
         const followingList = await this.userRelationRepo.getAllFollowings(
             user
         );
-
         return followingList;
     }
 

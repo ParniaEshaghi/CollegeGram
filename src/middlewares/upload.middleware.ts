@@ -67,16 +67,11 @@ export const postUpload: RequestHandler = (req, res, next) => {
         fileFilter: (req, file, cb) => {
             checkFileType(file, cb);
         },
-    }).array("images");
+    }).any();
 
     upload(req, res, (err) => {
         if (err) {
             return res.status(400).json({ message: err.message });
-        }
-        if (!req.files || req.files.length == 0) {
-            return res
-                .status(400)
-                .json({ message: "Posts require at least one image" });
         }
         next();
     });

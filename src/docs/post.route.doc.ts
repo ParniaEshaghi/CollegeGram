@@ -26,7 +26,8 @@
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: ["@mention1", "@mention2"]
+ *                   example: "mention1"
+ *                 example: ["mention1", "mention2"]
  *               images:
  *                 type: array
  *                 items:
@@ -150,11 +151,17 @@
  *                 type: string
  *                 description: The updated caption for the post.
  *                 example: "Updated caption #newtag"
- *               mentions:
+ *               deletedImages:
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: ["@newmention1", "@newmention2"]
+ *                 example: ["staticimagelink", "staticimagelink"]
+ *               mentions0:
+ *                 type: string
+ *               mentions1:
+ *                 type: string
+ *               mentions2:
+ *                 type: string
  *               images:
  *                 type: array
  *                 items:
