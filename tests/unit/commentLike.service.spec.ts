@@ -52,7 +52,11 @@ describe("CommentLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test2", "test3"] },
+            {
+                caption: "test caption",
+                mentions: ["test2", "test3"],
+                close_status: false,
+            },
             ["testfile.jpg"],
             "localhost:3000"
         );
@@ -72,7 +76,11 @@ describe("CommentLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test2", "test3"] },
+            {
+                caption: "test caption",
+                mentions: ["test2", "test3"],
+                close_status: false,
+            },
             ["testfile.jpg"],
             "localhost:3000"
         );
@@ -90,7 +98,11 @@ describe("CommentLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test2", "test3"] },
+            {
+                caption: "test caption",
+                mentions: ["test2", "test3"],
+                close_status: false,
+            },
             ["testfile.jpg"],
             "localhost:3000"
         );
@@ -107,7 +119,11 @@ describe("CommentLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test2", "test3"] },
+            {
+                caption: "test caption",
+                mentions: ["test2", "test3"],
+                close_status: false,
+            },
             ["testfile.jpg"],
             "localhost:3000"
         );

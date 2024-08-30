@@ -46,6 +46,7 @@ describe("PostService test suite", () => {
         const postDto = {
             caption: "Test caption",
             mentions: ["test2", "test3"],
+            close_status: false,
         };
 
         const result = await postService.createPost(
@@ -74,6 +75,7 @@ describe("PostService test suite", () => {
         const postDto = {
             caption: "Test caption",
             mentions: ["test2", "test3"],
+            close_status: false,
         };
 
         const post = await postService.createPost(
@@ -86,6 +88,7 @@ describe("PostService test suite", () => {
         const updatedPostDto = {
             caption: "Updated caption",
             mentions: ["test2", "test3"],
+            close_status: false,
         };
 
         const updatedPost = await postService.updatePost(
@@ -107,6 +110,7 @@ describe("PostService test suite", () => {
         const postDto = {
             caption: "Test caption",
             mentions: ["test2", "test3"],
+            close_status: false,
         };
 
         const post = await postService.createPost(
@@ -121,6 +125,7 @@ describe("PostService test suite", () => {
         const updatedPostDto = {
             caption: "Updated caption",
             mentions: ["test2", "test3"],
+            close_status: false,
         };
 
         await expect(
@@ -140,6 +145,7 @@ describe("PostService test suite", () => {
         const updatedPostDto = {
             caption: "Updated caption",
             mentions: ["test2", "test3"],
+            close_status: true,
         };
 
         await expect(

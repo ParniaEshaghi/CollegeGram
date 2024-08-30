@@ -61,6 +61,7 @@ describe("Comment service test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
+                close_status: false,
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -84,6 +85,7 @@ describe("Comment service test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
+                close_status: false,
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -101,8 +103,8 @@ describe("Comment service test suite", () => {
         const notifications = await notificationService.findByType("comment");
 
         const notification = notifications[0];
-        expect(notification.recipient).toEqual(user);
-        expect(notification.sender).toEqual(user);
+        expect(notification.recipient.username).toEqual(user!.username);
+        expect(notification.sender.username).toEqual(user!.username);
         expect(notification.type).toEqual("comment");
         expect(notification.isRead).toEqual(false);
     });
@@ -114,6 +116,7 @@ describe("Comment service test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
+                close_status: false,
             },
             ["testfile.jpg"],
             "localhost:3000"

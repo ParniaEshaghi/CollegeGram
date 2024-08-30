@@ -62,7 +62,11 @@ describe("PostLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test2", "test3"] },
+            {
+                caption: "test caption",
+                mentions: ["test2", "test3"],
+                close_status: false,
+            },
             ["testfile.jpg"],
             "localhost:3000"
         );
@@ -76,7 +80,11 @@ describe("PostLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test2", "test3"] },
+            {
+                caption: "test caption",
+                mentions: ["test2", "test3"],
+                close_status: false,
+            },
             ["testfile.jpg"],
             "localhost:3000"
         );
@@ -84,11 +92,11 @@ describe("PostLikeService test suite", () => {
         const result = await postLikeService.likePost(user!, post.id);
         expect(result.message).toEqual("Post liked");
 
-        const notifications = await notificationService.findByType("likePost")
+        const notifications = await notificationService.findByType("likePost");
 
         const notification = notifications[0];
-        expect(notification.recipient).toEqual(user);
-        expect(notification.sender).toEqual(user);
+        expect(notification.recipient.username).toEqual(user!.username);
+        expect(notification.sender.username).toEqual(user!.username);
         expect(notification.type).toEqual("likePost");
         expect(notification.isRead).toEqual(false);
     });
@@ -97,7 +105,11 @@ describe("PostLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test2", "test3"] },
+            {
+                caption: "test caption",
+                mentions: ["test2", "test3"],
+                close_status: false,
+            },
             ["testfile.jpg"],
             "localhost:3000"
         );
@@ -111,7 +123,11 @@ describe("PostLikeService test suite", () => {
         const user = await userService.getUserByUsername("test");
         const post = await postService.createPost(
             user!,
-            { caption: "test caption", mentions: ["test2", "test3"] },
+            {
+                caption: "test caption",
+                mentions: ["test2", "test3"],
+                close_status: false,
+            },
             ["testfile.jpg"],
             "localhost:3000"
         );
