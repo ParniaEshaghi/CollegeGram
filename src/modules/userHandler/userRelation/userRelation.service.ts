@@ -331,10 +331,24 @@ export class UserRelationService {
             throw new NotFoundError();
         }
 
-        const posts = await this.userService.getUserPosts(username, baseUrl);
-
         const followStatus = await this.getFollowStatus(session_user, username);
         const profileFollowStatus = toProfileFollowStatus(followStatus);
+
+        if (
+            profileFollowStatus === "blocked" ||
+            (user.profileStatus === "private" &&
+                profileFollowStatus !== "followed")
+        ) {
+            return toProfile(user, profileFollowStatus, [], baseUrl);
+        }
+
+        const posts = await this.userService.getUserPosts(username, baseUrl);
+        if (followStatus === "followed") {
+            const normalPosts = posts.filter(
+                (post) => post.close_status === false
+            );
+            return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
+        }
         return toProfile(user, profileFollowStatus, posts, baseUrl);
     }
 

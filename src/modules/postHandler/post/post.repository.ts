@@ -2,6 +2,7 @@ import { DataSource, Repository } from "typeorm";
 import { Post, UpdatePost } from "./model/post.model";
 import { PostEntity } from "./entity/post.entity";
 import { User } from "../../userHandler/user/model/user.model";
+import { UserEntity } from "../../userHandler/user/entity/user.entity";
 
 export interface CreatePost {
     user: User;
@@ -12,16 +13,26 @@ export interface CreatePost {
     like_count: number;
     comment_count: number;
     saved_count: number;
+    close_status: boolean;
 }
 
 export class PostRepository {
     private postRepo: Repository<PostEntity>;
-    constructor(appDataSorce: DataSource) {
-        this.postRepo = appDataSorce.getRepository(PostEntity);
+    constructor(private appDataSource: DataSource) {
+        this.postRepo = appDataSource.getRepository(PostEntity);
     }
 
-    public create(post: CreatePost): Promise<Post> {
-        return this.postRepo.save(post);
+    public async create(post: CreatePost): Promise<Post> {
+        return await this.appDataSource.manager.transaction(async (manager) => {
+            const userRepo = manager.getRepository(UserEntity);
+            const postRepo = manager.getRepository(PostEntity);
+            const newPost = await postRepo.save(post);
+            await userRepo.update(
+                { username: post.user.username },
+                { post_count: () => "post_count + 1" }
+            );
+            return newPost;
+        });
     }
 
     public findPostById(postId: string): Promise<Post | null> {

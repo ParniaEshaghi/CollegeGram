@@ -10,6 +10,7 @@ export interface Post {
     like_count: number;
     comment_count: number;
     saved_count: number;
+    close_status: boolean;
 }
 
 export type UpdatePost = Omit<

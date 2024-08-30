@@ -7,6 +7,7 @@ const arraySchema = z
 export const postDto = z.object({
     caption: z.string(),
     mentions: arraySchema,
+    close_status: z.boolean(),
 });
 
 export type PostDto = z.infer<typeof postDto>;

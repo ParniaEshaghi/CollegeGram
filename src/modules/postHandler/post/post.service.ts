@@ -1,5 +1,4 @@
 import {
-    BadRequestError,
     ForbiddenError,
     HttpError,
     NotFoundError,
@@ -48,6 +47,7 @@ export class PostService {
             like_count: 0,
             comment_count: 0,
             saved_count: 0,
+            close_status: postDto.close_status,
         };
 
         const createdPost = await this.postRepo.create(newPost);
@@ -124,6 +124,7 @@ export class PostService {
             caption: postDto.caption,
             tags: this.extractTags(postDto.caption),
             mentions: postDto.mentions,
+            close_status: postDto.close_status,
         };
         const updatedPost = await this.postRepo.update(editedPost);
 

@@ -55,6 +55,9 @@ export class PostEntity {
     @Column()
     saved_count!: number;
 
+    @Column()
+    close_status!: boolean;
+
     @CreateDateColumn()
     createdAt!: Date;
 
