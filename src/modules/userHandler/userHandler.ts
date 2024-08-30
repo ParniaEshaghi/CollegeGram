@@ -51,7 +51,18 @@ export class UserHandler {
     }
 
     public async getProfileInfo(user: User, baseUrl: string) {
-        return this.userService.getProfileInfo(user, baseUrl);
+        const unreadNotifications =
+            (await this.notificationService.getAllUserUnreadNotifications(
+                user
+            )) +
+            (await this.notificationService.getAllUserFollowingsUnreadNotifications(
+                user
+            ));
+        return this.userService.getProfileInfo(
+            user,
+            baseUrl,
+            unreadNotifications
+        );
     }
 
     public async getUserPosts(username: string, baseUrl: string) {

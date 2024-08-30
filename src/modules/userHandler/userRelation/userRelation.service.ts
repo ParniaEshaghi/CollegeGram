@@ -355,7 +355,6 @@ export class UserRelationService {
     public async allFolloweList(user: User) {
         return await this.userRelationRepo.getAllFollowers(user);
     }
-
     public async followerList(
         session_user: User,
         username: string,

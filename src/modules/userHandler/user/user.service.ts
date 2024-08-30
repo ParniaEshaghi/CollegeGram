@@ -123,7 +123,9 @@ export class UserService {
             throw new UnauthorizedError();
         }
 
-        pictureFilename = pictureFilename ? pictureFilename : user.profilePicture;
+        pictureFilename = pictureFilename
+            ? pictureFilename
+            : user.profilePicture;
 
         try {
             await this.userRepo.updateProfile(user, pictureFilename, dto);
@@ -136,12 +138,16 @@ export class UserService {
         return toEditProfileInfo(updatedUser!, baseUrl);
     }
 
-    public async getProfileInfo(user: User, baseUrl: string) {
+    public async getProfileInfo(
+        user: User,
+        baseUrl: string,
+        unreadNotifications: number
+    ) {
         if (!user) {
             throw new UnauthorizedError();
         }
         const posts = await this.getUserPosts(user.username, baseUrl);
-        return toProfileInfo(user, posts, baseUrl);
+        return toProfileInfo(user, posts, baseUrl, unreadNotifications);
     }
 
     public async getUserPosts(username: string, baseUrl: string) {

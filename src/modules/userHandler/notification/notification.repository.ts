@@ -60,6 +60,18 @@ export class NotificationRepository {
         return { data: response, total: total };
     }
 
+    public async getUserAllNotifs(user: User): Promise<Notification[]> {
+        const reponse = await this.notificationRepo.find({
+            where: { recipient: { username: user.username } },
+            relations: ["recipient", "sender", "post", "comment"],
+            order: {
+                createdAt: "DESC",
+            },
+        });
+
+        return reponse;
+    }
+
     public async getUserFollowingsNotifications(
         followings: UserRelationEntity[],
         page: number,
@@ -79,6 +91,23 @@ export class NotificationRepository {
         });
 
         return { data: response, total: total };
+    }
+
+    public async getAllUserFollowingsNotifs(
+        followings: UserRelationEntity[]
+    ): Promise<NotificationEntity[]> {
+        const response = await this.notificationRepo.find({
+            where: {
+                sender: {
+                    id: In(
+                        followings.map((following) => following.following.id)
+                    ),
+                },
+            },
+            relations: ["recipient", "sender", "post", "comment"],
+        });
+
+        return response;
     }
 
     public async markNotificationsAsRead(

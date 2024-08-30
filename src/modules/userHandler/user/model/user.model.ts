@@ -26,12 +26,14 @@ export const toUserWithoutPassword = (user: User): UserWithoutPassword => {
 
 export type ProfileInfo = Omit<User, "password"> & {
     posts: any[];
+    unreadNotifications: number;
 };
 
 export const toProfileInfo = (
     user: User,
     posts: PostWithUsername[],
-    baseUrl: string
+    baseUrl: string,
+    unreadNotifications: number
 ): ProfileInfo => {
     const { password, profilePicture, ...profileInfo } = user;
     return {
@@ -40,6 +42,7 @@ export const toProfileInfo = (
         profilePicture: user.profilePicture
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",
+        unreadNotifications: unreadNotifications,
     };
 };
 
