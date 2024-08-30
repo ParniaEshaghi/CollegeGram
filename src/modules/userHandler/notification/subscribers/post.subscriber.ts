@@ -5,17 +5,22 @@ import {
     UpdateEvent,
 } from "typeorm";
 import { PostLikeEntity } from "../../../postHandler/postLike/entity/postLike.entity";
-import { CreateNotification } from "../model/notification.model";
+import { CreateNotification, Notification } from "../model/notification.model";
 import { NotificationService } from "../notification.service";
 import { PostEntity } from "../../../postHandler/post/entity/post.entity";
 import { UserService } from "../../user/user.service";
 import { User } from "../../user/model/user.model";
+import { UserNotificationService } from "../userNotification/userNotification.service";
+import { CreateUserNotification } from "../userNotification/model/userNotification.model";
+import { UserRelationService } from "../../userRelation/userRelation.service";
 
 @EventSubscriber()
 export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
     constructor(
         private notificationService: NotificationService,
-        private userService: UserService
+        private userService: UserService,
+        private userNotificationsService: UserNotificationService,
+        private userRelationService: UserRelationService
     ) {}
 
     listenTo() {
@@ -32,9 +37,39 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                         mention
                     );
                     if (notification) {
-                        await this.notificationService.createNotification(
-                            notification
-                        );
+                        const notif =
+                            await this.notificationService.createNotification(
+                                notification
+                            );
+                        const userNotification =
+                            await this.userNotificationsService.userNotif(
+                                mention,
+                                notif
+                            );
+
+                        if (userNotification) {
+                            this.userNotificationsService.createUserNotification(
+                                userNotification
+                            );
+                        }
+
+                        const senderFollowers =
+                            await this.userNotificationsService.getSenderFollowers(
+                                entity.user
+                            );
+
+                        senderFollowers.map(async (senderFollower) => {
+                            const userNotification =
+                                await this.userNotificationsService.userNotif(
+                                    senderFollower.follower.username,
+                                    notif
+                                );
+                            if (userNotification) {
+                                this.userNotificationsService.createUserNotification(
+                                    userNotification
+                                );
+                            }
+                        });
                     }
                 });
             }
@@ -51,9 +86,38 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                         mention
                     );
                     if (notification) {
-                        await this.notificationService.createNotification(
-                            notification
-                        );
+                        const notif =
+                            await this.notificationService.createNotification(
+                                notification
+                            );
+                        const userNotification =
+                            await this.userNotificationsService.userNotif(
+                                mention,
+                                notif
+                            );
+                        if (userNotification) {
+                            this.userNotificationsService.createUserNotification(
+                                userNotification
+                            );
+                        }
+
+                        const senderFollowers =
+                            await this.userNotificationsService.getSenderFollowers(
+                                entity.user
+                            );
+
+                        senderFollowers.map(async (senderFollower) => {
+                            const userNotification =
+                                await this.userNotificationsService.userNotif(
+                                    senderFollower.follower.username,
+                                    notif
+                                );
+                            if (userNotification) {
+                                this.userNotificationsService.createUserNotification(
+                                    userNotification
+                                );
+                            }
+                        });
                     }
                 });
             }

@@ -195,4 +195,22 @@ export class UserRelationRepository {
 
         return { data: response.map((res) => res.following), total: total };
     }
+
+    public async getAllFollowings(user: User): Promise<UserRelationEntity[]> {
+        const [response, total] = await this.userRelationRepo.findAndCount({
+            where: { follower: { username: user.username } },
+            relations: ["following"],
+        });
+
+        return response;
+    }
+
+    public async getAllFollowers(user: User): Promise<UserRelationEntity[]> {
+        const [response, total] = await this.userRelationRepo.findAndCount({
+            where: { following: { username: user.username } },
+            relations: ["follower"],
+        });
+
+        return response;
+    }
 }

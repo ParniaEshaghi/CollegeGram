@@ -352,6 +352,9 @@ export class UserRelationService {
         return toProfile(user, profileFollowStatus, posts, baseUrl);
     }
 
+    public async allFolloweList(user: User) {
+        return await this.userRelationRepo.getAllFollowers(user);
+    }
     public async followerList(
         session_user: User,
         username: string,
@@ -420,71 +423,16 @@ export class UserRelationService {
         };
     }
 
-    public async closeFriendList(
-        session_user: User,
-        username: string,
-        page: number,
-        limit: number,
-        baseUrl: string
-    ): Promise<followerFollowingListUserResponse | undefined> {
-        if (!session_user) {
-            throw new UnauthorizedError();
-        }
+    public async allFolloweingList(username: string) {
         const user = await this.userService.getUserByUsername(username);
         if (!user) {
             throw new NotFoundError();
         }
 
-        const closeFriendList = await this.userRelationRepo.getCloseFriends(
-            user,
-            page,
-            limit
+        const followingList = await this.userRelationRepo.getAllFollowings(
+            user
         );
 
-        return {
-            data: closeFriendList.data.map((follower) =>
-                toFollowerFollowingListUser(follower, baseUrl)
-            ),
-            meta: {
-                page: page,
-                limit: limit,
-                total: closeFriendList.total,
-                totalPage: Math.ceil(closeFriendList?.total / limit),
-            },
-        };
-    }
-
-    public async blockList(
-        session_user: User,
-        username: string,
-        page: number,
-        limit: number,
-        baseUrl: string
-    ): Promise<followerFollowingListUserResponse | undefined> {
-        if (!session_user) {
-            throw new UnauthorizedError();
-        }
-        const user = await this.userService.getUserByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
-
-        const blockList = await this.userRelationRepo.getBlockList(
-            user,
-            page,
-            limit
-        );
-
-        return {
-            data: blockList.data.map((followeing) =>
-                toFollowerFollowingListUser(followeing, baseUrl)
-            ),
-            meta: {
-                page: page,
-                limit: limit,
-                total: blockList.total,
-                totalPage: Math.ceil(blockList?.total / limit),
-            },
-        };
+        return followingList;
     }
 }

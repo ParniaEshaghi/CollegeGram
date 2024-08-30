@@ -12,6 +12,7 @@ import { PostLikeEntity } from "../../../postHandler/postLike/entity/postLike.en
 import { CommentLikeEntity } from "../../../postHandler/commentLike/entity/commentLike.entity";
 import { UserRelationEntity } from "../../userRelation/entity/userRelation.entity";
 import { NotificationEntity } from "../../notification/entity/notification.entity";
+import { UserNotificationEntity } from "../../notification/userNotification/entity/userNotification.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -80,6 +81,12 @@ export class UserEntity {
 
     @OneToMany(() => NotificationEntity, (relation) => relation.sender)
     senderNotifications!: NotificationEntity[];
+
+    @OneToMany(
+        () => UserNotificationEntity,
+        (userNotification) => userNotification.user
+    )
+    userNotifications!: UserNotificationEntity[];
 
     @CreateDateColumn()
     createdAt!: Date;

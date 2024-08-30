@@ -6,12 +6,16 @@ import {
 import { PostLikeEntity } from "../../../postHandler/postLike/entity/postLike.entity";
 import { CreateNotification } from "../model/notification.model";
 import { NotificationService } from "../notification.service";
+import { UserNotificationService } from "../userNotification/userNotification.service";
 
 @EventSubscriber()
 export class PostLikeSubscriber
     implements EntitySubscriberInterface<PostLikeEntity>
 {
-    constructor(private notificationService: NotificationService) {}
+    constructor(
+        private notificationService: NotificationService,
+        private userNotificationsService: UserNotificationService
+    ) {}
 
     listenTo() {
         return PostLikeEntity;
@@ -24,6 +28,36 @@ export class PostLikeSubscriber
             type: "likePost",
             post: event.entity.post,
         };
-        await this.notificationService.createNotification(notification);
+        const notif = await this.notificationService.createNotification(
+            notification
+        );
+
+        const userNotification = await this.userNotificationsService.userNotif(
+            event.entity.post.user.username,
+            notif
+        );
+        if (userNotification) {
+            this.userNotificationsService.createUserNotification(
+                userNotification
+            );
+        }
+
+        const senderFollowers =
+            await this.userNotificationsService.getSenderFollowers(
+                event.entity.user
+            );
+
+        senderFollowers.map(async (senderFollower) => {
+            const userNotification =
+                await this.userNotificationsService.userNotif(
+                    senderFollower.follower.username,
+                    notif
+                );
+            if (userNotification) {
+                this.userNotificationsService.createUserNotification(
+                    userNotification
+                );
+            }
+        });
     }
 }

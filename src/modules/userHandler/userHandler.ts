@@ -1,4 +1,5 @@
 import { ForgetPasswordService } from "./forgetPassword/forgetPassword.service";
+import { NotificationService } from "./notification/notification.service";
 import { SavedPostService } from "./savedPost/savedPost.service";
 import { EditProfileDto } from "./user/dto/edit-profile.dto";
 import { LoginDto } from "./user/dto/login.dto";
@@ -12,7 +13,8 @@ export class UserHandler {
     constructor(
         private userService: UserService,
         private userRelationService: UserRelationService,
-        private savedService: SavedPostService
+        private savedService: SavedPostService,
+        private notificationService: NotificationService
     ) {}
 
     public async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -123,6 +125,10 @@ export class UserHandler {
         );
     }
 
+    public async allFollowingList(username: string) {
+        return this.userRelationService.allFolloweingList(username);
+    }
+
     public async savePost(user: User, postId: string) {
         return this.savedService.savePost(user, postId);
     }
@@ -147,46 +153,31 @@ export class UserHandler {
         return this.userRelationService.unblock(user, following_username);
     }
 
-    public async addCloseFriend(user: User, follower_username: string) {
-        return this.userRelationService.addCloseFriend(user, follower_username);
-    }
-
-    public async removeCloseFriend(user: User, follower_username: string) {
-        return this.userRelationService.removeCloseFriend(
+    public async getUserNotifications(
+        user: User,
+        baseUrl: string,
+        page: number,
+        limit: number
+    ) {
+        return await this.notificationService.getUserNotifications(
             user,
-            follower_username
+            baseUrl,
+            page,
+            limit
         );
     }
 
-    public async closeFriendList(
-        session_user: User,
-        username: string,
+    public async getUserFollowingsNotifications(
+        user: User,
+        baseUrl: string,
         page: number,
-        limit: number,
-        baseUrl: string
-    ): Promise<followerFollowingListUserResponse | undefined> {
-        return this.userRelationService.closeFriendList(
-            session_user,
-            username,
+        limit: number
+    ) {
+        return await this.notificationService.getUserFollowingsNotifications(
+            user,
+            baseUrl,
             page,
-            limit,
-            baseUrl
-        );
-    }
-
-    public async blockList(
-        session_user: User,
-        username: string,
-        page: number,
-        limit: number,
-        baseUrl: string
-    ): Promise<followerFollowingListUserResponse | undefined> {
-        return this.userRelationService.blockList(
-            session_user,
-            username,
-            page,
-            limit,
-            baseUrl
+            limit
         );
     }
 }
