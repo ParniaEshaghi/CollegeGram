@@ -10,6 +10,34 @@ import { UserHandler } from "../modules/userHandler/userHandler";
 export const makeUserRouter = (userHandler: UserHandler) => {
     const app = Router();
 
+    app.get("/notifications", auth(userHandler), (req, res) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.getUserNotifications(
+                req.user,
+                req.base_url,
+                page,
+                limit
+            )
+        );
+    });
+
+    app.get("/followingsnotifications", auth(userHandler), (req, res) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.getUserFollowingsNotifications(
+                req.user,
+                req.base_url,
+                page,
+                limit
+            )
+        );
+    });
+
     app.post("/signup", (req, res) => {
         const dto = signUpDto.parse(req.body);
         handleExpress(res, () => userHandler.createUser(dto));

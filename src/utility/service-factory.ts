@@ -24,6 +24,8 @@ import { PostLikeSubscriber } from "../modules/userHandler/notification/subscrib
 import { CommentSubscriber } from "../modules/userHandler/notification/subscribers/comment.subscriber";
 import { UserRelationSubscriber } from "../modules/userHandler/notification/subscribers/userRelation.subscriber";
 import { PostSubscriber } from "../modules/userHandler/notification/subscribers/post.subscriber";
+import { UserNotificationRepository } from "../modules/userHandler/notification/userNotification/userNotification.repository";
+import { UserNotificationService } from "../modules/userHandler/notification/userNotification/userNotification.service";
 
 export class ServiceFactory {
     private dataSource: DataSource;
@@ -56,6 +58,9 @@ export class ServiceFactory {
     private commentSub: CommentSubscriber;
     private userRelationSub: UserRelationSubscriber;
     private postSub: PostSubscriber;
+
+    private userNotificationRepo: UserNotificationRepository;
+    private userNotificationsService: UserNotificationService;
 
     constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
@@ -108,6 +113,15 @@ export class ServiceFactory {
             this.commentService
         );
 
+        this.userNotificationRepo = new UserNotificationRepository(
+            this.dataSource
+        );
+        this.userNotificationsService = new UserNotificationService(
+            this.userNotificationRepo,
+            this.userService,
+            this.userRelationService
+        );
+
         this.postHandler = new PostHandler(
             this.postService,
             this.savedPostService,
@@ -116,31 +130,44 @@ export class ServiceFactory {
             this.commentLikeService
         );
 
+        this.notificationRepo = new NotificationRepository(dataSource);
+        this.notificationService = new NotificationService(
+            this.notificationRepo,
+            this.userRelationService,
+            this.userNotificationsService
+        );
+
         this.userHandler = new UserHandler(
             this.userService,
             this.userRelationService,
-            this.savedPostService
+            this.savedPostService,
+            this.notificationService
         );
 
-        this.notificationRepo = new NotificationRepository(dataSource);
-        this.notificationService = new NotificationService(
-            this.notificationRepo
+        this.postLikeSub = new PostLikeSubscriber(
+            this.notificationService,
+            this.userNotificationsService
         );
-
-        this.postLikeSub = new PostLikeSubscriber(this.notificationService);
         dataSource.subscribers.push(this.postLikeSub);
 
-        this.commentSub = new CommentSubscriber(this.notificationService);
+        this.commentSub = new CommentSubscriber(
+            this.notificationService,
+            this.userNotificationsService
+        );
         dataSource.subscribers.push(this.commentSub);
 
         this.userRelationSub = new UserRelationSubscriber(
-            this.notificationService
+            this.notificationService,
+            this.userNotificationsService
         );
+
         dataSource.subscribers.push(this.userRelationSub);
 
         this.postSub = new PostSubscriber(
             this.notificationService,
-            this.userService
+            this.userService,
+            this.userNotificationsService,
+            this.userRelationService
         );
         dataSource.subscribers.push(this.postSub);
     }

@@ -1,11 +1,13 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import { NotificationEntity } from "./entity/notification.entity";
 import {
     CreateNotification,
     Notification,
+    notificationData,
     NotificationTypes,
 } from "./model/notification.model";
 import { User } from "../user/model/user.model";
+import { UserRelationEntity } from "../userRelation/entity/userRelation.entity";
 
 export class NotificationRepository {
     private notificationRepo: Repository<NotificationEntity>;
@@ -38,5 +40,53 @@ export class NotificationRepository {
             },
             relations: ["recipient", "sender", "post", "comment"],
         });
+    }
+
+    public async getUserNotifications(
+        user: User,
+        page: number,
+        limit: number
+    ): Promise<notificationData> {
+        const [response, total] = await this.notificationRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: { recipient: { username: user.username } },
+            relations: ["recipient", "sender", "post", "comment"],
+            order: {
+                createdAt: "DESC",
+            },
+        });
+
+        return { data: response, total: total };
+    }
+
+    public async getUserFollowingsNotifications(
+        followings: UserRelationEntity[],
+        page: number,
+        limit: number
+    ): Promise<notificationData> {
+        const [response, total] = await this.notificationRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: {
+                sender: {
+                    id: In(
+                        followings.map((following) => following.following.id)
+                    ),
+                },
+            },
+            relations: ["recipient", "sender", "post", "comment"],
+        });
+
+        return { data: response, total: total };
+    }
+
+    public async markNotificationsAsRead(
+        notification: Notification
+    ): Promise<void> {
+        await this.notificationRepo.update(
+            { id: notification.id },
+            { isRead: true }
+        );
     }
 }
