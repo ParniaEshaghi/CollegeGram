@@ -436,7 +436,6 @@ export class UserRelationService {
 
     public async closeFriendList(
         session_user: User,
-        username: string,
         page: number,
         limit: number,
         baseUrl: string
@@ -444,12 +443,8 @@ export class UserRelationService {
         if (!session_user) {
             throw new UnauthorizedError();
         }
-        const user = await this.userService.getUserByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
         const closeFriendList = await this.userRelationRepo.getCloseFriends(
-            user,
+            session_user,
             page,
             limit
         );
@@ -469,7 +464,6 @@ export class UserRelationService {
 
     public async blockList(
         session_user: User,
-        username: string,
         page: number,
         limit: number,
         baseUrl: string
@@ -477,13 +471,9 @@ export class UserRelationService {
         if (!session_user) {
             throw new UnauthorizedError();
         }
-        const user = await this.userService.getUserByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
 
         const blockList = await this.userRelationRepo.getBlockList(
-            user,
+            session_user,
             page,
             limit
         );

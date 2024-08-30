@@ -22,17 +22,22 @@
  *               caption:
  *                 type: string
  *                 example: "This is a post caption #tag1"
+ *               required: false
  *               mentions:
  *                 type: array
  *                 items:
  *                   type: string
  *                   example: "mention1"
  *                 example: ["mention1", "mention2"]
+ *               required: false
  *               images:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *               close_status:
+ *                 type: boolean
+ *                 required: false
  *     responses:
  *       200:
  *         description: Post created successfully
@@ -156,17 +161,19 @@
  *                 items:
  *                   type: string
  *                 example: ["staticimagelink", "staticimagelink"]
- *               mentions0:
- *                 type: string
- *               mentions1:
- *                 type: string
- *               mentions2:
- *                 type: string
+ *               mentions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["mention1", "mention2"]
  *               images:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *               close_status:
+ *                 type: boolean
+ *                 required: false
  *     responses:
  *       200:
  *         description: Post updated successfully

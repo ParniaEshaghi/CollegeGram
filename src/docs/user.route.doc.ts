@@ -59,7 +59,6 @@
  *                 example: StrongPassword123
  *               keepMeSignedIn:
  *                 type: boolean
- *                 example: true (optional / defaults to false)
  *     responses:
  *       200:
  *         description: Login successful
@@ -248,6 +247,9 @@
  *                 post_count:
  *                   type: integer
  *                   example: 75
+ *                 unreadNotifications:
+ *                   type: integer
+ *                   example: 6
  *                 posts:
  *                   type: array
  *                   items:
@@ -434,8 +436,12 @@
  *                   type: string
  *                   example: http://localhost:3000/api/images/profiles/profile.jpg
  *                 follow_status:
- *                   type: boolean
- *                   example: true
+ *                   type: string
+ *                   enum:
+ *                     - followed
+ *                     - not followed
+ *                     - blocked
+ *                     - requested
  *                 follower_count:
  *                   type: integer
  *                   example: 150
@@ -695,4 +701,343 @@
  *         description: Not Found.
  *       400:
  *         description: Bad Request. Post is not saved.
+ */
+
+/**
+ * @swagger
+ * /api/user/deletefollower/{username}:
+ *   post:
+ *     tags: [User]
+ *     summary: Delete a follower from follower list
+ *     description: Allows the logged-in user to follow another user.
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         description: The username of the user to delete from followers
+ *         schema:
+ *           type: string
+ *           example: janedoe
+ *     responses:
+ *       200:
+ *         description: Follower deleted
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/acceptrequest/{username}:
+ *   post:
+ *     tags: [User]
+ *     summary: Accepts a follow request
+ *     description: Allows the logged-in user to unfollow another user.
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: janedoe
+ *     responses:
+ *       200:
+ *         description: Request accepted
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/rejectrequest/{username}:
+ *   post:
+ *     tags: [User]
+ *     summary: Rejects a follow request
+ *     description: Allows the logged-in user to unfollow another user.
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: janedoe
+ *     responses:
+ *       200:
+ *         description: Request rejected
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/block/{username}:
+ *   post:
+ *     tags: [User]
+ *     summary: Blocked a user
+ *     description: Allows the logged-in user to unfollow another user.
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: janedoe
+ *     responses:
+ *       200:
+ *         description: User blocked
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/unblock/{username}:
+ *   post:
+ *     tags: [User]
+ *     summary: Unblocks a user
+ *     description: Allows the logged-in user to unfollow another user.
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: janedoe
+ *     responses:
+ *       200:
+ *         description: User unblocked
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/addclosefriend/{username}:
+ *   post:
+ *     tags: [User]
+ *     summary: Adds user to close friends
+ *     description: Allows the logged-in user to unfollow another user.
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: janedoe
+ *     responses:
+ *       200:
+ *         description: User added to close friends
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/removeclosefriend/{username}:
+ *   post:
+ *     tags: [User]
+ *     summary: Removes a user from close friends
+ *     description: Allows the logged-in user to unfollow another user.
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: janedoe
+ *     responses:
+ *       200:
+ *         description: User removed from close friends
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/closefriendlist:
+ *   get:
+ *     tags: [User]
+ *     summary: Get close friends list
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: The page number for pagination. Defaults to 1.
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: The number of followings to return per page. Defaults to 10.
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       username:
+ *                         type: string
+ *                       profilePicture:
+ *                         type: string
+ *                       firstname:
+ *                         type: string
+ *                       lastname:
+ *                         type: string
+ *                       follower_count:
+ *                         type: integer
+ *                       following_count:
+ *                         type: integer
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     totalPage:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *       401:
+ *         description: Unauthorized.
+ */
+
+/**
+ * @swagger
+ * /api/user/blocklist:
+ *   get:
+ *     tags: [User]
+ *     summary: Get block list
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: The page number for pagination. Defaults to 1.
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: The number of followings to return per page. Defaults to 10.
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       username:
+ *                         type: string
+ *                       profilePicture:
+ *                         type: string
+ *                       firstname:
+ *                         type: string
+ *                       lastname:
+ *                         type: string
+ *                       follower_count:
+ *                         type: integer
+ *                       following_count:
+ *                         type: integer
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     totalPage:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *       401:
+ *         description: Unauthorized.
+ */
+
+/**
+ * @swagger
+ * /api/user/explore:
+ *   get:
+ *     tags: [User]
+ *     summary: Get explore page posts
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 posts:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 12345
+ *                       username:
+ *                         type: string
+ *                         example: johndoe
+ *                       profilePicture:
+ *                         type: string
+ *                         example: http://localhost:3000/api/images/profiles/profile.jpg
+ *                       images:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: http://localhost:3000/api/images/posts/post1.jpg
+ *                       tags:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: tag1
+ *                       mentions:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: mention1
+ *                       like_count:
+ *                           type: integer
+ *                           example: 100
+ *                       comment_count:
+ *                           type: integer
+ *                           example: 100
+ *                       saved_count:
+ *                           type: integer
+ *                           example: 100
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
  */

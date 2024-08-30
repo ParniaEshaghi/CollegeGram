@@ -186,29 +186,21 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         );
     });
 
-    app.get("/closefriendlist/:username", auth(userHandler), (req, res) => {
-        const username = req.params.username;
+    app.get("/closefriendlist", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
 
         handleExpress(res, () =>
-            userHandler.closeFriendList(
-                req.user,
-                username,
-                page,
-                limit,
-                req.base_url
-            )
+            userHandler.closeFriendList(req.user, page, limit, req.base_url)
         );
     });
 
-    app.get("/blocklist/:username", auth(userHandler), (req, res) => {
-        const username = req.params.username;
+    app.get("/blocklist", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
 
         handleExpress(res, () =>
-            userHandler.blockList(req.user, username, page, limit, req.base_url)
+            userHandler.blockList(req.user, page, limit, req.base_url)
         );
     });
 
