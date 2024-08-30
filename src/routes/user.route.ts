@@ -222,5 +222,14 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         handleExpress(res, () => userHandler.unSavePost(req.user, postid));
     });
 
+    app.get("/explore", auth(userHandler), (req, res) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.explore(req.user, page, limit, req.base_url)
+        );
+    });
+
     return app;
 };

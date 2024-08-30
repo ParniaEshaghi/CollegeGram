@@ -4,6 +4,7 @@ import request from "supertest";
 import { createTestDb } from "../../src/utility/test-db";
 import { PostDto } from "../../src/modules/postHandler/post/dto/post.dto";
 import { ServiceFactory } from "../../src/utility/service-factory";
+import { UpdatePostDto } from "../../src/modules/postHandler/post/dto/updatePost.dto";
 
 describe("Post route test suite", () => {
     let app: Express;
@@ -59,10 +60,12 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
                 .field("mentions", postDto.mentions)
-
                 .attach("images", Buffer.from(""), "testFile1.jpg")
                 .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
+
+            console.log(create_post_response.body.mentions);
+
             expect(create_post_response.body.caption).toBe(postDto.caption);
             expect(create_post_response.body.mentions).toEqual(
                 postDto.mentions
@@ -138,10 +141,9 @@ describe("Post route test suite", () => {
                 .post("/api/post/createpost")
                 .set("Cookie", [cookie])
                 .field("caption", postDto.caption)
-                .field("mentions", postDto.mentions)
-
-                .attach("images", Buffer.from(""), "testFile1.jpg")
-                .attach("images", Buffer.from(""), "testFile2.jpg")
+                .field("mentions0", postDto.mentions)
+                .attach("images0", Buffer.from(""), "testFile1.jpg")
+                .attach("images1", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
             const response_getPostByPostId = await request(app)
@@ -199,9 +201,10 @@ describe("Post route test suite", () => {
                 .attach("images", Buffer.from(""), "testFile2.jpg")
                 .expect(200);
 
-            const updatedPostDto: PostDto = {
+            const updatedPostDto: UpdatePostDto = {
                 caption: "This #is a test #post #test",
                 mentions: ["test2", "test3"],
+                deletedImages: [create_post_response.body.images[0]],
                 close_status: false,
             };
 
@@ -210,7 +213,7 @@ describe("Post route test suite", () => {
                 .set("Cookie", [cookie])
                 .field("caption", updatedPostDto.caption)
                 .field("mentions", updatedPostDto.mentions)
-                .attach("images", Buffer.from(""), "testFile2.jpg")
+                .field("deletedImages", updatedPostDto.deletedImages)
                 .attach("images", Buffer.from(""), "testFile3.jpg")
                 .attach("images", Buffer.from(""), "testFile4.jpg")
                 .expect(200);

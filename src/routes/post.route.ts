@@ -6,6 +6,8 @@ import { handleExpress } from "../utility/handle-express";
 import { commentDto } from "../modules/postHandler/comment/dto/comment.dto";
 import { PostHandler } from "../modules/postHandler/postHandler";
 import { UserHandler } from "../modules/userHandler/userHandler";
+import { extractNumberedFields } from "../utility/extract-numbered-fields";
+import { updatePostDto } from "../modules/postHandler/post/dto/updatePost.dto";
 
 export const makePostRouter = (
     userHandler: UserHandler,
@@ -14,10 +16,24 @@ export const makePostRouter = (
     const app = Router();
 
     app.post("/createpost", auth(userHandler), postUpload, (req, res) => {
-        const dto = postDto.parse(req.body);
-        const postImageFilenames = (req.files as Express.Multer.File[]).map(
-            (file) => file.filename
-        );
+        const mentions = req.body.mentions
+            ? req.body.mentions
+            : extractNumberedFields<string>(req.body, "mentions");
+
+        if (!req.files || req.files.length == 0) {
+            return res
+                .status(400)
+                .json({ message: "Posts require at least one image" });
+        }
+
+        const files = req.files as Express.Multer.File[];
+        const images = Array.isArray(!files)
+            ? files
+            : files.filter((file) => file.fieldname.startsWith("images"));
+
+        const dto = postDto.parse({ caption: req.body.caption, mentions });
+        const postImageFilenames = images.map((file) => file.filename);
+
         handleExpress(
             res,
             async () =>
@@ -48,11 +64,27 @@ export const makePostRouter = (
         auth(userHandler),
         postUpload,
         (req, res) => {
+            console.log(req.body);
             const postid = req.params.postid;
-            const dto = postDto.parse(req.body);
-            const postImageFilenames = (req.files as Express.Multer.File[]).map(
-                (file) => file.filename
-            );
+            const mentions = req.body.mentions
+                ? req.body.mentions
+                : extractNumberedFields<string>(req.body, "mentions");
+            const deletedImages = req.body.deletedImages
+                ? req.body.deletedImages
+                : extractNumberedFields<string>(req.body, "deletedImages");
+
+            const files = req.files as Express.Multer.File[];
+            const images = Array.isArray(!files)
+                ? files
+                : files.filter((file) => file.fieldname.startsWith("images"));
+
+            const dto = updatePostDto.parse({
+                caption: req.body.caption,
+                mentions,
+                deletedImages,
+            });
+            const postImageFilenames = images.map((file) => file.filename);
+
             handleExpress(res, () =>
                 postHandlerService.updatePost(
                     req.user,

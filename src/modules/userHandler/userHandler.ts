@@ -1,4 +1,3 @@
-import { ForgetPasswordService } from "./forgetPassword/forgetPassword.service";
 import { NotificationService } from "./notification/notification.service";
 import { SavedPostService } from "./savedPost/savedPost.service";
 import { EditProfileDto } from "./user/dto/edit-profile.dto";
@@ -221,6 +220,17 @@ export class UserHandler {
             page,
             limit,
             baseUrl
+        );
+    }
+
+    public async explore(
+        user: User,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        const followings = this.userRelationService.allFolloweingList(
+            user.username
         );
     }
 }
