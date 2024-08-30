@@ -259,6 +259,65 @@ export class UserRelationService {
         return { message: "User unblocked" };
     }
 
+    public async addCloseFriend(user: User, follower_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const follower = await this.userService.getUserByUsername(
+            follower_username
+        );
+        if (!follower) {
+            throw new NotFoundError();
+        }
+
+        const followStatus = await this.getFollowStatus(
+            follower,
+            user.username
+        );
+        if (
+            followStatus !== "followed" &&
+            followStatus !== "request accepted"
+        ) {
+            throw new BadRequestError();
+        }
+
+        const relation: UserRelation = {
+            follower,
+            following: user,
+            followStatus: "close",
+        };
+        await this.userRelationRepo.createCloseFriend(relation);
+        return { message: "User added to close friends" };
+    }
+
+    public async removeCloseFriend(user: User, follower_username: string) {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        const follower = await this.userService.getUserByUsername(
+            follower_username
+        );
+        if (!follower) {
+            throw new NotFoundError();
+        }
+
+        const followStatus = await this.getFollowStatus(
+            follower,
+            user.username
+        );
+        if (followStatus !== "close") {
+            throw new BadRequestError();
+        }
+
+        const relation: UserRelation = {
+            follower,
+            following: user,
+            followStatus: "followed",
+        };
+        await this.userRelationRepo.deleteCloseFriend(relation);
+        return { message: "User removed from close friends" };
+    }
+
     public async userProfile(
         session_user: User,
         username: string,
@@ -343,6 +402,74 @@ export class UserRelationService {
                 limit: limit,
                 total: followingList.total,
                 totalPage: Math.ceil(followingList?.total / limit),
+            },
+        };
+    }
+
+    public async closeFriendList(
+        session_user: User,
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ): Promise<followerFollowingListUserResponse | undefined> {
+        if (!session_user) {
+            throw new UnauthorizedError();
+        }
+        const user = await this.userService.getUserByUsername(username);
+        if (!user) {
+            throw new NotFoundError();
+        }
+
+        const closeFriendList = await this.userRelationRepo.getCloseFriends(
+            user,
+            page,
+            limit
+        );
+
+        return {
+            data: closeFriendList.data.map((follower) =>
+                toFollowerFollowingListUser(follower, baseUrl)
+            ),
+            meta: {
+                page: page,
+                limit: limit,
+                total: closeFriendList.total,
+                totalPage: Math.ceil(closeFriendList?.total / limit),
+            },
+        };
+    }
+
+    public async blockList(
+        session_user: User,
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ): Promise<followerFollowingListUserResponse | undefined> {
+        if (!session_user) {
+            throw new UnauthorizedError();
+        }
+        const user = await this.userService.getUserByUsername(username);
+        if (!user) {
+            throw new NotFoundError();
+        }
+
+        const blockList = await this.userRelationRepo.getBlockList(
+            user,
+            page,
+            limit
+        );
+
+        return {
+            data: blockList.data.map((followeing) =>
+                toFollowerFollowingListUser(followeing, baseUrl)
+            ),
+            meta: {
+                page: page,
+                limit: limit,
+                total: blockList.total,
+                totalPage: Math.ceil(blockList?.total / limit),
             },
         };
     }

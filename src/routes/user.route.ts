@@ -105,6 +105,20 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         handleExpress(res, () => userHandler.unblock(req.user, username));
     });
 
+    app.post("/addclosefriend/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () =>
+            userHandler.addCloseFriend(req.user, username)
+        );
+    });
+
+    app.post("/removeclosefriend/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () =>
+            userHandler.removeCloseFriend(req.user, username)
+        );
+    });
+
     app.get("/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
@@ -141,6 +155,32 @@ export const makeUserRouter = (userHandler: UserHandler) => {
                 limit,
                 req.base_url
             )
+        );
+    });
+
+    app.get("/closefriendlist/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.closeFriendList(
+                req.user,
+                username,
+                page,
+                limit,
+                req.base_url
+            )
+        );
+    });
+
+    app.get("/blocklist/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.blockList(req.user, username, page, limit, req.base_url)
         );
     });
 

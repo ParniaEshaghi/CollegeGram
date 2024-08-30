@@ -146,4 +146,47 @@ export class UserHandler {
     public async unblock(user: User, following_username: string) {
         return this.userRelationService.unblock(user, following_username);
     }
+
+    public async addCloseFriend(user: User, follower_username: string) {
+        return this.userRelationService.addCloseFriend(user, follower_username);
+    }
+
+    public async removeCloseFriend(user: User, follower_username: string) {
+        return this.userRelationService.removeCloseFriend(
+            user,
+            follower_username
+        );
+    }
+
+    public async closeFriendList(
+        session_user: User,
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ): Promise<followerFollowingListUserResponse | undefined> {
+        return this.userRelationService.closeFriendList(
+            session_user,
+            username,
+            page,
+            limit,
+            baseUrl
+        );
+    }
+
+    public async blockList(
+        session_user: User,
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ): Promise<followerFollowingListUserResponse | undefined> {
+        return this.userRelationService.blockList(
+            session_user,
+            username,
+            page,
+            limit,
+            baseUrl
+        );
+    }
 }
