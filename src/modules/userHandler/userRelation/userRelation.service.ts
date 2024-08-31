@@ -345,7 +345,7 @@ export class UserRelationService {
         const posts = await this.userService.getUserPosts(username, baseUrl);
         if (followStatus === "followed") {
             const normalPosts = posts.filter(
-                (post) => post.close_status === false
+                (post) => post.close_status === "normal"
             );
             return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
         }

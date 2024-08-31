@@ -1,3 +1,5 @@
+import { toProfilePost } from "../postHandler/post/model/post.model";
+import { PostService } from "../postHandler/post/post.service";
 import { NotificationService } from "./notification/notification.service";
 import { SavedPostService } from "./savedPost/savedPost.service";
 import { EditProfileDto } from "./user/dto/edit-profile.dto";
@@ -13,7 +15,8 @@ export class UserHandler {
         private userService: UserService,
         private userRelationService: UserRelationService,
         private savedService: SavedPostService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private postService: PostService
     ) {}
 
     public async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -236,8 +239,40 @@ export class UserHandler {
         limit: number,
         baseUrl: string
     ) {
-        const followings = this.userRelationService.allFolloweingList(
+        const followings = await this.userRelationService.allFolloweingList(
             user.username
         );
+        const allPosts = await this.postService.getExplorePosts(
+            followings,
+            page,
+            limit
+        );
+
+        const shownPosts = [];
+        for (const post of allPosts.data) {
+            if (post.close_status === "close") {
+                const follow_status =
+                    await this.userRelationService.getFollowStatus(
+                        user,
+                        post.user.username
+                    );
+                if (follow_status === "close") {
+                    shownPosts.push(post);
+                }
+            } else {
+                shownPosts.push(post);
+            }
+        }
+
+        const response = {
+            data: shownPosts.map((post) =>
+                toProfilePost(post.user, post, baseUrl)
+            ),
+            meta: { page: page, limit: limit },
+            total: shownPosts.length,
+            totalPage: Math.ceil(shownPosts.length / limit),
+        };
+
+        return response;
     }
 }

@@ -34,7 +34,10 @@
  *                   type: string
  *                   format: binary
  *               close_status:
- *                 type: boolean
+ *                 type: string
+ *                 enum:
+ *                   - close
+ *                   - normal
  *     responses:
  *       200:
  *         description: Post created successfully
@@ -169,7 +172,10 @@
  *                   type: string
  *                   format: binary
  *               close_status:
- *                 type: boolean
+ *                 type: string
+ *                 enum:
+ *                   - close
+ *                   - normal
  *     responses:
  *       200:
  *         description: Post updated successfully

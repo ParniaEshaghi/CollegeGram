@@ -38,6 +38,15 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         );
     });
 
+    app.get("/explore", auth(userHandler), (req, res) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.explore(req.user, page, limit, req.base_url)
+        );
+    });
+
     app.post("/signup", (req, res) => {
         const dto = signUpDto.parse(req.body);
         handleExpress(res, () => userHandler.createUser(dto));
@@ -212,15 +221,6 @@ export const makeUserRouter = (userHandler: UserHandler) => {
     app.post("/unsavepost/:postid", auth(userHandler), (req, res) => {
         const postid = req.params.postid;
         handleExpress(res, () => userHandler.unSavePost(req.user, postid));
-    });
-
-    app.get("/explore", auth(userHandler), (req, res) => {
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-
-        handleExpress(res, () =>
-            userHandler.explore(req.user, page, limit, req.base_url)
-        );
     });
 
     return app;

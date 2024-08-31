@@ -31,7 +31,11 @@ export const makePostRouter = (
             ? files
             : files.filter((file) => file.fieldname.startsWith("images"));
 
-        const dto = postDto.parse({ caption: req.body.caption, mentions });
+        const dto = postDto.parse({
+            caption: req.body.caption,
+            mentions,
+            close_status: req.body.close_status,
+        });
         const postImageFilenames = images.map((file) => file.filename);
 
         handleExpress(
@@ -82,6 +86,7 @@ export const makePostRouter = (
                 caption: req.body.caption,
                 mentions,
                 deletedImages,
+                close_status: req.body.close_status,
             });
             const postImageFilenames = images.map((file) => file.filename);
 
