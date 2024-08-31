@@ -39,7 +39,7 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                     UserNotificationEntity
                 );
 
-                entity.mentions.map(async (mention) => {
+                for (const mention of entity.mentions) {
                     const notification = await this.tagsNotification(
                         event,
                         mention
@@ -61,7 +61,7 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                                 entity.user
                             );
 
-                        senderFollowers.map(async (senderFollower) => {
+                        for (const senderFollower of senderFollowers) {
                             const userNotification =
                                 await this.userNotificationsService.userNotif(
                                     senderFollower.follower.username,
@@ -72,58 +72,57 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                                     userNotification
                                 );
                             }
-                        });
+                        }
                     }
-                });
+                }
             }
         }
     }
 
     async afterUpdate(event: UpdateEvent<PostEntity>): Promise<void> {
         const entity = event.entity as PostEntity;
-        if ("mentions" in entity) {
-            if (entity && entity.mentions.length > 0) {
-                const notificationRepo =
-                    event.manager.getRepository(NotificationEntity);
-                const userNotificationRepo = event.manager.getRepository(
-                    UserNotificationEntity
-                );
+        if ("mentions" in entity && entity.mentions.length > 0) {
+            const notificationRepo =
+                event.manager.getRepository(NotificationEntity);
+            const userNotificationRepo = event.manager.getRepository(
+                UserNotificationEntity
+            );
 
-                entity.mentions.map(async (mention: string) => {
-                    const notification = await this.tagsUpdateNotification(
-                        event,
-                        mention
-                    );
-                    if (notification) {
-                        const notif = await notificationRepo.save(notification);
-                        const userNotification =
+            for (const mention of entity.mentions) {
+                const notification = await this.tagsUpdateNotification(
+                    event,
+                    mention
+                );
+                if (notification) {
+                    const notif = await notificationRepo.save(notification);
+                    const userNotification =
+                        await this.userNotificationsService.userNotif(
+                            mention,
+                            notif
+                        );
+
+                    if (userNotification) {
+                        await userNotificationRepo.save(userNotification);
+                    }
+
+                    const senderFollowers =
+                        await this.userNotificationsService.getSenderFollowers(
+                            entity.user
+                        );
+
+                    for (const senderFollower of senderFollowers) {
+                        const followerNotification =
                             await this.userNotificationsService.userNotif(
-                                mention,
+                                senderFollower.follower.username,
                                 notif
                             );
-                        if (userNotification) {
-                            await userNotificationRepo.save(userNotification);
-                        }
-
-                        const senderFollowers =
-                            await this.userNotificationsService.getSenderFollowers(
-                                entity.user
+                        if (followerNotification) {
+                            await userNotificationRepo.save(
+                                followerNotification
                             );
-
-                        senderFollowers.map(async (senderFollower) => {
-                            const userNotification =
-                                await this.userNotificationsService.userNotif(
-                                    senderFollower.follower.username,
-                                    notif
-                                );
-                            if (userNotification) {
-                                await userNotificationRepo.save(
-                                    userNotification
-                                );
-                            }
-                        });
+                        }
                     }
-                });
+                }
             }
         }
     }

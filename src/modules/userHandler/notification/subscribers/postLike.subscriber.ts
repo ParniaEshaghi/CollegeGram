@@ -51,7 +51,7 @@ export class PostLikeSubscriber
                 event.entity.user
             );
 
-        senderFollowers.map(async (senderFollower) => {
+        for (const senderFollower of senderFollowers) {
             const userNotification =
                 await this.userNotificationsService.userNotif(
                     senderFollower.follower.username,
@@ -60,6 +60,6 @@ export class PostLikeSubscriber
             if (userNotification) {
                 await userNotificationRepo.save(userNotification);
             }
-        });
+        }
     }
 }

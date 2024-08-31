@@ -55,7 +55,7 @@ export class CommentSubscriber
                 event.entity.user
             );
 
-        senderFollowers.map(async (senderFollower) => {
+        for (const senderFollower of senderFollowers) {
             const userNotification =
                 await this.userNotificationsService.userNotif(
                     senderFollower.follower.username,
@@ -64,6 +64,6 @@ export class CommentSubscriber
             if (userNotification) {
                 await userNotificationRepo.save(userNotification);
             }
-        });
+        }
     }
 }

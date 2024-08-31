@@ -52,7 +52,7 @@ export class UserRelationSubscriber
                     event.entity.follower
                 );
 
-            senderFollowers.map(async (senderFollower) => {
+            for (const senderFollower of senderFollowers) {
                 const userNotification =
                     await this.userNotificationsService.userNotif(
                         senderFollower.follower.username,
@@ -61,7 +61,7 @@ export class UserRelationSubscriber
                 if (userNotification) {
                     await userNotificationRepo.save(userNotification);
                 }
-            });
+            }
         }
 
         if (event.entity.followStatus === "request pending") {
@@ -113,7 +113,7 @@ export class UserRelationSubscriber
                         event.entity.following
                     );
 
-                senderFollowers.map(async (senderFollower) => {
+                for (const senderFollower of senderFollowers) {
                     const userNotification =
                         await this.userNotificationsService.userNotif(
                             senderFollower.follower.username,
@@ -122,7 +122,7 @@ export class UserRelationSubscriber
                     if (userNotification) {
                         await userNotificationRepo.save(userNotification);
                     }
-                });
+                }
             }
         }
 
