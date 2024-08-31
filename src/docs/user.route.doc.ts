@@ -998,7 +998,7 @@
  *             schema:
  *               type: object
  *               properties:
- *                 posts:
+ *                 data:
  *                   type: array
  *                   items:
  *                     type: object
@@ -1028,14 +1028,225 @@
  *                           type: string
  *                           example: mention1
  *                       like_count:
- *                           type: integer
- *                           example: 100
+ *                         type: integer
+ *                         example: 100
  *                       comment_count:
- *                           type: integer
- *                           example: 100
+ *                         type: integer
+ *                         example: 100
  *                       saved_count:
- *                           type: integer
- *                           example: 100
+ *                         type: integer
+ *                         example: 100
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     totalPage:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/notifications:
+ *   get:
+ *     tags: [User]
+ *     summary: Get notifications
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       type:
+ *                         type: string
+ *                         example: "followed"
+ *                       isRead:
+ *                         type: boolean
+ *                         example: true
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-08-30T15:54:48.717Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-08-30T15:54:48.717Z"
+ *                       deletedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         nullable: true
+ *                       recipient:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                             example: "johndoe1"
+ *                           profilePicture:
+ *                             type: string
+ *                             example: ""
+ *                           firstname:
+ *                             type: string
+ *                             example: "John"
+ *                           lastname:
+ *                             type: string
+ *                             example: "Doe"
+ *                       sender:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                             example: "johndoe2"
+ *                           email:
+ *                             type: string
+ *                             example: "johndoe2@example.com"
+ *                           profilePicture:
+ *                             type: string
+ *                             example: ""
+ *                           firstname:
+ *                             type: string
+ *                             example: ""
+ *                           lastname:
+ *                             type: string
+ *                             example: ""
+ *                       post:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           images:
+ *                             type: string
+ *                       comment:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           text:
+ *                             type: string
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     totalPage:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/followingsnotifications:
+ *   get:
+ *     tags: [User]
+ *     summary: Get followings notifications
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       type:
+ *                         type: string
+ *                         example: "followed"
+ *                       isRead:
+ *                         type: boolean
+ *                         example: true
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-08-30T15:54:48.717Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-08-30T15:54:48.717Z"
+ *                       deletedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         nullable: true
+ *                       recipient:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                             example: "johndoe1"
+ *                           profilePicture:
+ *                             type: string
+ *                             example: ""
+ *                           firstname:
+ *                             type: string
+ *                             example: "John"
+ *                           lastname:
+ *                             type: string
+ *                             example: "Doe"
+ *                       sender:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                             example: "johndoe2"
+ *                           email:
+ *                             type: string
+ *                             example: "johndoe2@example.com"
+ *                           profilePicture:
+ *                             type: string
+ *                             example: ""
+ *                           firstname:
+ *                             type: string
+ *                             example: ""
+ *                           lastname:
+ *                             type: string
+ *                             example: ""
+ *                       post:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           images:
+ *                             type: string
+ *                       comment:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           text:
+ *                             type: string
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     totalPage:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
  *       401:
  *         description: Unauthorized
  *       500:
