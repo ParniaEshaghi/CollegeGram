@@ -5,6 +5,7 @@ import {
 } from "../../../utility/http-errors";
 import { User } from "../user/model/user.model";
 import { UserService } from "../user/user.service";
+import { UserRelationEntity } from "./entity/userRelation.entity";
 import {
     followerFollowingListUserResponse,
     toFollowerFollowingListUser,
@@ -489,5 +490,9 @@ export class UserRelationService {
                 totalPage: Math.ceil(blockList?.total / limit),
             },
         };
+    }
+
+    public async getAllBlockList(user: User): Promise<UserRelationEntity[]> {
+        return await this.userRelationRepo.getAllBlockList(user);
     }
 }

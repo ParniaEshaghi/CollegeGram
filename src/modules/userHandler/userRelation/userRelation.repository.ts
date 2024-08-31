@@ -195,6 +195,17 @@ export class UserRelationRepository {
 
         return { data: response.map((res) => res.following), total: total };
     }
+    public async getAllBlockList(user: User): Promise<UserRelationEntity[]> {
+        const response = await this.userRelationRepo.find({
+            where: {
+                follower: { username: user.username },
+                followStatus: "blocked",
+            },
+            relations: ["following"],
+        });
+
+        return response;
+    }
 
     public async getAllFollowings(user: User): Promise<UserRelationEntity[]> {
         const [response, total] = await this.userRelationRepo.findAndCount({
