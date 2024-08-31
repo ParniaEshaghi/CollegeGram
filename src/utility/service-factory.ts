@@ -141,7 +141,8 @@ export class ServiceFactory {
             this.userService,
             this.userRelationService,
             this.savedPostService,
-            this.notificationService
+            this.notificationService,
+            this.postService
         );
 
         this.postLikeSub = new PostLikeSubscriber(

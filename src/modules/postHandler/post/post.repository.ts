@@ -1,8 +1,9 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import { Post, UpdatePost } from "./model/post.model";
 import { PostEntity } from "./entity/post.entity";
 import { User } from "../../userHandler/user/model/user.model";
 import { UserEntity } from "../../userHandler/user/entity/user.entity";
+import { UserRelation } from "../../userHandler/userRelation/model/userRelation.model";
 
 export interface CreatePost {
     user: User;
@@ -13,7 +14,7 @@ export interface CreatePost {
     like_count: number;
     comment_count: number;
     saved_count: number;
-    close_status: boolean;
+    close_status: "close" | "normal";
 }
 
 export class PostRepository {
@@ -48,5 +49,28 @@ export class PostRepository {
 
     public update(post: UpdatePost): Promise<Post> {
         return this.postRepo.save(post);
+    }
+
+    public async getExplorePosts(
+        followings: UserRelation[],
+        page: number,
+        limit: number
+    ) {
+        const [response, total] = await this.postRepo.findAndCount({
+            where: {
+                user: {
+                    username: In(
+                        followings.map(
+                            (following) => following.following.username
+                        )
+                    ),
+                },
+            },
+            relations: ["user"],
+            order: {
+                createdAt: "DESC",
+            },
+        });
+        return { data: response, total: total };
     }
 }

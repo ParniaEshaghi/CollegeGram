@@ -55,8 +55,11 @@ export class PostEntity {
     @Column()
     saved_count!: number;
 
-    @Column()
-    close_status!: boolean;
+    @Column({
+        type: "enum",
+        enum: ["close", "normal"],
+    })
+    close_status!: "close" | "normal";
 
     @CreateDateColumn()
     createdAt!: Date;

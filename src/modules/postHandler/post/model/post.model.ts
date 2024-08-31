@@ -10,7 +10,7 @@ export interface Post {
     like_count: number;
     comment_count: number;
     saved_count: number;
-    close_status: boolean;
+    close_status: "close" | "normal";
 }
 
 export type UpdatePost = Omit<
@@ -72,6 +72,7 @@ export const toProfilePost = (
     baseUrl: string
 ): PostWithUsername => {
     const { user, images, ...postDetails } = post;
+
     return {
         ...postDetails,
         username: post_user.username,

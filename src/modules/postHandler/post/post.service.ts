@@ -16,6 +16,7 @@ import {
 import { CreatePost, PostRepository } from "./post.repository";
 import { UpdatePostDto } from "./dto/updatePost.dto";
 import { UserService } from "../../userHandler/user/user.service";
+import { UserRelation } from "../../userHandler/userRelation/model/userRelation.model";
 
 export class PostService {
     constructor(
@@ -145,5 +146,13 @@ export class PostService {
 
     public async getPost(postId: string): Promise<Post | null> {
         return await this.postRepo.findPostById(postId);
+    }
+
+    public async getExplorePosts(
+        followings: UserRelation[],
+        page: number,
+        limit: number
+    ) {
+        return await this.postRepo.getExplorePosts(followings, page, limit);
     }
 }
