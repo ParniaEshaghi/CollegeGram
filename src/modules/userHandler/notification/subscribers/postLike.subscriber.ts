@@ -7,6 +7,8 @@ import { PostLikeEntity } from "../../../postHandler/postLike/entity/postLike.en
 import { CreateNotification } from "../model/notification.model";
 import { NotificationService } from "../notification.service";
 import { UserNotificationService } from "../userNotification/userNotification.service";
+import { NotificationEntity } from "../entity/notification.entity";
+import { UserNotificationEntity } from "../userNotification/entity/userNotification.entity";
 
 @EventSubscriber()
 export class PostLikeSubscriber
@@ -22,24 +24,26 @@ export class PostLikeSubscriber
     }
 
     async afterInsert(event: InsertEvent<PostLikeEntity>): Promise<void> {
+        const notificationRepo =
+            event.manager.getRepository(NotificationEntity);
+        const userNotificationRepo = event.manager.getRepository(
+            UserNotificationEntity
+        );
+
         const notification: CreateNotification = {
             recipient: event.entity.post.user,
             sender: event.entity.user,
             type: "likePost",
             post: event.entity.post,
         };
-        const notif = await this.notificationService.createNotification(
-            notification
-        );
+        const notif = await notificationRepo.save(notification);
 
         const userNotification = await this.userNotificationsService.userNotif(
             event.entity.post.user.username,
             notif
         );
         if (userNotification) {
-            this.userNotificationsService.createUserNotification(
-                userNotification
-            );
+            await userNotificationRepo.save(userNotification);
         }
 
         const senderFollowers =
@@ -54,9 +58,7 @@ export class PostLikeSubscriber
                     notif
                 );
             if (userNotification) {
-                this.userNotificationsService.createUserNotification(
-                    userNotification
-                );
+                await userNotificationRepo.save(userNotification);
             }
         });
     }

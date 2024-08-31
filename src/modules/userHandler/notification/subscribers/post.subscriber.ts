@@ -13,6 +13,8 @@ import { User } from "../../user/model/user.model";
 import { UserNotificationService } from "../userNotification/userNotification.service";
 import { CreateUserNotification } from "../userNotification/model/userNotification.model";
 import { UserRelationService } from "../../userRelation/userRelation.service";
+import { NotificationEntity } from "../entity/notification.entity";
+import { UserNotificationEntity } from "../userNotification/entity/userNotification.entity";
 
 @EventSubscriber()
 export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
@@ -31,16 +33,19 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
         const entity = event.entity;
         if ("mentions" in entity) {
             if (entity.mentions.length > 0) {
+                const notificationRepo =
+                    event.manager.getRepository(NotificationEntity);
+                const userNotificationRepo = event.manager.getRepository(
+                    UserNotificationEntity
+                );
+
                 entity.mentions.map(async (mention) => {
                     const notification = await this.tagsNotification(
                         event,
                         mention
                     );
                     if (notification) {
-                        const notif =
-                            await this.notificationService.createNotification(
-                                notification
-                            );
+                        const notif = await notificationRepo.save(notification);
                         const userNotification =
                             await this.userNotificationsService.userNotif(
                                 mention,
@@ -48,9 +53,7 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                             );
 
                         if (userNotification) {
-                            this.userNotificationsService.createUserNotification(
-                                userNotification
-                            );
+                            await userNotificationRepo.save(userNotification);
                         }
 
                         const senderFollowers =
@@ -65,7 +68,7 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                                     notif
                                 );
                             if (userNotification) {
-                                this.userNotificationsService.createUserNotification(
+                                await userNotificationRepo.save(
                                     userNotification
                                 );
                             }
@@ -80,25 +83,26 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
         const entity = event.entity as PostEntity;
         if ("mentions" in entity) {
             if (entity && entity.mentions.length > 0) {
+                const notificationRepo =
+                    event.manager.getRepository(NotificationEntity);
+                const userNotificationRepo = event.manager.getRepository(
+                    UserNotificationEntity
+                );
+
                 entity.mentions.map(async (mention: string) => {
                     const notification = await this.tagsUpdateNotification(
                         event,
                         mention
                     );
                     if (notification) {
-                        const notif =
-                            await this.notificationService.createNotification(
-                                notification
-                            );
+                        const notif = await notificationRepo.save(notification);
                         const userNotification =
                             await this.userNotificationsService.userNotif(
                                 mention,
                                 notif
                             );
                         if (userNotification) {
-                            this.userNotificationsService.createUserNotification(
-                                userNotification
-                            );
+                            await userNotificationRepo.save(userNotification);
                         }
 
                         const senderFollowers =
@@ -113,7 +117,7 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                                     notif
                                 );
                             if (userNotification) {
-                                this.userNotificationsService.createUserNotification(
+                                await userNotificationRepo.save(
                                     userNotification
                                 );
                             }

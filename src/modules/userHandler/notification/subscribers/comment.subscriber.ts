@@ -7,6 +7,8 @@ import { CreateNotification } from "../model/notification.model";
 import { NotificationService } from "../notification.service";
 import { CommentEntity } from "../../../postHandler/comment/entity/comment.entity";
 import { UserNotificationService } from "../userNotification/userNotification.service";
+import { NotificationEntity } from "../entity/notification.entity";
+import { UserNotificationEntity } from "../userNotification/entity/userNotification.entity";
 
 @EventSubscriber()
 export class CommentSubscriber
@@ -25,6 +27,12 @@ export class CommentSubscriber
         if (event.entity.parent) {
             return;
         }
+        const notificationRepo =
+            event.manager.getRepository(NotificationEntity);
+        const userNotificationRepo = event.manager.getRepository(
+            UserNotificationEntity
+        );
+
         const notification: CreateNotification = {
             recipient: event.entity.post.user,
             sender: event.entity.user,
@@ -32,18 +40,14 @@ export class CommentSubscriber
             post: event.entity.post,
             comment: event.entity,
         };
-        const notif = await this.notificationService.createNotification(
-            notification
-        );
+        const notif = await notificationRepo.save(notification);
 
         const userNotification = await this.userNotificationsService.userNotif(
             event.entity.post.user.username,
             notif
         );
         if (userNotification) {
-            this.userNotificationsService.createUserNotification(
-                userNotification
-            );
+            await userNotificationRepo.save(userNotification);
         }
 
         const senderFollowers =
@@ -58,9 +62,7 @@ export class CommentSubscriber
                     notif
                 );
             if (userNotification) {
-                this.userNotificationsService.createUserNotification(
-                    userNotification
-                );
+                await userNotificationRepo.save(userNotification);
             }
         });
     }

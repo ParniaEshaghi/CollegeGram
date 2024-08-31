@@ -7,6 +7,8 @@ import { CreateNotification } from "../model/notification.model";
 import { NotificationService } from "../notification.service";
 import { UserRelationEntity } from "../../userRelation/entity/userRelation.entity";
 import { UserNotificationService } from "../userNotification/userNotification.service";
+import { NotificationEntity } from "../entity/notification.entity";
+import { UserNotificationEntity } from "../userNotification/entity/userNotification.entity";
 
 @EventSubscriber()
 export class UserRelationSubscriber
@@ -22,11 +24,17 @@ export class UserRelationSubscriber
     }
 
     async afterInsert(event: InsertEvent<UserRelationEntity>): Promise<void> {
+        const notificationRepo =
+            event.manager.getRepository(NotificationEntity);
+        const userNotificationRepo = event.manager.getRepository(
+            UserNotificationEntity
+        );
+
         if (
             event.entity.followStatus === "request accepted" ||
             event.entity.followStatus === "followed"
         ) {
-            const notif = await this.notificationService.createNotification(
+            const notif = await notificationRepo.save(
                 this.followedNotification(event)
             );
 
@@ -36,9 +44,7 @@ export class UserRelationSubscriber
                     notif
                 );
             if (userNotification) {
-                this.userNotificationsService.createUserNotification(
-                    userNotification
-                );
+                await userNotificationRepo.save(userNotification);
             }
 
             const senderFollowers =
@@ -53,9 +59,7 @@ export class UserRelationSubscriber
                         notif
                     );
                 if (userNotification) {
-                    this.userNotificationsService.createUserNotification(
-                        userNotification
-                    );
+                    await userNotificationRepo.save(userNotification);
                 }
             });
         }
@@ -67,9 +71,7 @@ export class UserRelationSubscriber
                 type: "followRequest",
             };
 
-            const notif = await this.notificationService.createNotification(
-                notification
-            );
+            const notif = await notificationRepo.save(notification);
 
             const userNotification =
                 await this.userNotificationsService.userNotif(
@@ -77,9 +79,7 @@ export class UserRelationSubscriber
                     notif
                 );
             if (userNotification) {
-                this.userNotificationsService.createUserNotification(
-                    userNotification
-                );
+                await userNotificationRepo.save(userNotification);
             }
 
             // ya khoda
@@ -91,7 +91,7 @@ export class UserRelationSubscriber
                 );
 
             if (oldNotification) {
-                const notif = await this.notificationService.createNotification(
+                const notif = await notificationRepo.save(
                     this.followBackNotification(event)
                 );
 
@@ -105,9 +105,7 @@ export class UserRelationSubscriber
                         notif
                     );
                 if (userNotification) {
-                    this.userNotificationsService.createUserNotification(
-                        userNotification
-                    );
+                    await userNotificationRepo.save(userNotification);
                 }
 
                 const senderFollowers =
@@ -122,9 +120,7 @@ export class UserRelationSubscriber
                             notif
                         );
                     if (userNotification) {
-                        this.userNotificationsService.createUserNotification(
-                            userNotification
-                        );
+                        await userNotificationRepo.save(userNotification);
                     }
                 });
             }
@@ -136,9 +132,7 @@ export class UserRelationSubscriber
                 sender: event.entity.following,
                 type: "followAccept",
             };
-            const notif = await this.notificationService.createNotification(
-                notification
-            );
+            const notif = await notificationRepo.save(notification);
 
             const userNotification =
                 await this.userNotificationsService.userNotif(
@@ -146,9 +140,7 @@ export class UserRelationSubscriber
                     notif
                 );
             if (userNotification) {
-                this.userNotificationsService.createUserNotification(
-                    userNotification
-                );
+                await userNotificationRepo.save(userNotification);
             }
         }
 
@@ -158,7 +150,7 @@ export class UserRelationSubscriber
         //             sender: event.entity.following,
         //             type: "followRequest",
         //         };
-        //         await this.notificationService.createNotification(notification);
+        //         await notificationRepo.save(notification);
         //     }
     }
 
