@@ -55,7 +55,7 @@ describe("CommentLikeService test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
-                close_status: false,
+                close_status: "normal",
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -79,7 +79,7 @@ describe("CommentLikeService test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
-                close_status: false,
+                close_status: "normal",
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -101,7 +101,7 @@ describe("CommentLikeService test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
-                close_status: false,
+                close_status: "normal",
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -122,7 +122,7 @@ describe("CommentLikeService test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
-                close_status: false,
+                close_status: "normal",
             },
             ["testfile.jpg"],
             "localhost:3000"

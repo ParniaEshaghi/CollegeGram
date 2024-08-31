@@ -323,7 +323,7 @@ describe("User route test suite", () => {
             const postDto: PostDto = {
                 caption: "This is a test post #test",
                 mentions: ["test2", "test3"],
-                close_status: false,
+                close_status: "normal",
             };
 
             await request(app)
@@ -1021,7 +1021,7 @@ describe("User route test suite", () => {
             const postDto: PostDto = {
                 caption: "This is a test post #test",
                 mentions: ["test2", "test3"],
-                close_status: true,
+                close_status: "close"
             };
 
             const create_post_response = await request(app)
@@ -1058,7 +1058,7 @@ describe("User route test suite", () => {
             const postDto: PostDto = {
                 caption: "This is a test post #test",
                 mentions: ["test2", "test3"],
-                close_status: true,
+                close_status: "close",
             };
 
             const create_post_response = await request(app)
@@ -1101,7 +1101,7 @@ describe("User route test suite", () => {
             const postDto: PostDto = {
                 caption: "This is a test post #test",
                 mentions: ["test2", "test3"],
-                close_status: true,
+                close_status: "close"
             };
 
             const create_post_response = await request(app)
@@ -1132,7 +1132,7 @@ describe("User route test suite", () => {
             const postDto: PostDto = {
                 caption: "This is a test post #test",
                 mentions: ["test2", "test3"],
-                close_status: true,
+                close_status: "close"
             };
 
             const create_post_response = await request(app)

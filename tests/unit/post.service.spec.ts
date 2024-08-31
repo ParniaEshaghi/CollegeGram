@@ -5,6 +5,8 @@ import { ServiceFactory } from "../../src/utility/service-factory";
 import { NotFoundError, ForbiddenError } from "../../src/utility/http-errors";
 import { randomUUID } from "crypto";
 import { UpdatePostDto } from "../../src/modules/postHandler/post/dto/updatePost.dto";
+import { PostDto } from "../../src/modules/postHandler/post/dto/post.dto";
+import { UpdateDescription } from "typeorm";
 
 describe("PostService test suite", () => {
     let serviceFactory: ServiceFactory;
@@ -44,10 +46,10 @@ describe("PostService test suite", () => {
     it("should create a post successfully if user is valid", async () => {
         const user = await userService.getUserByUsername("test");
 
-        const postDto = {
+        const postDto: PostDto = {
             caption: "Test caption",
             mentions: ["test2", "test3"],
-            close_status: false,
+            close_status: "normal",
         };
 
         const result = await postService.createPost(
@@ -73,10 +75,10 @@ describe("PostService test suite", () => {
 
     it("should update a post successfully if user is valid and owns the post", async () => {
         const user = await userService.getUserByUsername("test");
-        const postDto = {
+        const postDto: PostDto = {
             caption: "Test caption",
             mentions: ["test2", "test3"],
-            close_status: false,
+            close_status: "normal",
         };
 
         const post = await postService.createPost(
@@ -86,11 +88,11 @@ describe("PostService test suite", () => {
             "localhost:3000"
         );
 
-        const updatedPostDto = {
+        const updatedPostDto: UpdatePostDto = {
             caption: "Updated caption",
             deletedImages: [],
             mentions: ["test2", "test3"],
-            close_status: false,
+            close_status: "normal",
         };
 
         const updatedPost = await postService.updatePost(
@@ -109,10 +111,10 @@ describe("PostService test suite", () => {
 
     it("should throw ForbiddenError if user tries to update a post they don't own", async () => {
         const user = await userService.getUserByUsername("test");
-        const postDto = {
+        const postDto: PostDto = {
             caption: "Test caption",
             mentions: ["test2", "test3"],
-            close_status: false,
+            close_status: "normal",
         };
 
         const post = await postService.createPost(
@@ -128,7 +130,7 @@ describe("PostService test suite", () => {
             caption: "Updated caption",
             deletedImages: [],
             mentions: ["test2", "test3"],
-            close_status: false,
+            close_status: "normal",
         };
 
         await expect(
@@ -145,11 +147,11 @@ describe("PostService test suite", () => {
     it("should throw NotFoundError if post is not found when updating", async () => {
         const user = await userService.getUserByUsername("test");
 
-        const updatedPostDto = {
+        const updatedPostDto: UpdatePostDto = {
             caption: "Updated caption",
             deletedImages: [],
             mentions: ["test2", "test3"],
-            close_status: true,
+            close_status: "close",
         };
 
         await expect(
