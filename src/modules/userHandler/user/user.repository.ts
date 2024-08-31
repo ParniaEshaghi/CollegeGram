@@ -99,6 +99,9 @@ export class UserRepository {
         const userWithPosts = await this.userRepo.findOne({
             where: { username },
             relations: ["posts"],
+            order: {
+                createdAt: "DESC",
+            },
         });
 
         if (userWithPosts) {
