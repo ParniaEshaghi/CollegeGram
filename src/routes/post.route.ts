@@ -111,29 +111,31 @@ export const makePostRouter = (
 
     app.post("/likepost/:postid", auth(userHandler), (req, res) => {
         const postid = req.params.postid;
-        handleExpress(res, () => postHandlerService.likePost(req.user, postid));
-    });
-
-    app.post("/unlikepost/:postid", auth(userHandler), (req, res) => {
-        const postid = req.params.postid;
         handleExpress(res, () =>
-            postHandlerService.unLikePost(req.user, postid)
+            postHandlerService.likePostHandler(req.user, postid)
         );
     });
+
+    // app.post("/unlikepost/:postid", auth(userHandler), (req, res) => {
+    //     const postid = req.params.postid;
+    //     handleExpress(res, () =>
+    //         postHandlerService.unLikePost(req.user, postid)
+    //     );
+    // });
 
     app.post("/likecomment/:commentid", auth(userHandler), (req, res) => {
         const commentid = req.params.commentid;
         handleExpress(res, () =>
-            postHandlerService.likeComment(req.user, commentid)
+            postHandlerService.likeCommentHandler(req.user, commentid)
         );
     });
 
-    app.post("/unlikecomment/:commentid", auth(userHandler), (req, res) => {
-        const commentid = req.params.commentid;
-        handleExpress(res, () =>
-            postHandlerService.unLikeComment(req.user, commentid)
-        );
-    });
+    // app.post("/unlikecomment/:commentid", auth(userHandler), (req, res) => {
+    //     const commentid = req.params.commentid;
+    //     handleExpress(res, () =>
+    //         postHandlerService.unLikeComment(req.user, commentid)
+    //     );
+    // });
 
     app.get("/comments/:postid", auth(userHandler), (req, res) => {
         const postid = req.params.postid;

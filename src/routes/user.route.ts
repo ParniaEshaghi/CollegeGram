@@ -103,13 +103,13 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.post("/follow/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
-        handleExpress(res, () => userHandler.follow(req.user, username));
+        handleExpress(res, () => userHandler.followHandler(req.user, username));
     });
 
-    app.post("/unfollow/:username", auth(userHandler), (req, res) => {
-        const username = req.params.username;
-        handleExpress(res, () => userHandler.unfollow(req.user, username));
-    });
+    // app.post("/unfollow/:username", auth(userHandler), (req, res) => {
+    //     const username = req.params.username;
+    //     handleExpress(res, () => userHandler.unfollow(req.user, username));
+    // });
 
     app.post("/deletefollower/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
@@ -134,27 +134,27 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.post("/block/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
-        handleExpress(res, () => userHandler.block(req.user, username));
+        handleExpress(res, () => userHandler.blockHandler(req.user, username));
     });
 
-    app.post("/unblock/:username", auth(userHandler), (req, res) => {
-        const username = req.params.username;
-        handleExpress(res, () => userHandler.unblock(req.user, username));
-    });
+    // app.post("/unblock/:username", auth(userHandler), (req, res) => {
+    //     const username = req.params.username;
+    //     handleExpress(res, () => userHandler.unblock(req.user, username));
+    // });
 
     app.post("/addclosefriend/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
-            userHandler.addCloseFriend(req.user, username)
+            userHandler.addCloseFriendHandler(req.user, username)
         );
     });
 
-    app.post("/removeclosefriend/:username", auth(userHandler), (req, res) => {
-        const username = req.params.username;
-        handleExpress(res, () =>
-            userHandler.removeCloseFriend(req.user, username)
-        );
-    });
+    // app.post("/removeclosefriend/:username", auth(userHandler), (req, res) => {
+    //     const username = req.params.username;
+    //     handleExpress(res, () =>
+    //         userHandler.removeCloseFriend(req.user, username)
+    //     );
+    // });
 
     app.get("/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
@@ -215,13 +215,13 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.post("/savepost/:postid", auth(userHandler), (req, res) => {
         const postid = req.params.postid;
-        handleExpress(res, () => userHandler.savePost(req.user, postid));
+        handleExpress(res, () => userHandler.savePostHandler(req.user, postid));
     });
 
-    app.post("/unsavepost/:postid", auth(userHandler), (req, res) => {
-        const postid = req.params.postid;
-        handleExpress(res, () => userHandler.unSavePost(req.user, postid));
-    });
+    // app.post("/unsavepost/:postid", auth(userHandler), (req, res) => {
+    //     const postid = req.params.postid;
+    //     handleExpress(res, () => userHandler.unSavePost(req.user, postid));
+    // });
 
     return app;
 };
