@@ -38,6 +38,9 @@
  *                 enum:
  *                   - close
  *                   - normal
+ *           encoding:
+ *             mentions:
+ *               style: form
  *     responses:
  *       200:
  *         description: Post created successfully
@@ -176,6 +179,11 @@
  *                 enum:
  *                   - close
  *                   - normal
+ *           encoding:
+ *             mentions:
+ *               style: form
+ *             deletedImages:
+ *               style: form
  *     responses:
  *       200:
  *         description: Post updated successfully
