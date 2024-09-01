@@ -11,7 +11,7 @@ export const extractNumberedFields = <T>(
             // Ensure the value is not already an array, or flatten if necessary
             if (Array.isArray(value)) {
                 result.push(...(value as T[])); // Flatten array
-            } else {
+            } else if (value != "") {
                 result.push(value as T);
             }
         }
