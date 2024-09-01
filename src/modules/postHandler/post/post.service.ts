@@ -17,11 +17,13 @@ import { CreatePost, PostRepository } from "./post.repository";
 import { UpdatePostDto } from "./dto/updatePost.dto";
 import { UserService } from "../../userHandler/user/user.service";
 import { UserRelation } from "../../userHandler/userRelation/model/userRelation.model";
+import { UserRelationService } from "../../userHandler/userRelation/userRelation.service";
 
 export class PostService {
     constructor(
         private postRepo: PostRepository,
-        private userService: UserService
+        private userService: UserService,
+        private userRelationService: UserRelationService
     ) {}
 
     public async createPost(
@@ -34,7 +36,7 @@ export class PostService {
             throw new UnauthorizedError();
         }
 
-        const mentionResult = await this.checkMentions(postDto.mentions);
+        const mentionResult = await this.checkMentions(postDto.mentions, user);
         if (!mentionResult) {
             throw new NotFoundError();
         }
@@ -56,11 +58,31 @@ export class PostService {
         return toPostWithUsername(createdPost, baseUrl);
     }
 
-    private async checkMentions(mentions: string[]): Promise<boolean> {
+    private async checkMentions(
+        mentions: string[],
+        user: User
+    ): Promise<boolean> {
         const results = await Promise.all(
             mentions.map(async (mention) => {
-                const check = await this.userService.getUserByUsername(mention);
-                return check !== null;
+                const mentionedUser = await this.userService.getUserByUsername(
+                    mention
+                );
+                if (mentionedUser) {
+                    const mentionedUserBlockList =
+                        await this.userRelationService.getAllBlockList(
+                            mentionedUser
+                        );
+                    if (
+                        mentionedUserBlockList.filter(
+                            (mentionedUserBlock) =>
+                                mentionedUserBlock.following.username ==
+                                user.username
+                        ).length != 0
+                    ) {
+                        return false;
+                    }
+                    return true;
+                }
             })
         );
         return results.every((result) => result === true);
@@ -125,7 +147,7 @@ export class PostService {
 
         postImages.push(...postImagesFileNames);
 
-        const mentionResult = await this.checkMentions(postDto.mentions);
+        const mentionResult = await this.checkMentions(postDto.mentions, user);
         if (!mentionResult) {
             throw new NotFoundError();
         }

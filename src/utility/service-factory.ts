@@ -88,7 +88,8 @@ export class ServiceFactory {
         this.postRepository = new PostRepository(this.dataSource);
         this.postService = new PostService(
             this.postRepository,
-            this.userService
+            this.userService,
+            this.userRelationService
         );
         this.commentRepository = new CommentRepository(this.dataSource);
         this.commentService = new CommentService(
