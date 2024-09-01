@@ -156,11 +156,6 @@
  *                 type: string
  *                 description: The updated caption for the post.
  *                 example: "Updated caption #newtag"
- *               deletedImages:
- *                 type: array
- *                 items:
- *                   type: string
- *                 example: ["staticimagelink", "staticimagelink"]
  *               mentions:
  *                 type: array
  *                 items:
