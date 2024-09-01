@@ -74,8 +74,7 @@ export const toProfile = (
     posts: PostWithUsername[],
     baseUrl: string
 ): UserProfile => {
-    const { password, profileStatus, email, profilePicture, ...profileInfo } =
-        user;
+    const { password, email, profilePicture, ...profileInfo } = user;
     return {
         ...profileInfo,
         profilePicture: user.profilePicture
