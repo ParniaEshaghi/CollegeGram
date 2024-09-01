@@ -354,7 +354,31 @@
  * /api/user/follow/{username}:
  *   post:
  *     tags: [User]
- *     summary: Follow and unfollow a User
+ *     summary: Follow a User
+ *     description: Allows the logged-in user to follow another user.
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         description: The username of the user to follow
+ *         schema:
+ *           type: string
+ *           example: janedoe
+ *     responses:
+ *       200:
+ *         description: User followed successfully
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/unfollow/{username}:
+ *   post:
+ *     tags: [User]
+ *     summary: Unfollow a User
  *     description: Allows the logged-in user to follow another user.
  *     parameters:
  *       - in: path

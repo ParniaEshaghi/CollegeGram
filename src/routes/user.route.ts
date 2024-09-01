@@ -103,13 +103,13 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.post("/follow/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
-        handleExpress(res, () => userHandler.followHandler(req.user, username));
+        handleExpress(res, () => userHandler.follow(req.user, username));
     });
 
-    // app.post("/unfollow/:username", auth(userHandler), (req, res) => {
-    //     const username = req.params.username;
-    //     handleExpress(res, () => userHandler.unfollow(req.user, username));
-    // });
+    app.post("/unfollow/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () => userHandler.unfollow(req.user, username));
+    });
 
     app.post("/deletefollower/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
