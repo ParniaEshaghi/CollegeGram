@@ -222,7 +222,7 @@
  * /api/post/likepost/{postid}:
  *   post:
  *     tags: [Posts]
- *     summary: Like a Post
+ *     summary: Like and unlike a Post
  *     description: Likes a post for the authenticated user.
  *     parameters:
  *       - name: postid
@@ -252,43 +252,10 @@
 
 /**
  * @swagger
- * /api/post/unlikepost/{postid}:
- *   post:
- *     tags: [Posts]
- *     summary: Unlike a Post
- *     description: Removes a like from a post for the authenticated user.
- *     parameters:
- *       - name: postid
- *         in: path
- *         required: true
- *         description: The ID of the post to be unliked.
- *         schema:
- *           type: string
- *     responses:
- *       '200':
- *         description: Post successfully unliked.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Post unliked"
- *       '401':
- *         description: Unauthorized
- *       '404':
- *         description: Not Found.
- *       '400':
- *         description: Bad Request. Post is not liked.
- */
-
-/**
- * @swagger
  * /api/post/likecomment/{commentid}:
  *   post:
  *     tags: [Posts]
- *     summary: Like a Comment
+ *     summary: Like and unlike a Comment
  *     description: Likes a comment for the authenticated user.
  *     parameters:
  *       - name: commentid
@@ -314,39 +281,6 @@
  *         description: Not Found.
  *       '400':
  *         description: Bad Request. Comment is already liked.
- */
-
-/**
- * @swagger
- * /api/post/unlikecomment/{commentid}:
- *   post:
- *     tags: [Posts]
- *     summary: Unlike a Comment
- *     description: Removes a like from a comment for the authenticated user.
- *     parameters:
- *       - name: commentid
- *         in: path
- *         required: true
- *         description: The ID of the comment to be unliked.
- *         schema:
- *           type: string
- *     responses:
- *       '200':
- *         description: Comment successfully unliked.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Comment unliked"
- *       '401':
- *         description: Unauthorized.
- *       '404':
- *         description: Not Found.
- *       '400':
- *         description: Bad Request. Comment is not liked.
  */
 
 /**
