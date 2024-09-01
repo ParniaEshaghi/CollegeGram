@@ -208,6 +208,8 @@ describe("Post route test suite", () => {
                 close_status: "normal",
             };
 
+            console.log(create_post_response.body.images[0]);
+
             const response_editpost = await request(app)
                 .post(`/api/post/updatepost/${create_post_response.body.id}`)
                 .set("Cookie", [cookie])
