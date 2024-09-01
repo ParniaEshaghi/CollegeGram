@@ -105,7 +105,9 @@ export class UserRepository {
         });
 
         if (userWithPosts) {
-            return userWithPosts.posts;
+            return userWithPosts.posts.sort(
+                (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+            );
         }
 
         return [];
