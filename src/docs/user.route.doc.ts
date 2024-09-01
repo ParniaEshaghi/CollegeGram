@@ -354,7 +354,7 @@
  * /api/user/follow/{username}:
  *   post:
  *     tags: [User]
- *     summary: Follow a User
+ *     summary: Follow and unfollow a User
  *     description: Allows the logged-in user to follow another user.
  *     parameters:
  *       - in: path
@@ -367,30 +367,6 @@
  *     responses:
  *       200:
  *         description: User followed successfully
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Internal server error
- */
-
-/**
- * @swagger
- * /api/user/unfollow/{username}:
- *   post:
- *     tags: [User]
- *     summary: Unfollow a User
- *     description: Allows the logged-in user to unfollow another user.
- *     parameters:
- *       - in: path
- *         name: username
- *         required: true
- *         description: The username of the user to unfollow
- *         schema:
- *           type: string
- *           example: janedoe
- *     responses:
- *       200:
- *         description: User unfollowed successfully
  *       401:
  *         description: Unauthorized
  *       500:
@@ -642,7 +618,7 @@
  * /api/user/savepost/{postid}:
  *   post:
  *     tags: [User]
- *     summary: Save a Post
+ *     summary: Save and unsave a Post
  *     description: Saves a post to the authenticated user's saved posts list.
  *     parameters:
  *       - name: postid
@@ -668,39 +644,6 @@
  *         description: Not Found.
  *       400:
  *         description: Bad Request. Post is already saved.
- */
-
-/**
- * @swagger
- * /api/user/unsavepost/{postid}:
- *   post:
- *     tags: [User]
- *     summary: Unsave a Post
- *     description: Removes a post from the authenticated user's saved posts list.
- *     parameters:
- *       - name: postid
- *         in: path
- *         required: true
- *         description: The ID of the post to be unsaved.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Post successfully unsaved.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Post unsaved"
- *       401:
- *         description: Unauthorized.
- *       404:
- *         description: Not Found.
- *       400:
- *         description: Bad Request. Post is not saved.
  */
 
 /**
@@ -778,7 +721,7 @@
  * /api/user/block/{username}:
  *   post:
  *     tags: [User]
- *     summary: Blocked a user
+ *     summary: Block and unblock a user
  *     description: Allows the logged-in user to unfollow another user.
  *     parameters:
  *       - in: path
@@ -798,33 +741,10 @@
 
 /**
  * @swagger
- * /api/user/unblock/{username}:
- *   post:
- *     tags: [User]
- *     summary: Unblocks a user
- *     description: Allows the logged-in user to unfollow another user.
- *     parameters:
- *       - in: path
- *         name: username
- *         required: true
- *         schema:
- *           type: string
- *           example: janedoe
- *     responses:
- *       200:
- *         description: User unblocked
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Internal server error
- */
-
-/**
- * @swagger
  * /api/user/addclosefriend/{username}:
  *   post:
  *     tags: [User]
- *     summary: Adds user to close friends
+ *     summary: Adds and removes user to close friends
  *     description: Allows the logged-in user to unfollow another user.
  *     parameters:
  *       - in: path
@@ -836,29 +756,6 @@
  *     responses:
  *       200:
  *         description: User added to close friends
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Internal server error
- */
-
-/**
- * @swagger
- * /api/user/removeclosefriend/{username}:
- *   post:
- *     tags: [User]
- *     summary: Removes a user from close friends
- *     description: Allows the logged-in user to unfollow another user.
- *     parameters:
- *       - in: path
- *         name: username
- *         required: true
- *         schema:
- *           type: string
- *           example: janedoe
- *     responses:
- *       200:
- *         description: User removed from close friends
  *       401:
  *         description: Unauthorized
  *       500:

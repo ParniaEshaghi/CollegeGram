@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../utility/http-errors";
 import { toProfilePost } from "../postHandler/post/model/post.model";
 import { PostService } from "../postHandler/post/post.service";
 import { NotificationService } from "./notification/notification.service";
@@ -72,6 +73,26 @@ export class UserHandler {
         return this.userService.getUserPosts(username, baseUrl);
     }
 
+    public async followHandler(user: User, following_username: string) {
+        const followStatus = await this.userRelationService.getFollowStatus(
+            user,
+            following_username
+        );
+
+        if (
+            followStatus == "unfollowed" ||
+            followStatus == "not followed" ||
+            followStatus == "request rejected" ||
+            followStatus == "request rescinded" ||
+            followStatus == "follower deleted" ||
+            followStatus == "unblocked"
+        ) {
+            return this.follow(user, following_username);
+        } else {
+            return this.unfollow(user, following_username);
+        }
+    }
+
     public async follow(user: User, following_username: string) {
         return this.userRelationService.follow(user, following_username);
     }
@@ -142,6 +163,18 @@ export class UserHandler {
         return this.userRelationService.allFolloweingList(username);
     }
 
+    public async savePostHandler(user: User, postId: string) {
+        const savedStatus = await this.savedService.getPostSaveStatus(
+            user,
+            postId
+        );
+        if (savedStatus) {
+            return this.unSavePost(user, postId);
+        } else {
+            return this.savePost(user, postId);
+        }
+    }
+
     public async savePost(user: User, postId: string) {
         return this.savedService.savePost(user, postId);
     }
@@ -156,6 +189,19 @@ export class UserHandler {
 
     public async deleteFollower(user: User, follower_username: string) {
         return this.userRelationService.deleteFollower(user, follower_username);
+    }
+
+    public async blockHandler(user: User, following_username: string) {
+        const followStatus = await this.userRelationService.getFollowStatus(
+            user,
+            following_username
+        );
+
+        if (followStatus == "blocked") {
+            return this.unblock(user, following_username);
+        } else {
+            return this.block(user, following_username);
+        }
     }
 
     public async block(user: User, following_username: string) {
@@ -192,6 +238,24 @@ export class UserHandler {
             page,
             limit
         );
+    }
+
+    public async addCloseFriendHandler(user: User, follower_username: string) {
+        const follower = await this.userService.getUserByUsername(
+            follower_username
+        );
+        if (!follower) {
+            throw new NotFoundError();
+        }
+        const followStatus = await this.userRelationService.getFollowStatus(
+            follower,
+            user.username
+        );
+        if (followStatus == "close") {
+            return this.removeCloseFriend(user, follower_username);
+        } else {
+            return this.addCloseFriend(user, follower_username);
+        }
     }
 
     public async addCloseFriend(user: User, follower_username: string) {

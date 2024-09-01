@@ -5,9 +5,9 @@ const arraySchema = z
     .transform((arg) => (Array.isArray(arg) ? arg : [arg]));
 
 export const postDto = z.object({
-    caption: z.string(),
-    mentions: arraySchema,
-    close_status: z.enum(["close", "normal"]).default("normal"),
+    caption: z.string().optional().default(""),
+    mentions: arraySchema.optional().default([]),
+    close_status: z.enum(["close", "normal"]).optional().default("normal"),
 });
 
 export type PostDto = z.infer<typeof postDto>;

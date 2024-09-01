@@ -6,9 +6,9 @@ const arraySchema = z
 
 export const updatePostDto = z.object({
     caption: z.string().optional().default(""),
-    mentions: arraySchema,
-    deletedImages: arraySchema,
-    close_status: z.enum(["close", "normal"]).default("normal"),
+    mentions: arraySchema.optional().default([]),
+    deletedImages: arraySchema.optional().default([]),
+    close_status: z.enum(["close", "normal"]).optional().default("normal"),
 });
 
 export type UpdatePostDto = z.infer<typeof updatePostDto>;

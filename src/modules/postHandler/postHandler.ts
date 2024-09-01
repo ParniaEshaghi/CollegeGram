@@ -77,6 +77,18 @@ export class PostHandler {
         return toPostPage(post, baseUrl, like_status, save_status);
     }
 
+    public async likePostHandler(user: User, postId: string) {
+        const postLikeStatus = await this.postLikeService.getLikeStatus(
+            user,
+            postId
+        );
+        if (postLikeStatus) {
+            return this.unLikePost(user, postId);
+        } else {
+            return this.likePost(user, postId);
+        }
+    }
+
     public likePost(user: User, postId: string) {
         return this.postLikeService.likePost(user, postId);
     }
@@ -87,6 +99,18 @@ export class PostHandler {
 
     public createComment(user: User, commentDto: CommentDto) {
         return this.commentService.createComment(user, commentDto);
+    }
+
+    public async likeCommentHandler(user: User, commentId: string) {
+        const commentLikeStatus = await this.commentLikeService.getLikeStatus(
+            user,
+            commentId
+        );
+        if (commentLikeStatus) {
+            return this.unLikeComment(user, commentId);
+        } else {
+            return this.likeComment(user, commentId);
+        }
     }
 
     public likeComment(user: User, commentId: string) {
