@@ -1,132 +1,5 @@
 /**
  * @swagger
- * tags:
- *   - name: UserRelations
- *     description: User relation management endpoints
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     UserProfile:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         username:
- *           type: string
- *         firstname:
- *           type: string
- *         lastname:
- *           type: string
- *         profileStatus:
- *           type: string
- *           enum:
- *             - public
- *             - private
- *         bio:
- *           type: string
- *         follower_count:
- *           type: integer
- *         following_count:
- *           type: integer
- *         post_count:
- *           type: integer
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- *         profilePicture:
- *           type: string
- *         posts:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Post'
- *         followStatus:
- *           type: string
- *           enum:
- *             - followed
- *             - not followed
- *             - requested
- *             - blocked
- *             - user blocked
- *     Post:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         caption:
- *           type: string
- *         tags:
- *           type: array
- *           items:
- *             type: string
- *         mentions:
- *           type: array
- *           items:
- *             type: string
- *         like_count:
- *           type: integer
- *         comment_count:
- *           type: integer
- *         saved_count:
- *           type: integer
- *         close_status:
- *           type: string
- *           enum:
- *             - normal
- *             - close
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- *         deletedAt:
- *           type: string
- *           format: date-time
- *           nullable: true
- *         username:
- *           type: string
- *         profilePicture:
- *           type: string
- *         images:
- *           type: array
- *           items:
- *             type: string
- *     User:
- *       type: object
- *       properties:
- *         username:
- *           type: string
- *         profilePicture:
- *           type: string
- *         firstname:
- *           type: string
- *         lastname:
- *           type: string
- *         follower_count:
- *           type: integer
- *         following_count:
- *           type: integer
- *     Meta:
- *       type: object
- *       properties:
- *         total:
- *           type: integer
- *         page:
- *           type: integer
- *         totalPage:
- *           type: integer
- *         limit:
- *           type: integer
- */
-
-/**
- * @swagger
  * /api/user/{username}:
  *   get:
  *     tags: [UserRelations]
@@ -146,13 +19,13 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/UserProfile'
+ *               $ref: '#/components/schemas/AnotherUserProfile'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       404:
- *         description: User not found
+ *         $ref: '#/components/responses/NotFound'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -173,10 +46,12 @@
  *     responses:
  *       200:
  *         description: User followed successfully
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -197,10 +72,12 @@
  *     responses:
  *       200:
  *         description: User unfollowed successfully
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -221,10 +98,12 @@
  *     responses:
  *       200:
  *         description: Follower deleted
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -245,10 +124,12 @@
  *     responses:
  *       200:
  *         description: Request accepted
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -269,10 +150,12 @@
  *     responses:
  *       200:
  *         description: Request rejected
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -314,13 +197,13 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/User'
+ *                     $ref: '#/components/schemas/ListUser'
  *                 meta:
  *                   $ref: '#/components/schemas/Meta'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       404:
- *         description: Not Found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -362,13 +245,13 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/User'
+ *                     $ref: '#/components/schemas/ListUser'
  *                 meta:
  *                   $ref: '#/components/schemas/Meta'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       404:
- *         description: Not Found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -389,10 +272,12 @@
  *     responses:
  *       200:
  *         description: User blocked or unblocked
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -413,10 +298,12 @@
  *     responses:
  *       200:
  *         description: User added to or removed from close friends
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -452,11 +339,11 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/User'
+ *                     $ref: '#/components/schemas/ListUser'
  *                 meta:
  *                   $ref: '#/components/schemas/Meta'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  */
 
 /**
@@ -492,13 +379,11 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/User'
+ *                     $ref: '#/components/schemas/ListUser'
  *                 meta:
  *                   $ref: '#/components/schemas/Meta'
  *       401:
- *         description: Unauthorized
- *       404:
- *         description: Not Found
+ *         $ref: '#/components/responses/Unauthorized'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */

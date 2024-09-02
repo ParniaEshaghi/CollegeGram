@@ -1,15 +1,54 @@
 /**
  * @swagger
- * tags:
- *   name: User
- *   description: User management endpoints
+ * /api/user/signin:
+ *   post:
+ *     tags: [Users]
+ *     summary: User Login
+ *     description: Authenticates a user and provides a token for further requests.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               credential:
+ *                 type: string
+ *                 example: johndoe@example.com
+ *               password:
+ *                 type: string
+ *                 example: StrongPassword123
+ *               keepMeSignedIn:
+ *                 type: boolean
+ *                 description: If not provided defaults to false.
+ *             required:
+ *               - credential
+ *               - password
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Login successful
+ *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       401:
+ *         description: Invalid credential or password
+ *       500:
+ *         description: Internal server error
  */
 
 /**
  * @swagger
  * /api/user/signup:
  *   post:
- *     tags: [User]
+ *     tags: [Users]
  *     summary: User Registration
  *     description: Creates a new user account with provided details.
  *     requestBody:
@@ -39,51 +78,9 @@
 
 /**
  * @swagger
- * /api/user/signin:
- *   post:
- *     tags: [User]
- *     summary: User Login
- *     description: Authenticates a user and provides a token for further requests.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               credential:
- *                 type: string
- *                 example: johndoe@example.com
- *               password:
- *                 type: string
- *                 example: StrongPassword123
- *               keepMeSignedIn:
- *                 type: boolean
- *     responses:
- *       200:
- *         description: Login successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Login successful
- *                 token:
- *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *       401:
- *         description: Invalid credential or password
- *       500:
- *         description: Internal server error
- */
-
-/**
- * @swagger
  * /api/user/editprofile:
  *   post:
- *     tags: [User]
+ *     tags: [Users]
  *     summary: Edit User Profile
  *     description: Updates the user's profile information including profile picture.
  *     requestBody:
@@ -113,15 +110,16 @@
  *                 type: string
  *                 enum: [public, private]
  *                 description: User's profile visibility status
- *                 example: public
  *               profilePicture:
  *                 type: string
  *                 format: binary
- *                 description: Profile picture file (optional)
+ *                 description: Profile picture file
  *               password:
  *                 type: string
- *                 description: User's new password (optional)
- *                 example: newSecurePassword123
+ *                 description: User's new password
+ *             required:
+ *               - email
+ *               - profileStatus
  *     responses:
  *       200:
  *         description: Profile updated successfully
@@ -167,7 +165,7 @@
  * @swagger
  * /api/user/profileInfo:
  *   get:
- *     tags: [User]
+ *     tags: [Users]
  *     summary: Get User Profile Information
  *     description: Retrieves the profile information of the logged-in user, including posts.
  *     responses:
@@ -176,79 +174,7 @@
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 email:
- *                   type: string
- *                   example: johndoe@example.com
- *                 profileStatus:
- *                   type: string
- *                   example: private
- *                 username:
- *                   type: string
- *                   example: johndoe
- *                 firstname:
- *                   type: string
- *                   example: John
- *                 lastname:
- *                   type: string
- *                   example: Doe
- *                 bio:
- *                   type: string
- *                   example: Software Developer
- *                 profilePicture:
- *                   type: string
- *                   example: http://localhost:3000/api/images/profiles/profile.jpg
- *                 follower_count:
- *                   type: integer
- *                   example: 150
- *                 following_count:
- *                   type: integer
- *                   example: 180
- *                 post_count:
- *                   type: integer
- *                   example: 75
- *                 unreadNotifications:
- *                   type: integer
- *                   example: 6
- *                 posts:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                         example: 12345
- *                       username:
- *                         type: string
- *                         example: johndoe
- *                       profilePicture:
- *                         type: string
- *                         example: http://localhost:3000/api/images/profiles/profile.jpg
- *                       images:
- *                         type: array
- *                         items:
- *                           type: string
- *                           example: http://localhost:3000/api/images/posts/post1.jpg
- *                       tags:
- *                         type: array
- *                         items:
- *                           type: string
- *                           example: tag1
- *                       mentions:
- *                         type: array
- *                         items:
- *                           type: string
- *                           example: mention1
- *                       like_count:
- *                           type: integer
- *                           example: 100
- *                       comment_count:
- *                           type: integer
- *                           example: 100
- *                       saved_count:
- *                           type: integer
- *                           example: 100
+ *               $ref: '#/components/schemas/UserProfile'
  *       401:
  *         description: Unauthorized
  *       500:
@@ -259,7 +185,7 @@
  * @swagger
  * /api/user/forgetpassword:
  *   post:
- *     tags: [User]
+ *     tags: [Users]
  *     summary: Password Reset Request
  *     description: Initiates the password reset process by sending an email to the user.
  *     requestBody:
@@ -285,7 +211,7 @@
  * @swagger
  * /api/user/resetpassword:
  *   post:
- *     tags: [User]
+ *     tags: [Users]
  *     summary: Reset Password
  *     description: Resets the user's password using a provided token and new password.
  *     requestBody:
@@ -314,7 +240,7 @@
  * @swagger
  * /api/user/savepost/{postid}:
  *   post:
- *     tags: [User]
+ *     tags: [Users]
  *     summary: Save and unsave a Post
  *     description: Saves a post to the authenticated user's saved posts list.
  *     parameters:
@@ -347,7 +273,7 @@
  * @swagger
  * /api/user/explore:
  *   get:
- *     tags: [User]
+ *     tags: [Users]
  *     summary: Get explore page posts
  *     responses:
  *       200:
@@ -359,52 +285,9 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                         example: 12345
- *                       username:
- *                         type: string
- *                         example: johndoe
- *                       profilePicture:
- *                         type: string
- *                         example: http://localhost:3000/api/images/profiles/profile.jpg
- *                       images:
- *                         type: array
- *                         items:
- *                           type: string
- *                           example: http://localhost:3000/api/images/posts/post1.jpg
- *                       tags:
- *                         type: array
- *                         items:
- *                           type: string
- *                           example: tag1
- *                       mentions:
- *                         type: array
- *                         items:
- *                           type: string
- *                           example: mention1
- *                       like_count:
- *                         type: integer
- *                         example: 100
- *                       comment_count:
- *                         type: integer
- *                         example: 100
- *                       saved_count:
- *                         type: integer
- *                         example: 100
+ *                     $ref: '#/components/schemas/Post'
  *                 meta:
- *                   type: object
- *                   properties:
- *                     total:
- *                       type: integer
- *                     page:
- *                       type: integer
- *                     totalPage:
- *                       type: integer
- *                     limit:
- *                       type: integer
+ *                   $ref: '#/components/schemas/Meta'
  *       401:
  *         description: Unauthorized
  *       500:
@@ -415,7 +298,7 @@
  * @swagger
  * /api/user/notifications:
  *   get:
- *     tags: [User]
+ *     tags: [Users]
  *     summary: Get notifications
  *     responses:
  *       200:
@@ -427,84 +310,9 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     type: object
- *                     properties:
- *                       type:
- *                         type: string
- *                         example: "followed"
- *                       isRead:
- *                         type: boolean
- *                         example: true
- *                       createdAt:
- *                         type: string
- *                         format: date-time
- *                         example: "2024-08-30T15:54:48.717Z"
- *                       updatedAt:
- *                         type: string
- *                         format: date-time
- *                         example: "2024-08-30T15:54:48.717Z"
- *                       deletedAt:
- *                         type: string
- *                         format: date-time
- *                         nullable: true
- *                       recipient:
- *                         type: object
- *                         properties:
- *                           username:
- *                             type: string
- *                             example: "johndoe1"
- *                           profilePicture:
- *                             type: string
- *                             example: ""
- *                           firstname:
- *                             type: string
- *                             example: "John"
- *                           lastname:
- *                             type: string
- *                             example: "Doe"
- *                       sender:
- *                         type: object
- *                         properties:
- *                           username:
- *                             type: string
- *                             example: "johndoe2"
- *                           email:
- *                             type: string
- *                             example: "johndoe2@example.com"
- *                           profilePicture:
- *                             type: string
- *                             example: ""
- *                           firstname:
- *                             type: string
- *                             example: ""
- *                           lastname:
- *                             type: string
- *                             example: ""
- *                       post:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                           images:
- *                             type: string
- *                       comment:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                           text:
- *                             type: string
+ *                     $ref: '#/components/schemas/Notification'
  *                 meta:
- *                   type: object
- *                   properties:
- *                     total:
- *                       type: integer
- *                     page:
- *                       type: integer
- *                     totalPage:
- *                       type: integer
- *                     limit:
- *                       type: integer
+ *                   $ref: '#/components/schemas/Meta'
  *       401:
  *         description: Unauthorized
  *       500:
@@ -515,7 +323,7 @@
  * @swagger
  * /api/user/followingsnotifications:
  *   get:
- *     tags: [User]
+ *     tags: [Users]
  *     summary: Get followings notifications
  *     responses:
  *       200:
@@ -527,84 +335,9 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     type: object
- *                     properties:
- *                       type:
- *                         type: string
- *                         example: "followed"
- *                       isRead:
- *                         type: boolean
- *                         example: true
- *                       createdAt:
- *                         type: string
- *                         format: date-time
- *                         example: "2024-08-30T15:54:48.717Z"
- *                       updatedAt:
- *                         type: string
- *                         format: date-time
- *                         example: "2024-08-30T15:54:48.717Z"
- *                       deletedAt:
- *                         type: string
- *                         format: date-time
- *                         nullable: true
- *                       recipient:
- *                         type: object
- *                         properties:
- *                           username:
- *                             type: string
- *                             example: "johndoe1"
- *                           profilePicture:
- *                             type: string
- *                             example: ""
- *                           firstname:
- *                             type: string
- *                             example: "John"
- *                           lastname:
- *                             type: string
- *                             example: "Doe"
- *                       sender:
- *                         type: object
- *                         properties:
- *                           username:
- *                             type: string
- *                             example: "johndoe2"
- *                           email:
- *                             type: string
- *                             example: "johndoe2@example.com"
- *                           profilePicture:
- *                             type: string
- *                             example: ""
- *                           firstname:
- *                             type: string
- *                             example: ""
- *                           lastname:
- *                             type: string
- *                             example: ""
- *                       post:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                           images:
- *                             type: string
- *                       comment:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                           text:
- *                             type: string
+ *                     $ref: '#/components/schemas/Notification'
  *                 meta:
- *                   type: object
- *                   properties:
- *                     total:
- *                       type: integer
- *                     page:
- *                       type: integer
- *                     totalPage:
- *                       type: integer
- *                     limit:
- *                       type: integer
+ *                   $ref: '#/components/schemas/Meta'
  *       401:
  *         description: Unauthorized
  *       500:
