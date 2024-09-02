@@ -45,6 +45,9 @@ export const toProfileFollowStatus = (
     followStatus: FollowStatus,
     reverse_followStatus: FollowStatus
 ): ProfileFollowStatus => {
+    if (reverse_followStatus === "blocked") {
+        return "blocked";
+    }
     if (
         followStatus === "not followed" ||
         followStatus === "unfollowed" ||
@@ -53,21 +56,15 @@ export const toProfileFollowStatus = (
         followStatus === "follower deleted"
     ) {
         return "not followed";
-    }
-    if (
+    } else if (
         followStatus === "followed" ||
         followStatus === "request accepted" ||
         followStatus === "close"
     ) {
         return "followed";
-    }
-    if (followStatus === "request pending") {
+    } else if (followStatus === "request pending") {
         return "requested";
-    }
-    if (reverse_followStatus === "blocked") {
-        return "blocked";
-    }
-    if (followStatus === "blocked") {
+    } else if (followStatus === "blocked") {
         return "user blocked";
     }
     return "not followed";
