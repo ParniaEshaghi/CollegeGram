@@ -1,8 +1,137 @@
 /**
  * @swagger
  * tags:
- *   name: Posts
- *   description: API for managing posts
+ *   - name: Posts
+ *     description: API for managing posts, including creation, retrieval, updates, and interactions such as likes.
+ *   - name: Comments
+ *     description: API for managing comments on posts, including creating, liking, and retrieving nested comments.
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Post:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         username:
+ *           type: string
+ *         profilePicture:
+ *           type: string
+ *           description: URL of the user's profile picture
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Array of image URLs for the post.
+ *         caption:
+ *           type: string
+ *           description: Caption for the post, including hashtags.
+ *         tags:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: List of tags associated with the post.
+ *         mentions:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: List of users mentioned in the post.
+ *         like_count:
+ *           type: integer
+ *           description: Number of likes the post has received.
+ *         comment_count:
+ *           type: integer
+ *           description: Number of comments on the post.
+ *         saved_count:
+ *           type: integer
+ *           description: Number of times the post has been saved by users.
+ *         close_status:
+ *           type: string
+ *           enum:
+ *             - normal
+ *             - close
+ *           description: Visibility status of the post.
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *         deletedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *     PostWithLikeAndSaveStatus:
+ *       allof:
+ *         - $ref: '#/components/schemas/Post'
+ *         - type: object
+ *           properties:
+ *             like_status:
+ *               type: boolean
+ *               description: Whether the post is liked by the current user.
+ *             save_status:
+ *               type: boolean
+ *               description: Whether the post is saved by the current user.
+ *     Comment:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         postId:
+ *           type: string
+ *         text:
+ *           type: string
+ *           description: The content of the comment.
+ *         commentId:
+ *           type: string
+ *           description: ID of the parent comment (if nested).
+ *         like_count:
+ *           type: integer
+ *           description: Number of likes the comment has received.
+ *         username:
+ *           type: string
+ *           description: The username of the commenter.
+ *         profilePicture:
+ *           type: string
+ *           description: URL of the commenter's profile picture.
+ *         firstname:
+ *           type: string
+ *           description: Commenter’s first name.
+ *         lastname:
+ *           type: string
+ *           description: Commenter’s last name.
+ *         like_status:
+ *           type: boolean
+ *           description: Whether the comment is liked by the current user.
+ *         children:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Comment'
+ *           description: Nested comments (replies).
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *         deletedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *   responses:
+ *     BadRequest:
+ *       description: Bad request
+ *     Unauthorized:
+ *       description: Unauthorized
+ *     NotFound:
+ *       description: Resource not found
+ *     InternalServerError:
+ *       description: Internal server error
+ *     Forbidden:
+ *       description: Forbidden
  */
 
 /**
@@ -10,7 +139,7 @@
  * /api/post/createpost:
  *   post:
  *     summary: Create a new post
- *     description: Endpoint to create a new post with images.
+ *     description: Endpoint to create a new post with images and captions. Users can also add mentions and select the post visibility.
  *     tags: [Posts]
  *     requestBody:
  *       required: true
@@ -21,23 +150,29 @@
  *             properties:
  *               caption:
  *                 type: string
+ *                 description: Caption for the post including hashtags.
  *                 example: "This is a post caption #tag1"
  *               mentions:
  *                 type: array
  *                 items:
  *                   type: string
  *                   example: "mention1"
+ *                 description: List of users to mention in the post.
  *                 example: ["mention1", "mention2"]
  *               images:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *                 description: Images to be uploaded with the post.
  *               close_status:
  *                 type: string
+ *                 description: Visibility status of the post. If not provided defaults to normal.
  *                 enum:
- *                   - close
  *                   - normal
+ *                   - close
+ *             required:
+ *               - images
  *           encoding:
  *             mentions:
  *               style: form
@@ -47,92 +182,13 @@
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 username:
- *                   type: string
- *                 profilePicture:
- *                   type: string
- *                 images:
- *                   type: array
- *                   items:
- *                     type: string
- *                   description: Array of image URLs for the created post.
- *                 caption:
- *                   type: string
- *                 tags:
- *                   type: array
- *                   items:
- *                     type: string
- *                 mentions:
- *                   type: array
- *                   items:
- *                     type: string
+ *               $ref: '#/components/schemas/Post'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       500:
- *         description: Internal server error
- */
-
-/**
- * @swagger
- * /api/post/{postid}:
- *   get:
- *     summary: Get post by ID
- *     description: Retrieve a post by its ID.
- *     tags: [Posts]
- *     parameters:
- *       - in: path
- *         name: postid
- *         schema:
- *           type: string
- *         required: true
- *     responses:
- *       200:
- *         description: Post retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 username:
- *                   type: string
- *                 profilePicture:
- *                   type: string
- *                 images:
- *                   type: array
- *                   items:
- *                     type: string
- *                 caption:
- *                   type: string
- *                 tags:
- *                   type: array
- *                   items:
- *                     type: string
- *                 mentions:
- *                   type: array
- *                   items:
- *                     type: string
- *                 like_status:
- *                   type: boolean
- *                 save_status:
- *                   type: boolean
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Forbidden
- *       404:
- *         description: Post not found
- *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -140,7 +196,7 @@
  * /api/post/updatepost/{postid}:
  *   post:
  *     summary: Update a post
- *     description: Endpoint to update an existing post with new images and caption.
+ *     description: Endpoint to update an existing post. Users can change the caption, add/remove images, and update mentions.
  *     tags: [Posts]
  *     parameters:
  *       - in: path
@@ -148,6 +204,7 @@
  *         schema:
  *           type: string
  *         required: true
+ *         description: The ID of the post to be updated.
  *     requestBody:
  *       required: true
  *       content:
@@ -157,28 +214,32 @@
  *             properties:
  *               caption:
  *                 type: string
- *                 description: The updated caption for the post.
+ *                 description: Updated caption for the post.
  *                 example: "Updated caption #newtag"
  *               mentions:
  *                 type: array
  *                 items:
  *                   type: string
+ *                 description: Updated list of mentions.
  *                 example: ["newmention1", "newmention2"]
  *               deletedImages:
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: ["staticimagelink", "staticimagelink"]
+ *                 description: List of image URLs to delete.
+ *                 example: ["staticimagelink1", "staticimagelink2"]
  *               images:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *                 description: New images to add to the post.
  *               close_status:
  *                 type: string
+ *                 description: Updated visibility status of the post. If not provided defaults to normal.
  *                 enum:
- *                   - close
  *                   - normal
+ *                   - close
  *           encoding:
  *             mentions:
  *               style: form
@@ -190,48 +251,26 @@
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   description: ID of the updated post.
- *                 username:
- *                   type: string
- *                 profilePicture:
- *                   type: string
- *                 images:
- *                   type: array
- *                   items:
- *                     type: string
- *                 caption:
- *                   type: string
- *                 tags:
- *                   type: array
- *                   items:
- *                     type: string
- *                 mentions:
- *                   type: array
- *                   items:
- *                     type: string
+ *               $ref: '#/components/schemas/Post'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Post not found
+ *         $ref: '#/components/responses/NotFound'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
  * @swagger
  * /api/post/likepost/{postid}:
  *   post:
- *     tags: [Posts]
  *     summary: Like and unlike a Post
- *     description: Likes a post for the authenticated user.
+ *     description: Like or unlike a post for the authenticated user.
+ *     tags: [Posts]
  *     parameters:
  *       - name: postid
  *         in: path
@@ -240,8 +279,8 @@
  *         schema:
  *           type: string
  *     responses:
- *       '200':
- *         description: Post successfully liked.
+ *       200:
+ *         description: Post successfully liked or unliked.
  *         content:
  *           application/json:
  *             schema:
@@ -250,54 +289,54 @@
  *                 message:
  *                   type: string
  *                   example: "Post liked"
- *       '401':
- *         description: Unauthorized.
- *       '404':
- *         description: Not Found.
- *       '400':
- *         description: Bad Request. Post is already liked.
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
  * @swagger
- * /api/post/likecomment/{commentid}:
- *   post:
+ * /api/post/{postid}:
+ *   get:
+ *     summary: Get post by ID
+ *     description: Retrieve a post by its ID along with associated data such as images, captions, tags, and mentions.
  *     tags: [Posts]
- *     summary: Like and unlike a Comment
- *     description: Likes a comment for the authenticated user.
  *     parameters:
- *       - name: commentid
- *         in: path
- *         required: true
- *         description: The ID of the comment to be liked.
+ *       - in: path
+ *         name: postid
  *         schema:
  *           type: string
+ *         required: true
+ *         description: The ID of the post to retrieve.
  *     responses:
- *       '200':
- *         description: Comment successfully liked.
+ *       200:
+ *         description: Post retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Comment liked"
- *       '401':
- *         description: Unauthorized.
- *       '404':
- *         description: Not Found.
- *       '400':
- *         description: Bad Request. Comment is already liked.
+ *               $ref: '#/components/schemas/PostWithLikeAndSaveStatus'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
  * @swagger
  * /api/post/comment:
  *   post:
- *     tags: [Posts]
  *     summary: Create a new comment
- *     description: Creates a new comment for a specified post.
+ *     description: Creates a new comment for a specified post. Comments can also be nested as replies to other comments.
+ *     tags: [Comments]
  *     requestBody:
  *       description: Comment object that needs to be added
  *       required: true
@@ -308,11 +347,15 @@
  *             properties:
  *               postId:
  *                 type: string
+ *                 format: uuid
+ *                 description: Id of the post that the comment is for.
  *               text:
  *                 type: string
+ *                 description: The comment content
  *               commentId:
  *                 type: string
- *                 example: Id of the parent comment (optional)
+ *                 format: uuid
+ *                 description: Id of the comment that parents the new comment. Should be provided if the comment is a reply to another comment.
  *             required:
  *               - postId
  *               - text
@@ -322,20 +365,46 @@
  *         content:
  *           application/json:
  *             schema:
+ *               $ref: '#/components/schemas/Comment'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /api/post/likecomment/{commentid}:
+ *   post:
+ *     summary: Like and unlike a Comment
+ *     description: Like or unlike a comment for the authenticated user.
+ *     tags: [Comments]
+ *     parameters:
+ *       - name: commentid
+ *         in: path
+ *         required: true
+ *         description: The ID of the comment to be liked.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Comment successfully liked or unliked.
+ *         content:
+ *           application/json:
+ *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 message:
  *                   type: string
- *                 like_count:
- *                   type: integer
- *                 text:
- *                   type: string
- *                 username:
- *                   type: string
+ *                   example: "Comment liked"
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized.
+ *         $ref: '#/components/responses/Unauthorized'
  *       404:
- *         description: Not Found.
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -343,8 +412,8 @@
  * /api/post/comments/{postid}:
  *   get:
  *     summary: Get comments for a post
- *     description: Retrieve comments for a specific post, including nested comments.
- *     tags: [Posts]
+ *     description: Retrieve comments for a specific post, including nested comments. Supports pagination.
+ *     tags: [Comments]
  *     parameters:
  *       - in: path
  *         name: postid
@@ -377,24 +446,7 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                         description: ID of the comment
- *                       text:
- *                         type: string
- *                         description: Content of the comment
- *                       like_count:
- *                         type: integer
- *                       username:
- *                         type: string
- *                         description: Username of the comment author
- *                       children:
- *                         type: array
- *                         items:
- *                           type: object
- *                           example: 'nested comments'
+ *                     $ref: '#/components/schemas/Comment'
  *                 meta:
  *                   type: object
  *                   properties:
@@ -410,8 +462,10 @@
  *                     totalPage:
  *                       type: integer
  *                       description: Total number of pages
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized.
+ *         $ref: '#/components/responses/Unauthorized'
  *       404:
- *         description: Not Found
+ *         $ref: '#/components/responses/NotFound'
  */
