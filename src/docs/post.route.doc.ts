@@ -109,7 +109,7 @@
  *         children:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/Comment'
+ *             type: object
  *           description: Nested comments (replies).
  *         createdAt:
  *           type: string
