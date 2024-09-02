@@ -127,6 +127,7 @@ export class UserRelationService {
                 followStatus: "request rescinded",
             };
             await this.userRelationRepo.deleteFollowRequest(relation);
+
             return { message: "Follow request rescinded" };
         }
     }

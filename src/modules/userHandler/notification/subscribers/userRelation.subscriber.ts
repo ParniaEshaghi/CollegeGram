@@ -24,6 +24,9 @@ export class UserRelationSubscriber
     }
 
     async afterInsert(event: InsertEvent<UserRelationEntity>): Promise<void> {
+        console.log("@@@@@@@@@@@@@");
+        console.log(event.entity.followStatus);
+        console.log("@@@@@@@@@@@@@");
         const notificationRepo =
             event.manager.getRepository(NotificationEntity);
         const userNotificationRepo = event.manager.getRepository(
@@ -34,6 +37,14 @@ export class UserRelationSubscriber
             event.entity.followStatus === "request accepted" ||
             event.entity.followStatus === "followed"
         ) {
+            if (event.entity.followStatus === "request accepted") {
+                await notificationRepo.softDelete({
+                    recipient: event.entity.following,
+                    sender: event.entity.follower,
+                    type: "followRequest",
+                });
+            }
+
             const notif = await notificationRepo.save(
                 this.followedNotification(event)
             );
@@ -64,6 +75,30 @@ export class UserRelationSubscriber
             }
         }
 
+        if (event.entity.followStatus === "request rejected") {
+            await notificationRepo.softDelete({
+                recipient: event.entity.following,
+                sender: event.entity.follower,
+                type: "followRequest",
+            });
+        }
+
+        if (event.entity.followStatus === "request rescinded") {
+            const oldNotification =
+                await this.notificationService.getNotification(
+                    event.entity.follower,
+                    event.entity.following,
+                    "followBack"
+                );
+
+            if (oldNotification) {
+                await notificationRepo.save({
+                    id: oldNotification.id,
+                    type: "followed",
+                });
+            }
+        }
+
         if (event.entity.followStatus === "request pending") {
             const notification: CreateNotification = {
                 recipient: event.entity.following,
@@ -85,44 +120,51 @@ export class UserRelationSubscriber
             // ya khoda
 
             const oldNotification =
-                await this.notificationService.getFollowedNotification(
+                await this.notificationService.getNotification(
                     event.entity.follower,
-                    event.entity.following
+                    event.entity.following,
+                    "followed"
                 );
 
             if (oldNotification) {
-                const notif = await notificationRepo.save(
-                    this.followBackNotification(event)
-                );
+                const userNotification = await notificationRepo.save({
+                    id: oldNotification.id,
+                    type: "followBack",
+                });
 
-                await this.notificationService.deleteNotification(
-                    oldNotification
-                );
+                // const notif = await notificationRepo.save(
+                //     this.followBackNotification(event)
+                // );
 
-                const userNotification =
-                    await this.userNotificationsService.userNotif(
-                        event.entity.follower.username,
-                        notif
-                    );
-                if (userNotification) {
-                    await userNotificationRepo.save(userNotification);
-                }
+                // await this.notificationService.deleteNotification(
+                //     oldNotification
+                // );
 
-                const senderFollowers =
-                    await this.userNotificationsService.getSenderFollowers(
-                        event.entity.following
-                    );
+                // const userNotification =
+                //     await this.userNotificationsService.userNotif(
+                //         event.entity.follower.username,
+                //         notif
+                //     );
 
-                for (const senderFollower of senderFollowers) {
-                    const userNotification =
-                        await this.userNotificationsService.userNotif(
-                            senderFollower.follower.username,
-                            notif
-                        );
-                    if (userNotification) {
-                        await userNotificationRepo.save(userNotification);
-                    }
-                }
+                // if (userNotification) {
+                //     await userNotificationRepo.save(userNotification);
+                // }
+
+                // const senderFollowers =
+                //     await this.userNotificationsService.getSenderFollowers(
+                //         event.entity.following
+                //     );
+
+                // for (const senderFollower of senderFollowers) {
+                //     const userNotification =
+                //         await this.userNotificationsService.userNotif(
+                //             senderFollower.follower.username,
+                //             notif
+                //         );
+                //     if (userNotification) {
+                //         await userNotificationRepo.save(userNotification);
+                //     }
+                // }
             }
         }
 

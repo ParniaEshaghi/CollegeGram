@@ -56,6 +56,7 @@ export class UserRelationRepository {
         userRelation: UserRelation
     ): Promise<void> {
         await this.deleteLastRelation(userRelation);
+        await this.userRelationRepo.save(userRelation);
     }
 
     public async createFollowAccepted(

@@ -31,8 +31,12 @@ export class NotificationService {
         return this.notificationRepo.findByType(type);
     }
 
-    public getFollowedNotification(recipient: User, sender: User) {
-        return this.notificationRepo.getFollowedNotification(recipient, sender);
+    public getNotification(
+        recipient: User,
+        sender: User,
+        type: NotificationTypes
+    ) {
+        return this.notificationRepo.getNotification(recipient, sender, type);
     }
 
     public deleteNotification(notification: Notification) {

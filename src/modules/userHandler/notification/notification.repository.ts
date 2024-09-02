@@ -31,12 +31,16 @@ export class NotificationRepository {
         });
     }
 
-    public getFollowedNotification(recipient: User, sender: User) {
+    public getNotification(
+        recipient: User,
+        sender: User,
+        type: NotificationTypes
+    ) {
         return this.notificationRepo.findOne({
             where: {
                 recipient: { username: recipient.username },
                 sender: { username: sender.username },
-                type: "followed",
+                type: type,
             },
             relations: ["recipient", "sender", "post", "comment"],
         });
