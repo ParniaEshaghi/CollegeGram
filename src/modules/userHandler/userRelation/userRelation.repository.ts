@@ -15,6 +15,7 @@ export class UserRelationRepository {
         await this.appDataSource.manager.transaction(async (manager) => {
             const userRepo = manager.getRepository(UserEntity);
             const userRelationRepo = manager.getRepository(UserRelationEntity);
+            await this.deleteLastRelation(relation);
             await userRelationRepo.save(relation);
             await userRepo.update(
                 { username: relation.follower.username },
@@ -31,10 +32,7 @@ export class UserRelationRepository {
         await this.appDataSource.manager.transaction(async (manager) => {
             const userRepo = manager.getRepository(UserEntity);
             const userRelationRepo = manager.getRepository(UserRelationEntity);
-            await userRelationRepo.softDelete({
-                follower: userRelation.follower,
-                following: userRelation.following,
-            });
+            await this.deleteLastRelation(userRelation);
             await userRelationRepo.save(userRelation);
             await userRepo.update(
                 { username: userRelation.follower.username },
@@ -50,16 +48,14 @@ export class UserRelationRepository {
     public async createFollowRequest(
         userRelation: UserRelation
     ): Promise<void> {
+        await this.deleteLastRelation(userRelation);
         await this.userRelationRepo.save(userRelation);
     }
 
     public async deleteFollowRequest(
         userRelation: UserRelation
     ): Promise<void> {
-        await this.userRelationRepo.softDelete({
-            follower: userRelation.follower,
-            following: userRelation.following,
-        });
+        await this.deleteLastRelation(userRelation);
     }
 
     public async createFollowAccepted(
@@ -75,10 +71,7 @@ export class UserRelationRepository {
     }
 
     public async createBlocked(userRelation: UserRelation): Promise<void> {
-        await this.userRelationRepo.softDelete({
-            follower: userRelation.follower,
-            following: userRelation.following,
-        });
+        await this.deleteLastRelation(userRelation);
         await this.userRelationRepo.softDelete({
             follower: userRelation.following,
             following: userRelation.follower,
@@ -87,27 +80,25 @@ export class UserRelationRepository {
     }
 
     public async createUnBlocked(userRelation: UserRelation): Promise<void> {
-        await this.userRelationRepo.softDelete({
-            follower: userRelation.follower,
-            following: userRelation.following,
-        });
+        await this.deleteLastRelation(userRelation);
         await this.userRelationRepo.save(userRelation);
     }
 
     public async createCloseFriend(userRelation: UserRelation): Promise<void> {
-        await this.userRelationRepo.softDelete({
-            follower: userRelation.follower,
-            following: userRelation.following,
-        });
+        await this.deleteLastRelation(userRelation);
         await this.userRelationRepo.save(userRelation);
     }
 
     public async deleteCloseFriend(userRelation: UserRelation): Promise<void> {
+        await this.deleteLastRelation(userRelation);
+        await this.userRelationRepo.save(userRelation);
+    }
+
+    public async deleteLastRelation(userRelation: UserRelation) {
         await this.userRelationRepo.softDelete({
             follower: userRelation.follower,
             following: userRelation.following,
         });
-        await this.userRelationRepo.save(userRelation);
     }
 
     public async checkExistance(

@@ -103,12 +103,9 @@ export class UserRelationService {
             following.username
         );
         if (
-            followStatus === "not followed" ||
-            followStatus === "request rejected" ||
-            followStatus === "unfollowed" ||
-            followStatus === "blocked" ||
-            followStatus === "request rescinded" ||
-            followStatus === "follower deleted"
+            followStatus !== "followed" &&
+            followStatus !== "request accepted" &&
+            followStatus !== "request pending"
         ) {
             throw new BadRequestError();
         }
@@ -333,10 +330,18 @@ export class UserRelationService {
         }
 
         const followStatus = await this.getFollowStatus(session_user, username);
-        const profileFollowStatus = toProfileFollowStatus(followStatus);
+        const reverse_followStatus = await this.getFollowStatus(
+            user,
+            session_user.username
+        );
+        const profileFollowStatus = toProfileFollowStatus(
+            followStatus,
+            reverse_followStatus
+        );
 
         if (
             profileFollowStatus === "blocked" ||
+            profileFollowStatus === "user blocked" ||
             (user.profileStatus === "private" &&
                 profileFollowStatus !== "followed")
         ) {
@@ -344,18 +349,21 @@ export class UserRelationService {
         }
 
         const posts = await this.userService.getUserPosts(username, baseUrl);
+        const normalPosts = posts.filter(
+            (post) => post.close_status === "normal"
+        );
         if (followStatus === "followed") {
-            const normalPosts = posts.filter(
-                (post) => post.close_status === "normal"
-            );
             return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
+        } else if (followStatus === "close") {
+            return toProfile(user, profileFollowStatus, posts, baseUrl);
         }
-        return toProfile(user, profileFollowStatus, posts, baseUrl);
+        return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
     }
 
     public async allFolloweList(user: User) {
         return await this.userRelationRepo.getAllFollowers(user);
     }
+
     public async followerList(
         session_user: User,
         username: string,

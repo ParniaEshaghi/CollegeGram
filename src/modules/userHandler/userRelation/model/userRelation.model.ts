@@ -38,10 +38,12 @@ export type ProfileFollowStatus =
     | "followed"
     | "requested"
     | "not followed"
-    | "blocked";
+    | "blocked"
+    | "user blocked";
 
 export const toProfileFollowStatus = (
-    followStatus: FollowStatus
+    followStatus: FollowStatus,
+    reverse_followStatus: FollowStatus
 ): ProfileFollowStatus => {
     if (
         followStatus === "not followed" ||
@@ -62,8 +64,11 @@ export const toProfileFollowStatus = (
     if (followStatus === "request pending") {
         return "requested";
     }
-    if (followStatus === "blocked") {
+    if (reverse_followStatus === "blocked") {
         return "blocked";
+    }
+    if (followStatus === "blocked") {
+        return "user blocked";
     }
     return "not followed";
 };
