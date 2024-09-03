@@ -47,13 +47,13 @@ export class PostEntity {
     @OneToMany(() => NotificationEntity, (notification) => notification.post)
     notifications!: NotificationEntity[];
 
-    @Column()
+    @Column({ default: 0 })
     like_count!: number;
 
-    @Column()
+    @Column({ default: 0 })
     comment_count!: number;
 
-    @Column()
+    @Column({ default: 0 })
     saved_count!: number;
 
     @Column({
@@ -70,11 +70,4 @@ export class PostEntity {
 
     @DeleteDateColumn()
     deletedAt!: Date;
-
-    @BeforeInsert()
-    handleBeforeInsert() {
-        this.like_count = 0;
-        this.comment_count = 0;
-        this.saved_count = 0;
-    }
 }

@@ -79,6 +79,7 @@ describe("User service test suite", () => {
             const response = await userService.login({
                 credential: "test",
                 password: "test",
+                keepMeSignedIn: false,
             });
             expect(response.message).toBe("Login successfull");
         });
@@ -87,6 +88,7 @@ describe("User service test suite", () => {
             const response = await userService.login({
                 credential: "test@gmail.com",
                 password: "test",
+                keepMeSignedIn: false,
             });
             expect(response.message).toBe("Login successfull");
         });
@@ -96,6 +98,7 @@ describe("User service test suite", () => {
                 userService.login({
                     credential: "test@gmail.com",
                     password: "11111",
+                    keepMeSignedIn: false,
                 })
             ).rejects.toThrow(new InvalidCredentialError());
         });
@@ -105,6 +108,7 @@ describe("User service test suite", () => {
                 userService.login({
                     credential: "testwrongusername",
                     password: "11111",
+                    keepMeSignedIn: false,
                 })
             ).rejects.toThrow(new InvalidCredentialError());
         });
@@ -114,6 +118,7 @@ describe("User service test suite", () => {
                 userService.login({
                     credential: "testwrong@gmail.com",
                     password: "11111",
+                    keepMeSignedIn: false,
                 })
             ).rejects.toThrow(new InvalidCredentialError());
         });

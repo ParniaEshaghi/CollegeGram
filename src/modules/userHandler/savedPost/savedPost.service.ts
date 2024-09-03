@@ -14,31 +14,14 @@ export class SavedPostService {
     ) {}
 
     public async getPostSaveStatus(user: User, postId: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
         const post = await this.postService.getPost(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
-
         const save = await this.savedPostRepo.checkExistance(user, post);
-
         const save_status = save ? true : false;
         return save_status;
     }
 
     public async savePost(user: User, postId: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
         const post = await this.postService.getPost(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
-
         const save_status = await this.getPostSaveStatus(user, postId);
 
         if (save_status) {
@@ -46,20 +29,11 @@ export class SavedPostService {
         }
 
         await this.savedPostRepo.create(user, post);
-
         return { message: "Post saved" };
     }
 
     public async unSavePost(user: User, postId: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
         const post = await this.postService.getPost(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
-
         const save_status = await this.getPostSaveStatus(user, postId);
 
         if (!save_status) {
@@ -67,7 +41,6 @@ export class SavedPostService {
         }
 
         await this.savedPostRepo.delete(user, post);
-
         return { message: "Post unsaved" };
     }
 }

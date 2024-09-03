@@ -24,9 +24,6 @@ export class UserRelationSubscriber
     }
 
     async afterInsert(event: InsertEvent<UserRelationEntity>): Promise<void> {
-        console.log("@@@@@@@@@@@@@");
-        console.log(event.entity.followStatus);
-        console.log("@@@@@@@@@@@@@");
         const notificationRepo =
             event.manager.getRepository(NotificationEntity);
         const userNotificationRepo = event.manager.getRepository(

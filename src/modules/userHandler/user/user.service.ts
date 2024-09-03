@@ -3,7 +3,6 @@ import {
     DuplicateError,
     InvalidCredentialError,
     NotFoundError,
-    UnauthorizedError,
 } from "../../../utility/http-errors";
 import { hashGenerator } from "../../../utility/hash-generator";
 import { SignUpDto } from "./dto/signup.dto";
@@ -33,32 +32,40 @@ export class UserService {
     ) {}
 
     async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
+        const [emailResult, usernameResult] = await Promise.allSettled([
+            this.getUserByEmail(dto.email),
+            this.getUserByUsername(dto.username),
+        ]);
+
         if (
-            (await this.userRepo.findByEmail(dto.email)) ||
-            (await this.userRepo.findByUsername(dto.username))
+            emailResult.status === "fulfilled" ||
+            usernameResult.status === "fulfilled"
         ) {
             throw new DuplicateError();
         }
 
         const user = await this.userRepo.create(dto);
-
         return toUserWithoutPassword(user);
     }
 
     public async login(dto: LoginDto) {
         const { success, error } = z.string().email().safeParse(dto.credential);
 
-        const user = success
-            ? await this.getUserByEmail(dto.credential)
-            : await this.getUserByUsername(dto.credential);
+        let user;
+        try {
+            user = success
+                ? await this.getUserByEmail(dto.credential)
+                : await this.getUserByUsername(dto.credential);
+        } catch {
+            throw new InvalidCredentialError();
+        }
 
-        const match = await bcrypt.compare(dto.password, user?.password ?? "");
-        if (!user || !match) {
+        const match = await bcrypt.compare(dto.password, user.password);
+        if (!match) {
             throw new InvalidCredentialError();
         }
 
         const expiry = dto.keepMeSignedIn ? "7d" : "8h";
-
         const token = jwt.sign({ username: user.username }, "10", {
             expiresIn: expiry,
         });
@@ -67,11 +74,19 @@ export class UserService {
     }
 
     public async getUserByUsername(username: string) {
-        return await this.userRepo.findByUsername(username);
+        const user = await this.userRepo.findByUsername(username);
+        if (!user) {
+            throw new NotFoundError();
+        }
+        return user;
     }
 
     public async getUserByEmail(credential: string) {
-        return await this.userRepo.findByEmail(credential);
+        const user = await this.userRepo.findByEmail(credential);
+        if (!user) {
+            throw new NotFoundError();
+        }
+        return user;
     }
 
     public async forgetPassword(credential: string) {
@@ -83,9 +98,6 @@ export class UserService {
             ? await this.getUserByEmail(credential)
             : await this.getUserByUsername(credential);
 
-        if (!user) {
-            throw new InvalidCredentialError();
-        }
         const { id, token } = await this.forgetPasswordService.createToken(
             user.username
         );
@@ -107,9 +119,6 @@ export class UserService {
     }
 
     public getEditProfile(user: User, baseUrl: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         return toEditProfileInfo(user, baseUrl);
     }
 
@@ -119,10 +128,6 @@ export class UserService {
         dto: EditProfileDto,
         baseUrl: string
     ) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
         pictureFilename = pictureFilename
             ? pictureFilename
             : user.profilePicture;
@@ -134,7 +139,6 @@ export class UserService {
         }
 
         const updatedUser = await this.getUserByUsername(user.username);
-
         return toEditProfileInfo(updatedUser!, baseUrl);
     }
 
@@ -143,18 +147,12 @@ export class UserService {
         baseUrl: string,
         unreadNotifications: number
     ) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const posts = await this.getUserPosts(user.username, baseUrl);
         return toProfileInfo(user, posts, baseUrl, unreadNotifications);
     }
 
     public async getUserPosts(username: string, baseUrl: string) {
-        const user = await this.userRepo.findByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
+        const user = await this.getUserByUsername(username);
         const posts = await this.userRepo.getUserPosts(username);
         const profilePosts: PostWithUsername[] = posts.map((post) =>
             toProfilePost(user, post, baseUrl)

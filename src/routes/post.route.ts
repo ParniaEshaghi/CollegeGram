@@ -68,7 +68,6 @@ export const makePostRouter = (
         auth(userHandler),
         postUpload,
         (req, res) => {
-            console.log(req.body);
             const postid = req.params.postid;
             const mentions = req.body.mentions
                 ? req.body.mentions

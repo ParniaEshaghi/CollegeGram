@@ -17,6 +17,21 @@ export interface User {
     post_count: number;
 }
 
+export interface CreateUser {
+    username: string;
+    password: string;
+    email: string;
+}
+
+export interface UpdateProfile {
+    password?: string;
+    email: string;
+    firstname: string;
+    lastname: string;
+    profileStatus: "public" | "private";
+    bio: string;
+}
+
 export type UserWithoutPassword = Omit<User, "password">;
 
 export const toUserWithoutPassword = (user: User): UserWithoutPassword => {

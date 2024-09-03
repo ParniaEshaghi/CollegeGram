@@ -30,7 +30,7 @@ export class CommentEntity {
     @Column()
     text!: string;
 
-    @Column()
+    @Column({ default: 0 })
     like_count!: number;
 
     @OneToMany(() => CommentLikeEntity, (commentLike) => commentLike.comment)
@@ -53,9 +53,4 @@ export class CommentEntity {
 
     @DeleteDateColumn()
     deletedAt!: Date;
-
-    @BeforeInsert()
-    handleBeforeInsert() {
-        this.like_count = 0;
-    }
 }

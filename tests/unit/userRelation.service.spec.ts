@@ -359,7 +359,6 @@ describe("User relation service test suite", () => {
             await userRelationService.follow(user!, "follow_test");
 
             const followers = await userRelationService.followerList(
-                user!,
                 "follow_test",
                 1,
                 10,
@@ -374,7 +373,6 @@ describe("User relation service test suite", () => {
             await userRelationService.follow(user!, "follow_test");
 
             const followings = await userRelationService.followeingList(
-                user!,
                 "test",
                 1,
                 10,
@@ -389,7 +387,6 @@ describe("User relation service test suite", () => {
 
             await expect(
                 userRelationService.followerList(
-                    user!,
                     "non_existent_user",
                     1,
                     10,
@@ -403,7 +400,6 @@ describe("User relation service test suite", () => {
 
             await expect(
                 userRelationService.followeingList(
-                    user!,
                     "non_existent_user",
                     1,
                     10,

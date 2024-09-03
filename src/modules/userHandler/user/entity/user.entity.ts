@@ -1,4 +1,5 @@
 import {
+    BeforeInsert,
     Column,
     CreateDateColumn,
     Entity,
@@ -28,31 +29,32 @@ export class UserEntity {
     @Column({ unique: true })
     email!: string;
 
-    @Column()
+    @Column({ default: "" })
     profilePicture!: string;
 
-    @Column()
+    @Column({ default: "" })
     firstname!: string;
 
-    @Column()
+    @Column({ default: "" })
     lastname!: string;
 
     @Column({
         type: "enum",
         enum: ["public", "private"],
+        default: "public",
     })
     profileStatus!: "public" | "private";
 
-    @Column()
+    @Column({ default: "" })
     bio!: string;
 
-    @Column()
+    @Column({ default: 0 })
     follower_count!: number;
 
-    @Column()
+    @Column({ default: 0 })
     following_count!: number;
 
-    @Column()
+    @Column({ default: 0 })
     post_count!: number;
 
     @OneToMany(() => PostEntity, (post) => post.user)

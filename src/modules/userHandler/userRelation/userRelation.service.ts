@@ -22,15 +22,9 @@ export class UserRelationService {
     ) {}
 
     async getFollowStatus(user: User, following_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const following = await this.userService.getUserByUsername(
             following_username
         );
-        if (!following) {
-            throw new NotFoundError();
-        }
         const relation = await this.userRelationRepo.checkExistance(
             user,
             following
@@ -40,15 +34,9 @@ export class UserRelationService {
     }
 
     public async follow(user: User, following_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const following = await this.userService.getUserByUsername(
             following_username
         );
-        if (!following) {
-            throw new NotFoundError();
-        }
         const followStatus = await this.getFollowStatus(
             user,
             following.username
@@ -89,15 +77,9 @@ export class UserRelationService {
     }
 
     public async unfollow(user: User, following_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const following = await this.userService.getUserByUsername(
             following_username
         );
-        if (!following) {
-            throw new NotFoundError();
-        }
         const followStatus = await this.getFollowStatus(
             user,
             following.username
@@ -133,15 +115,9 @@ export class UserRelationService {
     }
 
     public async deleteFollower(user: User, follower_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const follower = await this.userService.getUserByUsername(
             follower_username
         );
-        if (!follower) {
-            throw new NotFoundError();
-        }
         const followStatus = await this.getFollowStatus(
             follower,
             user.username
@@ -162,15 +138,9 @@ export class UserRelationService {
     }
 
     public async acceptFollowRequest(user: User, follower_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const follower = await this.userService.getUserByUsername(
             follower_username
         );
-        if (!follower) {
-            throw new NotFoundError();
-        }
 
         const followStatus = await this.getFollowStatus(
             follower,
@@ -191,15 +161,10 @@ export class UserRelationService {
     }
 
     public async rejectFollowRequest(user: User, follower_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const follower = await this.userService.getUserByUsername(
             follower_username
         );
-        if (!follower) {
-            throw new NotFoundError();
-        }
+
         const followStatus = await this.getFollowStatus(
             follower,
             user.username
@@ -219,15 +184,9 @@ export class UserRelationService {
     }
 
     public async block(user: User, following_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const following = await this.userService.getUserByUsername(
             following_username
         );
-        if (!following) {
-            throw new NotFoundError();
-        }
 
         const relation: UserRelation = {
             follower: user,
@@ -239,15 +198,9 @@ export class UserRelationService {
     }
 
     public async unblock(user: User, following_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const following = await this.userService.getUserByUsername(
             following_username
         );
-        if (!following) {
-            throw new NotFoundError();
-        }
 
         const relation: UserRelation = {
             follower: user,
@@ -259,15 +212,9 @@ export class UserRelationService {
     }
 
     public async addCloseFriend(user: User, follower_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const follower = await this.userService.getUserByUsername(
             follower_username
         );
-        if (!follower) {
-            throw new NotFoundError();
-        }
 
         const followStatus = await this.getFollowStatus(
             follower,
@@ -290,15 +237,9 @@ export class UserRelationService {
     }
 
     public async removeCloseFriend(user: User, follower_username: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
         const follower = await this.userService.getUserByUsername(
             follower_username
         );
-        if (!follower) {
-            throw new NotFoundError();
-        }
 
         const followStatus = await this.getFollowStatus(
             follower,
@@ -322,14 +263,7 @@ export class UserRelationService {
         username: string,
         baseUrl: string
     ) {
-        if (!session_user) {
-            throw new UnauthorizedError();
-        }
         const user = await this.userService.getUserByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
-
         const followStatus = await this.getFollowStatus(session_user, username);
         const reverse_followStatus = await this.getFollowStatus(
             user,
@@ -366,19 +300,12 @@ export class UserRelationService {
     }
 
     public async followerList(
-        session_user: User,
         username: string,
         page: number,
         limit: number,
         baseUrl: string
     ): Promise<followerFollowingListUserResponse | undefined> {
-        if (!session_user) {
-            throw new UnauthorizedError();
-        }
         const user = await this.userService.getUserByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
 
         const followerList = await this.userRelationRepo.getFollowers(
             user,
@@ -400,19 +327,12 @@ export class UserRelationService {
     }
 
     public async followeingList(
-        session_user: User,
         username: string,
         page: number,
         limit: number,
         baseUrl: string
     ): Promise<followerFollowingListUserResponse | undefined> {
-        if (!session_user) {
-            throw new UnauthorizedError();
-        }
         const user = await this.userService.getUserByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
 
         const followingList = await this.userRelationRepo.getFollowings(
             user,
@@ -435,9 +355,6 @@ export class UserRelationService {
 
     public async allFolloweingList(username: string) {
         const user = await this.userService.getUserByUsername(username);
-        if (!user) {
-            throw new NotFoundError();
-        }
         const followingList = await this.userRelationRepo.getAllFollowings(
             user
         );
@@ -450,9 +367,6 @@ export class UserRelationService {
         limit: number,
         baseUrl: string
     ): Promise<followerFollowingListUserResponse | undefined> {
-        if (!session_user) {
-            throw new UnauthorizedError();
-        }
         const closeFriendList = await this.userRelationRepo.getCloseFriends(
             session_user,
             page,
@@ -478,10 +392,6 @@ export class UserRelationService {
         limit: number,
         baseUrl: string
     ): Promise<followerFollowingListUserResponse | undefined> {
-        if (!session_user) {
-            throw new UnauthorizedError();
-        }
-
         const blockList = await this.userRelationRepo.getBlockList(
             session_user,
             page,
