@@ -1,10 +1,9 @@
 import {
-    AfterInsert,
+    BeforeInsert,
     Column,
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
-    ManyToMany,
     ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
@@ -55,6 +54,8 @@ export class CommentEntity {
     @DeleteDateColumn()
     deletedAt!: Date;
 
-    @AfterInsert()
-    handleAfterInsert() {}
+    @BeforeInsert()
+    handleBeforeInsert() {
+        this.like_count = 0;
+    }
 }

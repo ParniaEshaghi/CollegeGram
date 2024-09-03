@@ -1,4 +1,5 @@
 import {
+    BeforeInsert,
     Column,
     CreateDateColumn,
     DeleteDateColumn,
@@ -69,4 +70,11 @@ export class PostEntity {
 
     @DeleteDateColumn()
     deletedAt!: Date;
+
+    @BeforeInsert()
+    handleBeforeInsert() {
+        this.like_count = 0;
+        this.comment_count = 0;
+        this.saved_count = 0;
+    }
 }
