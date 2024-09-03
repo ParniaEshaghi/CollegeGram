@@ -12,6 +12,7 @@ import { UserEntity } from "../../user/entity/user.entity";
 import { CommentEntity } from "../../../postHandler/comment/entity/comment.entity";
 import { PostEntity } from "../../../postHandler/post/entity/post.entity";
 import { UserNotificationEntity } from "../userNotification/entity/userNotification.entity";
+import { NotificationTypes } from "../model/notification.model";
 
 @Entity("notifications")
 export class NotificationEntity {
@@ -45,18 +46,12 @@ export class NotificationEntity {
             "followAccept",
             "followRequest",
             "followed",
-            "followBack",
+            "followBackRequest",
+            "followBackAccept",
             "comment",
         ],
     })
-    type!:
-        | "tags"
-        | "likePost"
-        | "followAccept"
-        | "followRequest"
-        | "followed"
-        | "followBack"
-        | "comment";
+    type!: NotificationTypes;
 
     @ManyToOne(() => PostEntity, (post) => post.notifications, {
         nullable: true,

@@ -9,7 +9,8 @@ export type NotificationTypes =
     | "followAccept"
     | "followRequest"
     | "followed"
-    | "followBack"
+    | "followBackRequest"
+    | "followBackAccept"
     | "comment";
 
 export interface Notification {
