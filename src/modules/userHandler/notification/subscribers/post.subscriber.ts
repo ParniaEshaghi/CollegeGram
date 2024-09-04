@@ -62,15 +62,17 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                             );
 
                         for (const senderFollower of senderFollowers) {
-                            const userNotification =
-                                await this.userNotificationsService.userNotif(
-                                    senderFollower.follower.username,
-                                    notif
-                                );
-                            if (userNotification) {
-                                await userNotificationRepo.save(
-                                    userNotification
-                                );
+                            if (senderFollower.follower.username != mention) {
+                                const userNotification =
+                                    await this.userNotificationsService.userNotif(
+                                        senderFollower.follower.username,
+                                        notif
+                                    );
+                                if (userNotification) {
+                                    await userNotificationRepo.save(
+                                        userNotification
+                                    );
+                                }
                             }
                         }
                     }
@@ -111,15 +113,17 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                         );
 
                     for (const senderFollower of senderFollowers) {
-                        const followerNotification =
-                            await this.userNotificationsService.userNotif(
-                                senderFollower.follower.username,
-                                notif
-                            );
-                        if (followerNotification) {
-                            await userNotificationRepo.save(
-                                followerNotification
-                            );
+                        if (senderFollower.follower.username != mention) {
+                            const followerNotification =
+                                await this.userNotificationsService.userNotif(
+                                    senderFollower.follower.username,
+                                    notif
+                                );
+                            if (followerNotification) {
+                                await userNotificationRepo.save(
+                                    followerNotification
+                                );
+                            }
                         }
                     }
                 }

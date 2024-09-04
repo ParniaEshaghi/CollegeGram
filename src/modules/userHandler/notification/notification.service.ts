@@ -7,6 +7,8 @@ import {
     Notification,
     notificationData,
     NotificationTypes,
+    toNotificationWithFollowStatus,
+    userFollowingNotificationsResponse,
     userNotificationsResponse,
 } from "./model/notification.model";
 import { NotificationRepository } from "./notification.repository";
@@ -174,7 +176,20 @@ export class NotificationService {
             userNotifs.data
         );
 
-        for (const fData of filteredData) {
+        const filteredDataFromSelf = filteredData.filter(
+            (fData) =>
+                fData.recipient.username != user.username &&
+                (fData.type === "comment" ||
+                    fData.type === "followAccept" ||
+                    fData.type === "followBackAccept" ||
+                    fData.type === "followBackRequest" ||
+                    fData.type === "followed" ||
+                    fData.type === "likePost")
+        );
+
+        const userFollowingNotifications = [];
+
+        for (const fData of filteredDataFromSelf) {
             const notif =
                 await this.userNotificationsService.findByUserAndNotification(
                     user,
@@ -183,14 +198,23 @@ export class NotificationService {
 
             if (notif) {
                 fData.isRead = notif.isRead;
+                const followStatus =
+                    await this.userRelationService.getFollowStatus(
+                        user,
+                        fData.recipient.username
+                    );
+                userFollowingNotifications.push(
+                    toNotificationWithFollowStatus(fData, followStatus)
+                );
+
                 await this.markNotificationAsRead(notif.id, user.username);
             }
         }
 
         // this.markNotificationAsRead(userNotifs.data);
 
-        const response: userNotificationsResponse = {
-            data: filteredData,
+        const response: userFollowingNotificationsResponse = {
+            data: userFollowingNotifications,
             meta: {
                 page: page,
                 limit: limit,
@@ -253,15 +277,25 @@ export class NotificationService {
         );
 
         for (const fData of filteredData) {
-            const notif =
-                await this.userNotificationsService.findByUserAndNotification(
-                    user,
-                    fData
-                );
+            if (fData.recipient.username != user.username) {
+                const notif =
+                    await this.userNotificationsService.findByUserAndNotification(
+                        user,
+                        fData
+                    );
 
-            if (notif) {
-                if (notif.isRead == false) {
-                    totalUserFollowingsUnreadNotifications += 1;
+                if (notif) {
+                    if (
+                        notif.isRead == false &&
+                        (notif.notification.type === "comment" ||
+                            notif.notification.type === "followAccept" ||
+                            notif.notification.type === "followBackAccept" ||
+                            notif.notification.type === "followBackRequest" ||
+                            notif.notification.type === "followed" ||
+                            notif.notification.type === "likePost")
+                    ) {
+                        totalUserFollowingsUnreadNotifications += 1;
+                    }
                 }
             }
         }

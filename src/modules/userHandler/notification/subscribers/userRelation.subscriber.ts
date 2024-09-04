@@ -66,13 +66,15 @@ export class UserRelationSubscriber
                 );
 
             for (const senderFollower of senderFollowers) {
-                const userNotification =
-                    await this.userNotificationsService.userNotif(
-                        senderFollower.follower.username,
-                        notif
-                    );
-                if (userNotification) {
-                    await userNotificationRepo.save(userNotification);
+                if (senderFollower.follower.id != event.entity.following.id) {
+                    const userNotification =
+                        await this.userNotificationsService.userNotif(
+                            senderFollower.follower.username,
+                            notif
+                        );
+                    if (userNotification) {
+                        await userNotificationRepo.save(userNotification);
+                    }
                 }
             }
         }
