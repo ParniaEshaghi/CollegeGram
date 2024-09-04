@@ -1,6 +1,7 @@
 import { Comment } from "../../../postHandler/comment/model/comment.model";
 import { Post } from "../../../postHandler/post/model/post.model";
 import { User } from "../../user/model/user.model";
+import { FollowStatus } from "../../userRelation/model/userRelation.model";
 import { NotificationEntity } from "../entity/notification.entity";
 
 export type NotificationTypes =
@@ -49,3 +50,24 @@ export type userNotificationsResponse = {
 //             tot
 //         }
 //     }
+
+export type NotificationWithFollowStatus = Notification & {
+    followStatus: FollowStatus;
+};
+
+export const toNotificationWithFollowStatus = (
+    notification: NotificationEntity,
+    followStatus: FollowStatus
+): NotificationWithFollowStatus => {
+    return { ...notification, followStatus };
+};
+
+export type userFollowingNotificationsResponse = {
+    data: NotificationWithFollowStatus[];
+    meta: {
+        total: number;
+        page: number;
+        totalPage: number;
+        limit: number;
+    };
+};
