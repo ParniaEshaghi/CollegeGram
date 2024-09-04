@@ -1,3 +1,12 @@
+image: docker:24.0.6
+
+services:
+  - docker:24.0.6-dind
+
+before_script:
+  - apk add --no-cache docker-cli
+
+
 stages:
   - build
   - test
