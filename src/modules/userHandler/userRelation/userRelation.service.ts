@@ -229,11 +229,19 @@ export class UserRelationService {
             throw new NotFoundError();
         }
 
+        const followStatus = await this.getFollowStatus(
+            following,
+            user.username
+        );
+
         const relation: UserRelation = {
             follower: user,
             following,
             followStatus: "blocked",
         };
+        if (followStatus !== "blocked") {
+            this.userRelationRepo.deleteLastReverseRelation(relation);
+        }
         await this.userRelationRepo.createBlocked(relation);
         return { message: "User blocked" };
     }

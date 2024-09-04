@@ -73,10 +73,6 @@ export class UserRelationRepository {
 
     public async createBlocked(userRelation: UserRelation): Promise<void> {
         await this.deleteLastRelation(userRelation);
-        await this.userRelationRepo.softDelete({
-            follower: userRelation.following,
-            following: userRelation.follower,
-        });
         await this.userRelationRepo.save(userRelation);
     }
 
@@ -99,6 +95,13 @@ export class UserRelationRepository {
         await this.userRelationRepo.softDelete({
             follower: userRelation.follower,
             following: userRelation.following,
+        });
+    }
+
+    public async deleteLastReverseRelation(userRelation: UserRelation) {
+        await this.userRelationRepo.softDelete({
+            follower: userRelation.following,
+            following: userRelation.follower,
         });
     }
 
