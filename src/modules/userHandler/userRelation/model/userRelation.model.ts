@@ -92,7 +92,7 @@ export const toProfileFollowStatus = (
     } else if (follow_status === "request pending") {
         followStatus = "requested";
     } else if (follow_status === "close") {
-        followStatus = "close friend";
+        followStatus = "followed";
     }
 
     return {
