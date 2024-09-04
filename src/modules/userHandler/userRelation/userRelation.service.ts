@@ -341,10 +341,10 @@ export class UserRelationService {
         );
 
         if (
-            profileFollowStatus === "blocked" ||
-            profileFollowStatus === "user blocked" ||
+            profileFollowStatus.followStatus === "blocked" ||
+            profileFollowStatus.reverseFollowStatus === "blocked" ||
             (user.profileStatus === "private" &&
-                profileFollowStatus !== "followed")
+                profileFollowStatus.followStatus !== "followed")
         ) {
             return toProfile(user, profileFollowStatus, [], baseUrl);
         }

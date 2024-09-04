@@ -30,44 +30,75 @@ export interface followerFollowing {
 }
 
 export type UserProfile = Omit<User, "password" | "email" | "profileStatus"> & {
-    followStatus: ProfileFollowStatus;
+    followStatus: PFollowStatus;
+    reverseFollowStatus: PFollowStatus;
     posts: PostWithUsername[];
 };
 
-export type ProfileFollowStatus =
+export type PFollowStatus =
     | "followed"
     | "requested"
     | "not followed"
     | "blocked"
-    | "user blocked";
+    | "close friend";
+
+export type ProfileFollowStatus = {
+    followStatus: PFollowStatus;
+    reverseFollowStatus: PFollowStatus;
+};
 
 export const toProfileFollowStatus = (
-    followStatus: FollowStatus,
+    follow_status: FollowStatus,
     reverse_followStatus: FollowStatus
 ): ProfileFollowStatus => {
+    let followStatus: PFollowStatus = "not followed";
+    let reverseFollowStatus: PFollowStatus = "not followed";
     if (reverse_followStatus === "blocked") {
-        return "blocked";
-    }
-    if (
-        followStatus === "not followed" ||
-        followStatus === "unfollowed" ||
-        followStatus === "request rejected" ||
-        followStatus === "request rescinded" ||
-        followStatus === "follower deleted"
-    ) {
-        return "not followed";
+        reverseFollowStatus = "blocked";
     } else if (
-        followStatus === "followed" ||
-        followStatus === "request accepted" ||
-        followStatus === "close"
+        reverse_followStatus === "not followed" ||
+        reverse_followStatus === "unfollowed" ||
+        reverse_followStatus === "request rejected" ||
+        reverse_followStatus === "request rescinded" ||
+        reverse_followStatus === "follower deleted"
     ) {
-        return "followed";
-    } else if (followStatus === "request pending") {
-        return "requested";
-    } else if (followStatus === "blocked") {
-        return "user blocked";
+        reverseFollowStatus = "not followed";
+    } else if (
+        reverse_followStatus === "followed" ||
+        reverse_followStatus === "request accepted"
+    ) {
+        reverseFollowStatus = "followed";
+    } else if (reverse_followStatus === "request pending") {
+        reverseFollowStatus = "requested";
+    } else if (reverse_followStatus === "close") {
+        reverseFollowStatus = "close friend";
     }
-    return "not followed";
+
+    if (follow_status === "blocked") {
+        followStatus = "blocked";
+    } else if (
+        follow_status === "not followed" ||
+        follow_status === "unfollowed" ||
+        follow_status === "request rejected" ||
+        follow_status === "request rescinded" ||
+        follow_status === "follower deleted"
+    ) {
+        followStatus = "not followed";
+    } else if (
+        follow_status === "followed" ||
+        follow_status === "request accepted"
+    ) {
+        followStatus = "followed";
+    } else if (follow_status === "request pending") {
+        followStatus = "requested";
+    } else if (follow_status === "close") {
+        followStatus = "close friend";
+    }
+
+    return {
+        followStatus,
+        reverseFollowStatus,
+    };
 };
 
 export const toProfile = (
@@ -83,7 +114,8 @@ export const toProfile = (
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",
         posts,
-        followStatus,
+        followStatus: followStatus.followStatus,
+        reverseFollowStatus: followStatus.reverseFollowStatus,
     };
 };
 
