@@ -20,6 +20,9 @@ export type UpdatePost = Omit<
 
 export type PostWithUsername = Omit<Post, "user"> & {
     username: string;
+    firstname: string;
+    lastname: string;
+    follower_count: number;
     profilePicture: string;
 };
 
@@ -36,6 +39,9 @@ export const toPostWithUsername = (
     return {
         ...postDetails,
         username: user.username,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        follower_count: user.follower_count,
         profilePicture: user.profilePicture
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",
@@ -55,6 +61,9 @@ export const toPostPage = (
     return {
         ...postDetails,
         username: user.username,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        follower_count: user.follower_count,
         profilePicture: user.profilePicture
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",
@@ -76,6 +85,9 @@ export const toProfilePost = (
     return {
         ...postDetails,
         username: post_user.username,
+        firstname: post_user.firstname,
+        lastname: post_user.lastname,
+        follower_count: post_user.follower_count,
         profilePicture: post_user.profilePicture
             ? `${baseUrl}/api/images/profiles/${post_user.profilePicture}`
             : "",
