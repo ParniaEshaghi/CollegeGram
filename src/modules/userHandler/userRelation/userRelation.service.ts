@@ -7,6 +7,7 @@ import { User } from "../user/model/user.model";
 import { UserService } from "../user/user.service";
 import { UserRelationEntity } from "./entity/userRelation.entity";
 import {
+    followerFollowingListUser,
     followerFollowingListUserResponse,
     toFollowerFollowingListUser,
     toProfile,
@@ -394,10 +395,31 @@ export class UserRelationService {
             limit
         );
 
+        const followerListData: followerFollowingListUser[] = [];
+
+        for (const follower of followerList.data) {
+            const followStatus = await this.getFollowStatus(
+                session_user,
+                follower.username
+            );
+            const reverse_followStatus = await this.getFollowStatus(
+                follower,
+                session_user.username
+            );
+            const profileFollowStatus = toProfileFollowStatus(
+                followStatus,
+                reverse_followStatus
+            );
+            followerListData.push(
+                toFollowerFollowingListUser(
+                    follower,
+                    baseUrl,
+                    profileFollowStatus
+                )
+            );
+        }
         return {
-            data: followerList.data.map((follower) =>
-                toFollowerFollowingListUser(follower, baseUrl)
-            ),
+            data: followerListData,
             meta: {
                 page: page,
                 limit: limit,
@@ -428,10 +450,32 @@ export class UserRelationService {
             limit
         );
 
+        const followingListData: followerFollowingListUser[] = [];
+
+        for (const following of followingList.data) {
+            const followStatus = await this.getFollowStatus(
+                session_user,
+                following.username
+            );
+            const reverse_followStatus = await this.getFollowStatus(
+                following,
+                session_user.username
+            );
+            const profileFollowStatus = toProfileFollowStatus(
+                followStatus,
+                reverse_followStatus
+            );
+            followingListData.push(
+                toFollowerFollowingListUser(
+                    following,
+                    baseUrl,
+                    profileFollowStatus
+                )
+            );
+        }
+
         return {
-            data: followingList.data.map((followeing) =>
-                toFollowerFollowingListUser(followeing, baseUrl)
-            ),
+            data: followingListData,
             meta: {
                 page: page,
                 limit: limit,
@@ -467,10 +511,28 @@ export class UserRelationService {
             limit
         );
 
+        const closeListData: followerFollowingListUser[] = [];
+
+        for (const close of closeFriendList.data) {
+            const followStatus = await this.getFollowStatus(
+                session_user,
+                close.username
+            );
+            const reverse_followStatus = await this.getFollowStatus(
+                close,
+                session_user.username
+            );
+            const profileFollowStatus = toProfileFollowStatus(
+                followStatus,
+                reverse_followStatus
+            );
+            closeListData.push(
+                toFollowerFollowingListUser(close, baseUrl, profileFollowStatus)
+            );
+        }
+
         return {
-            data: closeFriendList.data.map((follower) =>
-                toFollowerFollowingListUser(follower, baseUrl)
-            ),
+            data: closeListData,
             meta: {
                 page: page,
                 limit: limit,
@@ -496,10 +558,28 @@ export class UserRelationService {
             limit
         );
 
+        const blockListData: followerFollowingListUser[] = [];
+
+        for (const block of blockList.data) {
+            const followStatus = await this.getFollowStatus(
+                session_user,
+                block.username
+            );
+            const reverse_followStatus = await this.getFollowStatus(
+                block,
+                session_user.username
+            );
+            const profileFollowStatus = toProfileFollowStatus(
+                followStatus,
+                reverse_followStatus
+            );
+            blockListData.push(
+                toFollowerFollowingListUser(block, baseUrl, profileFollowStatus)
+            );
+        }
+
         return {
-            data: blockList.data.map((followeing) =>
-                toFollowerFollowingListUser(followeing, baseUrl)
-            ),
+            data: blockListData,
             meta: {
                 page: page,
                 limit: limit,

@@ -122,11 +122,15 @@ export const toProfile = (
 export type followerFollowingListUser = Omit<
     User,
     "password" | "post_count" | "email" | "profileStatus" | "bio"
->;
+> & {
+    followStatus: PFollowStatus;
+    reverseFollowStatus: PFollowStatus;
+};
 
 export const toFollowerFollowingListUser = (
     user: User,
-    baseUrl: string
+    baseUrl: string,
+    followStatus: ProfileFollowStatus
 ): followerFollowingListUser => {
     return {
         username: user.username,
@@ -137,6 +141,8 @@ export const toFollowerFollowingListUser = (
         lastname: user.lastname,
         follower_count: user.follower_count,
         following_count: user.following_count,
+        followStatus: followStatus.followStatus,
+        reverseFollowStatus: followStatus.reverseFollowStatus,
     };
 };
 
