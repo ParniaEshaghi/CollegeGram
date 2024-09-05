@@ -4,9 +4,10 @@ services:
   - name: docker:dind
     command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
 
-variables:
-  DOCKER_HOST: tcp://172.17.0.2:2375
-  DOCKER_TLS_CERTDIR: ""
+# variables:
+#   DOCKER_HOST: tcp://172.17.0.2:2375
+#   DOCKER_TLS_CERTDIR: ""
+
 
 stages:
   - build
@@ -14,6 +15,7 @@ stages:
 
 build:
   stage: build
+  
   script:
     - echo "Building the Docker image..."
     # Ensure Docker is available
