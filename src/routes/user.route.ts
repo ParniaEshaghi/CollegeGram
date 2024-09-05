@@ -10,43 +10,6 @@ import { UserHandler } from "../modules/userHandler/userHandler";
 export const makeUserRouter = (userHandler: UserHandler) => {
     const app = Router();
 
-    app.get("/notifications", auth(userHandler), (req, res) => {
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-
-        handleExpress(res, () =>
-            userHandler.getUserNotifications(
-                req.user,
-                req.base_url,
-                page,
-                limit
-            )
-        );
-    });
-
-    app.get("/followingsnotifications", auth(userHandler), (req, res) => {
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-
-        handleExpress(res, () =>
-            userHandler.getUserFollowingsNotifications(
-                req.user,
-                req.base_url,
-                page,
-                limit
-            )
-        );
-    });
-
-    app.get("/explore", auth(userHandler), (req, res) => {
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-
-        handleExpress(res, () =>
-            userHandler.explore(req.user, page, limit, req.base_url)
-        );
-    });
-
     app.post("/signup", (req, res) => {
         const dto = signUpDto.parse(req.body);
         handleExpress(res, () => userHandler.createUser(dto));
@@ -156,13 +119,6 @@ export const makeUserRouter = (userHandler: UserHandler) => {
     //     );
     // });
 
-    app.get("/:username", auth(userHandler), (req, res) => {
-        const username = req.params.username;
-        handleExpress(res, () =>
-            userHandler.userProfile(req.user, username, req.base_url)
-        );
-    });
-
     app.get("/followers/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         const page = parseInt(req.query.page as string) || 1;
@@ -213,6 +169,43 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         );
     });
 
+    app.get("/notifications", auth(userHandler), (req, res) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.getUserNotifications(
+                req.user,
+                req.base_url,
+                page,
+                limit
+            )
+        );
+    });
+
+    app.get("/followingsnotifications", auth(userHandler), (req, res) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.getUserFollowingsNotifications(
+                req.user,
+                req.base_url,
+                page,
+                limit
+            )
+        );
+    });
+
+    app.get("/explore", auth(userHandler), (req, res) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.explore(req.user, page, limit, req.base_url)
+        );
+    });
+
     app.post("/savepost/:postid", auth(userHandler), (req, res) => {
         const postid = req.params.postid;
         handleExpress(res, () => userHandler.savePostHandler(req.user, postid));
@@ -222,6 +215,13 @@ export const makeUserRouter = (userHandler: UserHandler) => {
     //     const postid = req.params.postid;
     //     handleExpress(res, () => userHandler.unSavePost(req.user, postid));
     // });
+
+    app.get("/:username", auth(userHandler), (req, res) => {
+        const username = req.params.username;
+        handleExpress(res, () =>
+            userHandler.userProfile(req.user, username, req.base_url)
+        );
+    });
 
     return app;
 };
