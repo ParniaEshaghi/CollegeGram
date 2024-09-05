@@ -54,25 +54,17 @@ export class PostHandler {
         postId: string,
         baseUrl: string
     ): Promise<PostWithUsername> {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
         const post = await this.postService.getPost(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
 
         const like_status = await this.postLikeService.getLikeStatus(
             user,
             post.id
         );
 
-        const save = await this.savedPostService.getPostSaveStatus(
+        const save_status = await this.savedPostService.getPostSaveStatus(
             user,
             post.id
         );
-        const save_status = save ? true : false;
 
         return toPostPage(post, baseUrl, like_status, save_status);
     }
@@ -129,10 +121,6 @@ export class PostHandler {
         baseUrl: string
     ) {
         const post = this.postService.getPost(postId);
-
-        if (!post) {
-            throw new NotFoundError();
-        }
 
         const commentList = await this.commentService.getComments(
             postId,

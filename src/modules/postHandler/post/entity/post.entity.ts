@@ -1,4 +1,5 @@
 import {
+    BeforeInsert,
     Column,
     CreateDateColumn,
     DeleteDateColumn,
@@ -46,13 +47,13 @@ export class PostEntity {
     @OneToMany(() => NotificationEntity, (notification) => notification.post)
     notifications!: NotificationEntity[];
 
-    @Column()
+    @Column({ default: 0 })
     like_count!: number;
 
-    @Column()
+    @Column({ default: 0 })
     comment_count!: number;
 
-    @Column()
+    @Column({ default: 0 })
     saved_count!: number;
 
     @Column({

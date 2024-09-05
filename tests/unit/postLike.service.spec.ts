@@ -44,12 +44,6 @@ describe("PostLikeService test suite", () => {
         });
     });
 
-    it("should throw UnauthorizedError if user is not provided when liking a post", async () => {
-        await expect(
-            postLikeService.likePost(null!, "test-post-id")
-        ).rejects.toThrow(UnauthorizedError);
-    });
-
     it("should throw NotFoundError if post is not found when liking a post", async () => {
         const user = await userService.getUserByUsername("test");
 
@@ -83,7 +77,7 @@ describe("PostLikeService test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
-                close_status: "normal"
+                close_status: "normal",
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -108,7 +102,7 @@ describe("PostLikeService test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
-                close_status: "normal"
+                close_status: "normal",
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -126,7 +120,7 @@ describe("PostLikeService test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
-                close_status: "normal"
+                close_status: "normal",
             },
             ["testfile.jpg"],
             "localhost:3000"

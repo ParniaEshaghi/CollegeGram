@@ -1,10 +1,9 @@
 import {
-    AfterInsert,
+    BeforeInsert,
     Column,
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
-    ManyToMany,
     ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
@@ -31,7 +30,7 @@ export class CommentEntity {
     @Column()
     text!: string;
 
-    @Column()
+    @Column({ default: 0 })
     like_count!: number;
 
     @OneToMany(() => CommentLikeEntity, (commentLike) => commentLike.comment)
@@ -54,7 +53,4 @@ export class CommentEntity {
 
     @DeleteDateColumn()
     deletedAt!: Date;
-
-    @AfterInsert()
-    handleAfterInsert() {}
 }

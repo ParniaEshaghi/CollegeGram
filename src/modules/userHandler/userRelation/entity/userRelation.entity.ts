@@ -43,7 +43,4 @@ export class UserRelationEntity {
 
     @DeleteDateColumn()
     deletedAt!: Date;
-
-    @AfterInsert()
-    handleAfterInsert() {}
 }

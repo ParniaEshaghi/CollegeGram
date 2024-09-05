@@ -66,11 +66,9 @@ describe("PostService test suite", () => {
     });
 
     it("should throw NotFoundError if post is not found when getting a post by ID", async () => {
-        const user = await userService.getUserByUsername("test");
-
-        await expect(
-            postService.getPostByPostId(user!, randomUUID(), "localhost:3000")
-        ).rejects.toThrow(NotFoundError);
+        await expect(postService.getPost(randomUUID())).rejects.toThrow(
+            NotFoundError
+        );
     });
 
     it("should update a post successfully if user is valid and owns the post", async () => {

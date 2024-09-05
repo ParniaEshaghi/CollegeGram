@@ -13,6 +13,11 @@ export interface Post {
     close_status: "close" | "normal";
 }
 
+export type CreatePost = Omit<
+    Post,
+    "id" | "like_count" | "comment_count" | "saved_count"
+>;
+
 export type UpdatePost = Omit<
     Post,
     "like_count" | "comment_count" | "saved_count"

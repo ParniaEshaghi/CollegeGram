@@ -8,12 +8,13 @@ import {
 import { User } from "../../userHandler/user/model/user.model";
 import { PostDto } from "./dto/post.dto";
 import {
+    CreatePost,
     Post,
     PostWithUsername,
     toPostWithUsername,
     UpdatePost,
 } from "./model/post.model";
-import { CreatePost, PostRepository } from "./post.repository";
+import { PostRepository } from "./post.repository";
 import { UpdatePostDto } from "./dto/updatePost.dto";
 import { UserService } from "../../userHandler/user/user.service";
 import { UserRelation } from "../../userHandler/userRelation/model/userRelation.model";
@@ -32,14 +33,7 @@ export class PostService {
         postImagesFileNames: string[],
         baseUrl: string
     ): Promise<PostWithUsername> {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
-        const mentionResult = await this.checkMentions(postDto.mentions, user);
-        if (!mentionResult) {
-            throw new NotFoundError();
-        }
+        await this.checkMentions(postDto.mentions, user);
 
         const newPost: CreatePost = {
             user: user,
@@ -47,21 +41,14 @@ export class PostService {
             caption: postDto.caption,
             tags: this.extractTags(postDto.caption),
             mentions: postDto.mentions,
-            like_count: 0,
-            comment_count: 0,
-            saved_count: 0,
             close_status: postDto.close_status,
         };
 
         const createdPost = await this.postRepo.create(newPost);
-
         return toPostWithUsername(createdPost, baseUrl);
     }
 
-    private async checkMentions(
-        mentions: string[],
-        user: User
-    ): Promise<boolean> {
+    private async checkMentions(mentions: string[], user: User): Promise<void> {
         const results = await Promise.all(
             mentions.map(async (mention) => {
                 const mentionedUser = await this.userService.getUserByUsername(
@@ -85,29 +72,14 @@ export class PostService {
                 }
             })
         );
-        return results.every((result) => result === true);
+        if (!results.every((result) => result === true)) {
+            throw new NotFoundError();
+        }
     }
 
     private extractTags(caption: string): string[] {
         const tags = caption.match(/#\w+/g);
         return tags ? tags.map((tag) => tag.toLocaleLowerCase()) : [];
-    }
-
-    public async getPostByPostId(
-        user: User,
-        postId: string,
-        baseUrl: string
-    ): Promise<PostWithUsername> {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
-        const post = await this.postRepo.findPostById(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
-
-        return toPostWithUsername(post, baseUrl);
     }
 
     public async updatePost(
@@ -117,13 +89,7 @@ export class PostService {
         postImagesFileNames: string[],
         baseUrl: string
     ): Promise<PostWithUsername> {
-        if (!user) {
-            throw new HttpError(401, "Unauthorized");
-        }
-        const post = await this.postRepo.findPostById(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
+        const post = await this.getPost(postId);
 
         if (post.user.username !== user.username) {
             throw new ForbiddenError();
@@ -140,17 +106,12 @@ export class PostService {
                 return deletedImagesFilename[0];
             }
         );
-
         const postImages = post.images.filter(
             (image) => !deletedImagesFilenames.includes(image)
         );
-
         postImages.push(...postImagesFileNames);
 
-        const mentionResult = await this.checkMentions(postDto.mentions, user);
-        if (!mentionResult) {
-            throw new NotFoundError();
-        }
+        await this.checkMentions(postDto.mentions, user);
 
         const editedPost: UpdatePost = {
             id: postId,
@@ -161,13 +122,17 @@ export class PostService {
             mentions: postDto.mentions,
             close_status: postDto.close_status,
         };
-        const updatedPost = await this.postRepo.update(editedPost);
 
+        const updatedPost = await this.postRepo.update(editedPost);
         return toPostWithUsername(updatedPost, baseUrl);
     }
 
-    public async getPost(postId: string): Promise<Post | null> {
-        return await this.postRepo.findPostById(postId);
+    public async getPost(postId: string): Promise<Post> {
+        const post = await this.postRepo.findPostById(postId);
+        if (!post) {
+            throw new NotFoundError();
+        }
+        return post;
     }
 
     public async getExplorePosts(

@@ -14,31 +14,14 @@ export class PostLikeService {
     ) {}
 
     public async getLikeStatus(user: User, postId: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
         const post = await this.postService.getPost(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
-
         const like = await this.postLikeRepo.checkExistance(user, post);
-
         const like_status = like ? true : false;
         return like_status;
     }
 
     public async likePost(user: User, postId: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
         const post = await this.postService.getPost(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
-
         const like_status = await this.getLikeStatus(user, postId);
 
         if (like_status) {
@@ -46,20 +29,11 @@ export class PostLikeService {
         }
 
         await this.postLikeRepo.create(user, post);
-
         return { message: "Post liked" };
     }
 
     public async unLikePost(user: User, postId: string) {
-        if (!user) {
-            throw new UnauthorizedError();
-        }
-
         const post = await this.postService.getPost(postId);
-        if (!post) {
-            throw new NotFoundError();
-        }
-
         const like_status = await this.getLikeStatus(user, postId);
 
         if (!like_status) {
@@ -67,7 +41,6 @@ export class PostLikeService {
         }
 
         await this.postLikeRepo.delete(user, post);
-
         return { message: "Post unliked" };
     }
 }

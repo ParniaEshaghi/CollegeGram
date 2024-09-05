@@ -11,6 +11,8 @@ export interface Comment {
     children?: Comment[];
 }
 
+export type CreateComment = Omit<Comment, "id" | "like_count">;
+
 export interface CommentsList {
     data: Comment[];
     total: number;
@@ -41,8 +43,6 @@ export const toPostCommentList = (
         like_status,
     };
 };
-
-export type CreateComment = Omit<Comment, "id">;
 
 export type CommentWithUsername = Omit<Comment, "post" | "user"> & {
     username: string;

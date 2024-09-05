@@ -39,7 +39,6 @@ describe("SavedPostService test suite", () => {
 
     it("should throw NotFoundError if post is not found when checking save status", async () => {
         const user = await userService.getUserByUsername("test");
-        jest.spyOn(postService, "getPost").mockResolvedValue(null);
 
         await expect(
             savedPostService.getPostSaveStatus(user!, randomUUID())
