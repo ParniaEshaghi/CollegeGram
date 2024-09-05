@@ -135,6 +135,7 @@ export class UserHandler {
         baseUrl: string
     ): Promise<followerFollowingListUserResponse | undefined> {
         return this.userRelationService.followerList(
+            session_user,
             username,
             page,
             limit,
@@ -150,6 +151,7 @@ export class UserHandler {
         baseUrl: string
     ): Promise<followerFollowingListUserResponse | undefined> {
         return this.userRelationService.followeingList(
+            session_user,
             username,
             page,
             limit,

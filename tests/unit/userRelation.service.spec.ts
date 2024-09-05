@@ -316,12 +316,12 @@ describe("User relation service test suite", () => {
             await userRelationService.follow(user!, "follow_test");
 
             const followBackNotifications =
-                await notificationService.findByType("followBack");
+                await notificationService.findByType("followBackRequest");
 
             const followBackNotification = followBackNotifications[0];
             expect(followBackNotification.recipient.username).toBe("test");
             expect(followBackNotification.sender.username).toBe("follow_test");
-            expect(followBackNotification.type).toEqual("followBack");
+            expect(followBackNotification.type).toEqual("followBackRequest");
         });
     });
 
@@ -359,6 +359,7 @@ describe("User relation service test suite", () => {
             await userRelationService.follow(user!, "follow_test");
 
             const followers = await userRelationService.followerList(
+                user,
                 "follow_test",
                 1,
                 10,
@@ -372,7 +373,10 @@ describe("User relation service test suite", () => {
             const user = await userService.getUserByUsername("test");
             await userRelationService.follow(user!, "follow_test");
 
+            const follower = await userService.getUserByUsername("follow_test");
+
             const followings = await userRelationService.followeingList(
+                follower,
                 "test",
                 1,
                 10,
@@ -387,6 +391,7 @@ describe("User relation service test suite", () => {
 
             await expect(
                 userRelationService.followerList(
+                    user,
                     "non_existent_user",
                     1,
                     10,
@@ -400,6 +405,7 @@ describe("User relation service test suite", () => {
 
             await expect(
                 userRelationService.followeingList(
+                    user,
                     "non_existent_user",
                     1,
                     10,

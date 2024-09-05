@@ -1,8 +1,4 @@
-import {
-    BadRequestError,
-    NotFoundError,
-    UnauthorizedError,
-} from "../../../utility/http-errors";
+import { BadRequestError } from "../../../utility/http-errors";
 import { User } from "../user/model/user.model";
 import { UserService } from "../user/user.service";
 import { UserRelationEntity } from "./entity/userRelation.entity";
@@ -309,6 +305,7 @@ export class UserRelationService {
     }
 
     public async followerList(
+        session_user: User,
         username: string,
         page: number,
         limit: number,
@@ -357,6 +354,7 @@ export class UserRelationService {
     }
 
     public async followeingList(
+        session_user: User,
         username: string,
         page: number,
         limit: number,
