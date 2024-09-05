@@ -16,6 +16,15 @@ stages:
   - build
   # - deploy
 
+before_script:
+  # Set up SSH key for connection
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan -H your.server.ip >> ~/.ssh/known_hosts
+
 build:
   stage: build
   
@@ -31,7 +40,15 @@ build:
     # Tag the built image for the registry
     - docker tag back-v1:${CI_COMMIT_SHA} registry.hamdocker.ir/mrmahdifardi/myapp:latest
     # Push the image to the Docker registry
-    - docker push registry.hamdocker.ir/mrmahdifardi/myapp:latest
+    - docker push registry.hamdocker.ir/mrmahdifardi/back-v1:latest
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying the Docker image to the server..."
+    # Use SSH to run commands on the server
+    - ssh ubuntu@37.32.6.230 "echo Hellllo"
+
 
 # deploy:
 #   stage: deploy
