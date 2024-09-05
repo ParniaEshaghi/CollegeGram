@@ -47,7 +47,7 @@ deploy:
   script:
     - echo "Deploying the Docker image to the server..."
     # Use SSH to run commands on the server
-    - ssh -v ubuntu@37.32.6.230 "echo Hellllo"
+    - ssh -v ubuntu@37.32.6.230 "cd /home/ubuntu && touch test.txt"
 
 
 # deploy:
