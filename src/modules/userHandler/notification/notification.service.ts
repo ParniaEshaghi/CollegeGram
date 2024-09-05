@@ -16,6 +16,7 @@ import { UserRelationService } from "../userRelation/userRelation.service";
 import { NotificationEntity } from "./entity/notification.entity";
 import { UserRelationEntity } from "../userRelation/entity/userRelation.entity";
 import { UserNotificationService } from "./userNotification/userNotification.service";
+import { toProfileFollowStatus } from "../userRelation/model/userRelation.model";
 
 export class NotificationService {
     constructor(
@@ -203,8 +204,19 @@ export class NotificationService {
                         user,
                         fData.recipient.username
                     );
+                const reverse_followStatus =
+                    await this.userRelationService.getFollowStatus(
+                        fData.recipient,
+                        user.username
+                    );
+
+                const profileFollowStatus = toProfileFollowStatus(
+                    followStatus,
+                    reverse_followStatus
+                );
+
                 userFollowingNotifications.push(
-                    toNotificationWithFollowStatus(fData, followStatus)
+                    toNotificationWithFollowStatus(fData, profileFollowStatus)
                 );
 
                 await this.markNotificationAsRead(notif.id, user.username);

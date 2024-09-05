@@ -1,7 +1,10 @@
 import { Comment } from "../../../postHandler/comment/model/comment.model";
 import { Post } from "../../../postHandler/post/model/post.model";
 import { User } from "../../user/model/user.model";
-import { FollowStatus } from "../../userRelation/model/userRelation.model";
+import {
+    FollowStatus,
+    ProfileFollowStatus,
+} from "../../userRelation/model/userRelation.model";
 import { NotificationEntity } from "../entity/notification.entity";
 
 export type NotificationTypes =
@@ -52,12 +55,12 @@ export type userNotificationsResponse = {
 //     }
 
 export type NotificationWithFollowStatus = Notification & {
-    followStatus: FollowStatus;
+    followStatus: ProfileFollowStatus;
 };
 
 export const toNotificationWithFollowStatus = (
     notification: NotificationEntity,
-    followStatus: FollowStatus
+    followStatus: ProfileFollowStatus
 ): NotificationWithFollowStatus => {
     return { ...notification, followStatus };
 };
