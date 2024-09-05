@@ -15,8 +15,8 @@ build:
 
   services:
     - docker:dind
-    - command: ["--experimental", "--tls=false"]
-    - dns: 8.8.8.8
+    - command:["--experimental", "--tls=false"]
+    - dns:8.8.8.8
 
   script:
     - echo "Building the Docker image..."
