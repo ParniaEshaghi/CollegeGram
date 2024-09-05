@@ -204,7 +204,10 @@ export class UserRelationRepository {
 
     public async getAllFollowings(user: User): Promise<UserRelationEntity[]> {
         const [response, total] = await this.userRelationRepo.findAndCount({
-            where: { follower: { username: user.username } },
+            where: {
+                follower: { username: user.username },
+                followStatus: In(["followed", "close"]),
+            },
             relations: ["following"],
         });
 

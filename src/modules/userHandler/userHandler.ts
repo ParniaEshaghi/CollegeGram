@@ -332,9 +332,12 @@ export class UserHandler {
             data: shownPosts.map((post) =>
                 toProfilePost(post.user, post, baseUrl)
             ),
-            meta: { page: page, limit: limit },
-            total: shownPosts.length,
-            totalPage: Math.ceil(shownPosts.length / limit),
+            meta: {
+                page: page,
+                limit: limit,
+                total: shownPosts.length,
+                totalPage: Math.ceil(shownPosts.length / limit),
+            },
         };
 
         return response;
