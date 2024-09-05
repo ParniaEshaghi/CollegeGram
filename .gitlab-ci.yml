@@ -4,7 +4,7 @@
 #   - docker:24.0.6-dind
 
 before_script:
-  #- apk add --no-cache docker-cli
+  - apk add --no-cache docker-cli
 
 
 stages:
