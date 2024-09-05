@@ -38,7 +38,7 @@ build:
     # Login to Docker registry
     - docker login -u mrmahdifardi -p 9gdU9jib42RjAGVxA1! registry.hamdocker.ir
     # Tag the built image for the registry
-    - docker tag back-v1:${CI_COMMIT_SHA} registry.hamdocker.ir/mrmahdifardi/myapp:latest
+    - docker tag back-v1:${CI_COMMIT_SHA} registry.hamdocker.ir/mrmahdifardi/back-v1:latest
     # Push the image to the Docker registry
     - docker push registry.hamdocker.ir/mrmahdifardi/back-v1:latest
 
