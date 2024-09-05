@@ -14,7 +14,7 @@ variables:
 
 stages:
   - build
-  - deploy
+  # - deploy
 
 build:
   stage: build
@@ -25,9 +25,6 @@ build:
     - docker info
     - docker build -t back-v1:${CI_COMMIT_SHA} .
 
-deploy:
-  stage: deploy
-  script:
     - echo "Deploying the Docker image..."
     # Login to Docker registry
     - docker login -u mrmahdifardi -p 9gdU9jib42RjAGVxA1! registry.hamdocker.ir
@@ -35,3 +32,14 @@ deploy:
     - docker tag back-v1:${CI_COMMIT_SHA} registry.hamdocker.ir/mrmahdifardi/myapp:latest
     # Push the image to the Docker registry
     - docker push registry.hamdocker.ir/mrmahdifardi/myapp:latest
+
+# deploy:
+#   stage: deploy
+#   script:
+#     - echo "Deploying the Docker image..."
+#     # Login to Docker registry
+#     - docker login -u mrmahdifardi -p 9gdU9jib42RjAGVxA1! registry.hamdocker.ir
+#     # Tag the built image for the registry
+#     - docker tag back-v1:${CI_COMMIT_SHA} registry.hamdocker.ir/mrmahdifardi/myapp:latest
+#     # Push the image to the Docker registry
+#     - docker push registry.hamdocker.ir/mrmahdifardi/myapp:latest
