@@ -1,4 +1,4 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import { UserRelationEntity } from "./entity/userRelation.entity";
 import { followerFollowing, UserRelation } from "./model/userRelation.model";
 import { User } from "../user/model/user.model";
@@ -129,7 +129,7 @@ export class UserRelationRepository {
             take: limit,
             where: {
                 following: { username: user.username },
-                followStatus: "followed" || "request accepted" || "close",
+                followStatus: In(["followed", "request accepted", "close"]),
             },
             relations: ["follower"],
         });
@@ -147,7 +147,7 @@ export class UserRelationRepository {
             take: limit,
             where: {
                 follower: { username: user.username },
-                followStatus: "followed" || "request accepted" || "close",
+                followStatus: In(["followed", "request accepted", "close"]),
             },
             relations: ["following"],
         });
