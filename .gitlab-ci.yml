@@ -14,7 +14,7 @@ variables:
 
 stages:
   - build
-  # - deploy
+  - deploy
 
 before_script:
   # Set up SSH key for connection
