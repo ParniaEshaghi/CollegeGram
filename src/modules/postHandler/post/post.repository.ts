@@ -57,6 +57,8 @@ export class PostRepository {
         limit: number
     ) {
         const [response, total] = await this.postRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
             where: {
                 user: {
                     username: In(
