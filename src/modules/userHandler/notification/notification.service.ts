@@ -113,7 +113,6 @@ export class NotificationService {
                 );
 
             if (notif) {
-                data.isRead = notif.isRead;
                 const followStatus =
                     await this.userRelationService.getFollowStatus(
                         data.recipient,
