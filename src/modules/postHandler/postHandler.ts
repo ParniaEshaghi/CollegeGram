@@ -120,7 +120,7 @@ export class PostHandler {
         limit: number,
         baseUrl: string
     ) {
-        const post = this.postService.getPost(postId);
+        const post = await this.postService.getPost(postId);
 
         const commentList = await this.commentService.getComments(
             postId,
