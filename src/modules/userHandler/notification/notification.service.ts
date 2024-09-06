@@ -1,14 +1,12 @@
-import { date, number } from "zod";
 import { UnauthorizedError } from "../../../utility/http-errors";
 import { User } from "../user/model/user.model";
 
 import {
     CreateNotification,
     Notification,
-    notificationData,
     NotificationTypes,
+    toShownNotification,
     toNotificationWithFollowStatus,
-    userFollowingNotificationsResponse,
     userNotificationsResponse,
 } from "./model/notification.model";
 import { NotificationRepository } from "./notification.repository";
@@ -16,6 +14,7 @@ import { UserRelationService } from "../userRelation/userRelation.service";
 import { NotificationEntity } from "./entity/notification.entity";
 import { UserRelationEntity } from "../userRelation/entity/userRelation.entity";
 import { UserNotificationService } from "./userNotification/userNotification.service";
+import { toFollowerFollowingListUser } from "../userRelation/model/userRelation.model";
 
 export class NotificationService {
     constructor(
@@ -44,14 +43,6 @@ export class NotificationService {
     public deleteNotification(notification: Notification) {
         return this.notificationRepo.delete(notification);
     }
-
-    // private markNotificationAsRead(userNotifs: Notification[]) {
-    //     userNotifs.map((userNotif) => {
-    //         if (userNotif.isRead == false) {
-    //             this.notificationRepo.markNotificationsAsRead(userNotif);
-    //         }
-    //     });
-    // }
 
     private markNotificationAsRead(userNotifId: string, username: string) {
         this.userNotificationsService.makeUserNotificationAsRead(
@@ -110,20 +101,6 @@ export class NotificationService {
         }
 
         const userNotifs = await this.getUserNotif(user, page, limit);
-
-        // userNotifs.data.forEach(async (userNotif) => {
-        //     const notif =
-        //         await this.userNotificationsService.findByUserAndNotification(
-        //             userNotif.recipient,
-        //             userNotif
-        //         );
-
-        //     if (notif) {
-        //         userNotif.isRead = notif.isRead;
-        //         this.markNotificationAsRead(notif.id);
-        //     }
-        // });
-
         for (const userNotif of userNotifs.data) {
             const notif =
                 await this.userNotificationsService.findByUserAndNotification(
@@ -137,10 +114,10 @@ export class NotificationService {
             }
         }
 
-        // this.markNotificationAsRead(userNotifs.data);
-
         const response: userNotificationsResponse = {
-            data: userNotifs.data,
+            data: userNotifs.data.map((notif) =>
+                toShownNotification(notif, baseUrl)
+            ),
             meta: {
                 page: page,
                 limit: limit,
@@ -211,10 +188,10 @@ export class NotificationService {
             }
         }
 
-        // this.markNotificationAsRead(userNotifs.data);
-
-        const response: userFollowingNotificationsResponse = {
-            data: userFollowingNotifications,
+        const response: userNotificationsResponse = {
+            data: userFollowingNotifications.map((notif) =>
+                toShownNotification(notif, baseUrl)
+            ),
             meta: {
                 page: page,
                 limit: limit,

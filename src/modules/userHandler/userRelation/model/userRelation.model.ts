@@ -124,6 +124,11 @@ export type followerFollowingListUser = Omit<
     reverseFollowStatus: PFollowStatus;
 };
 
+export type UserList = Omit<
+    User,
+    "password" | "post_count" | "email" | "profileStatus" | "bio"
+>;
+
 export const toFollowerFollowingListUser = (
     user: User,
     baseUrl: string,
@@ -140,6 +145,19 @@ export const toFollowerFollowingListUser = (
         following_count: user.following_count,
         followStatus: followStatus.followStatus,
         reverseFollowStatus: followStatus.reverseFollowStatus,
+    };
+};
+
+export const toUserList = (user: User, baseUrl: string): UserList => {
+    return {
+        username: user.username,
+        profilePicture: user.profilePicture
+            ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+            : "",
+        firstname: user.firstname,
+        lastname: user.lastname,
+        follower_count: user.follower_count,
+        following_count: user.following_count,
     };
 };
 
