@@ -203,7 +203,7 @@ export class UserRelationRepository {
         const followerCount = await this.userRelationRepo.count({
             where: {
                 following: { username },
-                followStatus: In(["followed", "close"]),
+                followStatus: In(["followed", "request accepted", "close"]),
             },
         });
         return followerCount;
@@ -213,7 +213,7 @@ export class UserRelationRepository {
         const followerCount = await this.userRelationRepo.count({
             where: {
                 follower: { username },
-                followStatus: In(["followed", "close"]),
+                followStatus: In(["followed", "request accepted", "close"]),
             },
         });
         return followerCount;
