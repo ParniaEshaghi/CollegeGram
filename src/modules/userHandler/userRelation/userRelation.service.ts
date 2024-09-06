@@ -263,43 +263,6 @@ export class UserRelationService {
         return { message: "User removed from close friends" };
     }
 
-    public async userProfile(
-        session_user: User,
-        username: string,
-        baseUrl: string
-    ) {
-        const user = await this.userService.getUserByUsername(username);
-        const followStatus = await this.getFollowStatus(session_user, username);
-        const reverse_followStatus = await this.getFollowStatus(
-            user,
-            session_user.username
-        );
-        const profileFollowStatus = toProfileFollowStatus(
-            followStatus,
-            reverse_followStatus
-        );
-
-        if (
-            profileFollowStatus.followStatus === "blocked" ||
-            profileFollowStatus.reverseFollowStatus === "blocked" ||
-            (user.profileStatus === "private" &&
-                profileFollowStatus.followStatus !== "followed")
-        ) {
-            return toProfile(user, profileFollowStatus, [], baseUrl);
-        }
-
-        const posts = await this.userService.getUserPosts(username, baseUrl);
-        const normalPosts = posts.filter(
-            (post) => post.close_status === "normal"
-        );
-        if (followStatus === "followed") {
-            return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
-        } else if (followStatus === "close") {
-            return toProfile(user, profileFollowStatus, posts, baseUrl);
-        }
-        return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
-    }
-
     public async allFolloweList(user: User) {
         return await this.userRelationRepo.getAllFollowers(user);
     }
