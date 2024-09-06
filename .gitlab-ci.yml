@@ -1,43 +1,43 @@
-# image: docker:latest
+image: docker:latest
 
-# services:
-#   - name: docker:dind
-#     alias: docker
+services:
+  - name: docker:dind
+    alias: docker
 
-# variables:
+variables:
 
-#   DOCKER_HOST: tcp://docker:2375
-#   DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
 
-# stages:
-#   - build
+stages:
+  - build
 #   - deploy
 
-# before_script:
-#   # Set up SSH key for connection
-#   - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-#   - eval $(ssh-agent -s)
-#   - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-#   - mkdir -p ~/.ssh
-#   - chmod 700 ~/.ssh
-#   - ssh-keyscan -H 37.32.6.230 >> ~/.ssh/known_hosts
+before_script:
+  # Set up SSH key for connection
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan -H 37.32.6.230 >> ~/.ssh/known_hosts
 
-# build:
-#   stage: build
+build:
+  stage: build
   
-#   script:
-#     - echo "Building the Docker image..."
-#     # Ensure Docker is available
-#     - docker info
-#     - docker build -t back-v1:${CI_COMMIT_SHA} .
+  script:
+    - echo "Building the Docker image..."
+    # Ensure Docker is available
+    - docker info
+    - docker build -t back-v1:${CI_COMMIT_SHA} .
 
-#     - echo "Deploying the Docker image..."
-#     # Login to Docker registry
-#     - docker login -u mrmahdifardi -p 9gdU9jib42RjAGVxA1! registry.hamdocker.ir
-#     # Tag the built image for the registry
-#     - docker tag back-v1:${CI_COMMIT_SHA} registry.hamdocker.ir/mrmahdifardi/back-v1:latest
-#     # Push the image to the Docker registry
-#     - docker push registry.hamdocker.ir/mrmahdifardi/back-v1:latest
+    - echo "Deploying the Docker image..."
+    # Login to Docker registry
+    - docker login -u mrmahdifardi -p 9gdU9jib42RjAGVxA1! registry.hamdocker.ir
+    # Tag the built image for the registry
+    - docker tag back-v1:${CI_COMMIT_SHA} registry.hamdocker.ir/mrmahdifardi/back-v1:latest
+    # Push the image to the Docker registry
+    - docker push registry.hamdocker.ir/mrmahdifardi/back-v1:latest
 
 # deploy:
 #   stage: deploy
