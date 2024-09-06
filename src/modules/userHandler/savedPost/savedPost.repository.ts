@@ -12,29 +12,13 @@ export class SavedPostRepository {
     }
 
     public async create(user: User, post: Post): Promise<void> {
-        await this.appDataSource.manager.transaction(async (manager) => {
-            const postRepo = manager.getRepository(PostEntity);
-            const savedPostRepo = manager.getRepository(SavedPostsEntity);
-            await savedPostRepo.save({ user, post });
-            await postRepo.update(
-                { id: post.id },
-                { saved_count: () => "saved_count + 1" }
-            );
-        });
+        await this.savedPostRepo.save({ user, post });
     }
 
     public async delete(user: User, post: Post): Promise<void> {
-        await this.appDataSource.manager.transaction(async (manager) => {
-            const postRepo = manager.getRepository(PostEntity);
-            const savedPostRepo = manager.getRepository(SavedPostsEntity);
-            await savedPostRepo.softDelete({
-                user: user,
-                post: { id: post.id },
-            });
-            await postRepo.update(
-                { id: post.id },
-                { saved_count: () => "saved_count - 1" }
-            );
+        await this.savedPostRepo.softDelete({
+            user: user,
+            post: { id: post.id },
         });
     }
 
@@ -50,5 +34,12 @@ export class SavedPostRepository {
         });
 
         return response;
+    }
+
+    public async getPostSavedCount(postId: string): Promise<number> {
+        const postSavedCount = await this.savedPostRepo.count({
+            where: { post: { id: postId } },
+        });
+        return postSavedCount;
     }
 }

@@ -1,8 +1,4 @@
-import {
-    BadRequestError,
-    NotFoundError,
-    UnauthorizedError,
-} from "../../../utility/http-errors";
+import { BadRequestError } from "../../../utility/http-errors";
 import { User } from "../../userHandler/user/model/user.model";
 import { CommentService } from "../comment/comment.service";
 import { CommentLikeRepository } from "./commentLike.repository";
@@ -42,5 +38,9 @@ export class CommentLikeService {
 
         await this.commentLikeRepo.delete(user, comment);
         return { message: "Comment unliked" };
+    }
+
+    public async getCommentLikeCount(commentId: string) {
+        return await this.commentLikeRepo.getCommentLikeCount(commentId);
     }
 }

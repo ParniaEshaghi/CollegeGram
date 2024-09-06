@@ -113,13 +113,4 @@ export class NotificationRepository {
 
         return response;
     }
-
-    public async markNotificationsAsRead(
-        notification: Notification
-    ): Promise<void> {
-        await this.notificationRepo.update(
-            { id: notification.id },
-            { isRead: true }
-        );
-    }
 }

@@ -85,7 +85,7 @@ describe("Comment service test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
-                close_status: "normal"
+                close_status: "normal",
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -106,7 +106,6 @@ describe("Comment service test suite", () => {
         expect(notification.recipient.username).toEqual(user!.username);
         expect(notification.sender.username).toEqual(user!.username);
         expect(notification.type).toEqual("comment");
-        expect(notification.isRead).toEqual(false);
     });
 
     it("should create a reply comment successfully if commentId is provided", async () => {
@@ -116,7 +115,7 @@ describe("Comment service test suite", () => {
             {
                 caption: "test caption",
                 mentions: ["test2", "test3"],
-                close_status: "normal"
+                close_status: "normal",
             },
             ["testfile.jpg"],
             "localhost:3000"
@@ -136,7 +135,6 @@ describe("Comment service test suite", () => {
 
         expect(result.parent!.id).toEqual(comment.id);
         expect(result.text).toEqual("Reply comment");
-        expect(result.like_count).toBe(0);
 
         const notifications = await notificationService.findByType("comment");
         expect(notifications.length).toEqual(1);

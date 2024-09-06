@@ -11,16 +11,7 @@ export class CommentRepository {
     }
 
     public async create(comment: CreateComment): Promise<Comment> {
-        return await this.appDataSource.manager.transaction(async (manager) => {
-            const commentRepo = manager.getRepository(CommentEntity);
-            const postRepo = manager.getRepository(PostEntity);
-            const newComment = await commentRepo.save(comment);
-            await postRepo.update(
-                { id: comment.post.id },
-                { comment_count: () => "comment_count + 1" }
-            );
-            return newComment;
-        });
+        return await this.commentRepo.save(comment);
     }
 
     public async findById(id: string): Promise<Comment | null> {
@@ -57,5 +48,12 @@ export class CommentRepository {
             child.children = await this.getChildren(child.id);
         }
         return children;
+    }
+
+    public async getCommentCount(postId: string): Promise<number> {
+        const commentCount = await this.commentRepo.count({
+            where: { post: { id: postId } },
+        });
+        return commentCount;
     }
 }

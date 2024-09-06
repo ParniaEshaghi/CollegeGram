@@ -11,16 +11,7 @@ export class PostRepository {
     }
 
     public async create(post: CreatePost): Promise<Post> {
-        return await this.appDataSource.manager.transaction(async (manager) => {
-            const userRepo = manager.getRepository(UserEntity);
-            const postRepo = manager.getRepository(PostEntity);
-            const newPost = await postRepo.save(post);
-            await userRepo.update(
-                { username: post.user.username },
-                { post_count: () => "post_count + 1" }
-            );
-            return newPost;
-        });
+        return await this.postRepo.save(post);
     }
 
     public findPostById(postId: string): Promise<Post | null> {
@@ -61,5 +52,12 @@ export class PostRepository {
             },
         });
         return { data: response, total: total };
+    }
+
+    public async getPostCount(username: string): Promise<number> {
+        const postCount = await this.postRepo.count({
+            where: { user: { username } },
+        });
+        return postCount;
     }
 }

@@ -14,7 +14,6 @@ import { UserRelationService } from "../userRelation/userRelation.service";
 import { NotificationEntity } from "./entity/notification.entity";
 import { UserRelationEntity } from "../userRelation/entity/userRelation.entity";
 import { UserNotificationService } from "./userNotification/userNotification.service";
-import { toFollowerFollowingListUser } from "../userRelation/model/userRelation.model";
 
 export class NotificationService {
     constructor(
@@ -109,7 +108,6 @@ export class NotificationService {
                 );
 
             if (notif) {
-                userNotif.isRead = notif.isRead;
                 await this.markNotificationAsRead(notif.id, user.username);
             }
         }
@@ -174,7 +172,6 @@ export class NotificationService {
                 );
 
             if (notif) {
-                fData.isRead = notif.isRead;
                 const followStatus =
                     await this.userRelationService.getFollowStatus(
                         user,

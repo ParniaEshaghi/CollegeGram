@@ -48,15 +48,6 @@ export class UserEntity {
     @Column({ default: "" })
     bio!: string;
 
-    @Column({ default: 0 })
-    follower_count!: number;
-
-    @Column({ default: 0 })
-    following_count!: number;
-
-    @Column({ default: 0 })
-    post_count!: number;
-
     @OneToMany(() => PostEntity, (post) => post.user)
     posts!: PostEntity[];
 

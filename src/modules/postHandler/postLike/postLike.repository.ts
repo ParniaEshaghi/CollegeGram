@@ -2,7 +2,6 @@ import { DataSource, Repository } from "typeorm";
 import { Post } from "../post/model/post.model";
 import { User } from "../../userHandler/user/model/user.model";
 import { PostLikeEntity } from "./entity/postLike.entity";
-import { PostEntity } from "../post/entity/post.entity";
 import { PostLike } from "./model/postLike.model";
 
 export class PostLikeRepository {
@@ -13,29 +12,13 @@ export class PostLikeRepository {
     }
 
     public async create(user: User, post: Post): Promise<void> {
-        await this.appDataSource.manager.transaction(async (manager) => {
-            const postRepo = manager.getRepository(PostEntity);
-            const postLikeRepo = manager.getRepository(PostLikeEntity);
-            await postLikeRepo.save({ user, post });
-            await postRepo.update(
-                { id: post.id },
-                { like_count: () => "like_count + 1" }
-            );
-        });
+        await this.postLikeRepo.save({ user, post });
     }
 
     public async delete(user: User, post: Post): Promise<void> {
-        await this.appDataSource.manager.transaction(async (manager) => {
-            const postRepo = manager.getRepository(PostEntity);
-            const postLikeRepo = manager.getRepository(PostLikeEntity);
-            await postLikeRepo.softDelete({
-                user: user,
-                post: { id: post.id },
-            });
-            await postRepo.update(
-                { id: post.id },
-                { like_count: () => "like_count - 1" }
-            );
+        await this.postLikeRepo.softDelete({
+            user: user,
+            post: { id: post.id },
         });
     }
 
@@ -51,5 +34,12 @@ export class PostLikeRepository {
         });
 
         return response;
+    }
+
+    public async getPostLikeCount(postId: string): Promise<number> {
+        const postLikeCount = await this.postLikeRepo.count({
+            where: { post: { id: postId } },
+        });
+        return postLikeCount;
     }
 }

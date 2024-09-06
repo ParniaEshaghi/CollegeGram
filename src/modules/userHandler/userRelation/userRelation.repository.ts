@@ -12,37 +12,13 @@ export class UserRelationRepository {
     }
 
     public async createFollow(relation: UserRelation): Promise<void> {
-        await this.appDataSource.manager.transaction(async (manager) => {
-            const userRepo = manager.getRepository(UserEntity);
-            const userRelationRepo = manager.getRepository(UserRelationEntity);
-            await this.deleteLastRelation(relation);
-            await userRelationRepo.save(relation);
-            await userRepo.update(
-                { username: relation.follower.username },
-                { following_count: () => "following_count + 1" }
-            );
-            await userRepo.update(
-                { username: relation.following.username },
-                { follower_count: () => "follower_count + 1" }
-            );
-        });
+        await this.deleteLastRelation(relation);
+        await this.userRelationRepo.save(relation);
     }
 
     public async deleteFollow(userRelation: UserRelation): Promise<void> {
-        await this.appDataSource.manager.transaction(async (manager) => {
-            const userRepo = manager.getRepository(UserEntity);
-            const userRelationRepo = manager.getRepository(UserRelationEntity);
-            await this.deleteLastRelation(userRelation);
-            await userRelationRepo.save(userRelation);
-            await userRepo.update(
-                { username: userRelation.follower.username },
-                { following_count: () => "following_count - 1" }
-            );
-            await userRepo.update(
-                { username: userRelation.following.username },
-                { follower_count: () => "follower_count - 1" }
-            );
-        });
+        await this.deleteLastRelation(userRelation);
+        await this.userRelationRepo.save(userRelation);
     }
 
     public async createFollowRequest(
@@ -221,5 +197,25 @@ export class UserRelationRepository {
         });
 
         return response;
+    }
+
+    public async getFollowerCount(username: string): Promise<number> {
+        const followerCount = await this.userRelationRepo.count({
+            where: {
+                following: { username },
+                followStatus: In(["followed", "close"]),
+            },
+        });
+        return followerCount;
+    }
+
+    public async getFollowingCount(username: string): Promise<number> {
+        const followerCount = await this.userRelationRepo.count({
+            where: {
+                follower: { username },
+                followStatus: In(["followed", "close"]),
+            },
+        });
+        return followerCount;
     }
 }
