@@ -35,6 +35,7 @@ export const toPostWithUsername = (
     baseUrl: string
 ): PostWithUsername => {
     const { user, images, ...postDetails } = post;
+    console.log(post);
     return {
         ...postDetails,
         username: user.username,

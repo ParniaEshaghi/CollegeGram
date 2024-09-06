@@ -7,12 +7,15 @@ import {
     Post,
     PostWithUsername,
     toPostWithUsername,
+    toProfilePost,
 } from "../../../postHandler/post/model/post.model";
 import { User } from "../../user/model/user.model";
 import {
     FollowStatus,
     toUserList,
     UserList,
+    ProfileFollowStatus,
+    PFollowStatus,
 } from "../../userRelation/model/userRelation.model";
 import { NotificationEntity } from "../entity/notification.entity";
 
@@ -72,20 +75,25 @@ export const toShownNotification = (
         id: notification.id,
         recipient: toUserList(recipient, baseUrl),
         sender: toUserList(sender, baseUrl),
-        post: post ? toPostWithUsername(post, baseUrl) : undefined,
-        comment: comment ? toCommentWithUsername(comment) : undefined,
+        post: post ? toProfilePost(recipient, post, baseUrl) : undefined,
+        comment: comment ? comment : undefined,
     };
 };
 
 export type NotificationWithFollowStatus = Notification & {
-    followStatus: FollowStatus;
+    followStatus: PFollowStatus;
+    reverseFollowStatus: PFollowStatus;
 };
 
 export const toNotificationWithFollowStatus = (
     notification: NotificationEntity,
-    followStatus: FollowStatus
+    followStatus: ProfileFollowStatus
 ): NotificationWithFollowStatus => {
-    return { ...notification, followStatus };
+    return {
+        ...notification,
+        followStatus: followStatus.followStatus,
+        reverseFollowStatus: followStatus.reverseFollowStatus,
+    };
 };
 
 export type userFollowingNotificationsResponse = {
