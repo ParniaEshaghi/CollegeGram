@@ -1,7 +1,19 @@
-import { Comment } from "../../../postHandler/comment/model/comment.model";
-import { Post } from "../../../postHandler/post/model/post.model";
+import {
+    Comment,
+    CommentWithUsername,
+    toCommentWithUsername,
+} from "../../../postHandler/comment/model/comment.model";
+import {
+    Post,
+    PostWithUsername,
+    toPostWithUsername,
+} from "../../../postHandler/post/model/post.model";
 import { User } from "../../user/model/user.model";
-import { FollowStatus } from "../../userRelation/model/userRelation.model";
+import {
+    FollowStatus,
+    toUserList,
+    UserList,
+} from "../../userRelation/model/userRelation.model";
 import { NotificationEntity } from "../entity/notification.entity";
 
 export type NotificationTypes =
@@ -32,7 +44,7 @@ export interface notificationData {
 }
 
 export type userNotificationsResponse = {
-    data: Notification[];
+    data: ShownNotification[];
     meta: {
         total: number;
         page: number;
@@ -41,15 +53,31 @@ export type userNotificationsResponse = {
     };
 };
 
-// export const toUserNotificationsResponse = (data: Notification[], total: number,
-//     page: number,
-//     totalPage: number,
-//     limit: number) : userNotificationsResponse=> {
-//         return {
-//             data: data,
-//             tot
-//         }
-//     }
+export type ShownNotification = {
+    id: string;
+    recipient: UserList;
+    sender: UserList;
+    type: NotificationTypes;
+    post?: PostWithUsername;
+    comment?: CommentWithUsername;
+    isRead?: boolean;
+};
+
+export const toShownNotification = (
+    notification: Notification,
+    baseUrl: string
+): ShownNotification => {
+    const { recipient, sender, comment, post, ...commentDetails } =
+        notification;
+    return {
+        ...commentDetails,
+        id: notification.id,
+        recipient: toUserList(recipient, baseUrl),
+        sender: toUserList(sender, baseUrl),
+        post: post ? toPostWithUsername(post, baseUrl) : undefined,
+        comment: comment ? toCommentWithUsername(comment) : undefined,
+    };
+};
 
 export type NotificationWithFollowStatus = Notification & {
     followStatus: FollowStatus;

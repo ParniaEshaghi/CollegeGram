@@ -45,6 +45,7 @@ export const toPostCommentList = (
 };
 
 export type CommentWithUsername = Omit<Comment, "post" | "user"> & {
+    postId: string;
     username: string;
 };
 
@@ -54,6 +55,7 @@ export const toCommentWithUsername = (
     const { user, post, ...commentDetails } = comment;
     return {
         ...commentDetails,
+        postId: post.id,
         username: user.username,
     };
 };
