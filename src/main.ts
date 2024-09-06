@@ -3,7 +3,7 @@ import { AppDataSource } from "./data-source";
 import { User } from "./modules/userHandler/user/model/user.model";
 import { ServiceFactory } from "./utility/service-factory";
 
-const PORT = 3000;
+const PORT = 3012;
 
 declare global {
     namespace Express {
