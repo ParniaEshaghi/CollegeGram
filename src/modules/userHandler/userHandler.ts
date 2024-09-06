@@ -2,7 +2,6 @@ import { NotFoundError } from "../../utility/http-errors";
 import {
     PostWithUsername,
     toPostPage,
-    toProfilePost,
 } from "../postHandler/post/model/post.model";
 import { PostHandler } from "../postHandler/postHandler";
 import { NotificationService } from "./notification/notification.service";
@@ -75,7 +74,21 @@ export class UserHandler {
                 user
             ));
         const posts = await this.getUserPosts(user.username, baseUrl);
-        return toProfileInfo(user, posts, baseUrl, unreadNotifications);
+        const follower_count = await this.userRelationService.getFollowerCount(
+            user.username
+        );
+        const following_count =
+            await this.userRelationService.getFollowingCount(user.username);
+        const post_count = await this.postHandler.getPostCount(user.username);
+        return toProfileInfo(
+            user,
+            posts,
+            baseUrl,
+            unreadNotifications,
+            follower_count,
+            following_count,
+            post_count
+        );
     }
 
     public async getUserPosts(username: string, baseUrl: string) {
@@ -92,8 +105,28 @@ export class UserHandler {
                 post.id
             );
 
+            const follower_count =
+                await this.userRelationService.getFollowerCount(user.username);
+            const like_count = await this.postHandler.getPostLikeCount(post.id);
+            const saved_count = await this.postHandler.getSavedPostCount(
+                post.id
+            );
+            const comment_count = await this.postHandler.getCommentCount(
+                post.id
+            );
+
             profilePosts.push(
-                toPostPage(post, baseUrl, like_status, save_status)
+                toPostPage(
+                    user,
+                    post,
+                    baseUrl,
+                    follower_count,
+                    like_status,
+                    save_status,
+                    like_count,
+                    saved_count,
+                    comment_count
+                )
             );
         }
         return profilePosts;
@@ -377,8 +410,30 @@ export class UserHandler {
                     const save_status =
                         await this.postHandler.getPostSaveStatus(user, post.id);
 
+                    const follower_count =
+                        await this.userRelationService.getFollowerCount(
+                            post.user.username
+                        );
+                    const like_count = await this.postHandler.getPostLikeCount(
+                        post.id
+                    );
+                    const saved_count =
+                        await this.postHandler.getSavedPostCount(post.id);
+                    const comment_count =
+                        await this.postHandler.getCommentCount(post.id);
+
                     shownPosts.push(
-                        toPostPage(post, baseUrl, like_status, save_status)
+                        toPostPage(
+                            post.user,
+                            post,
+                            baseUrl,
+                            follower_count,
+                            like_status,
+                            save_status,
+                            like_count,
+                            saved_count,
+                            comment_count
+                        )
                     );
                 }
             } else {
@@ -391,8 +446,32 @@ export class UserHandler {
                     post.id
                 );
 
+                const follower_count =
+                    await this.userRelationService.getFollowerCount(
+                        post.user.username
+                    );
+                const like_count = await this.postHandler.getPostLikeCount(
+                    post.id
+                );
+                const saved_count = await this.postHandler.getSavedPostCount(
+                    post.id
+                );
+                const comment_count = await this.postHandler.getCommentCount(
+                    post.id
+                );
+
                 shownPosts.push(
-                    toPostPage(post, baseUrl, like_status, save_status)
+                    toPostPage(
+                        post.user,
+                        post,
+                        baseUrl,
+                        follower_count,
+                        like_status,
+                        save_status,
+                        like_count,
+                        saved_count,
+                        comment_count
+                    )
                 );
             }
         }

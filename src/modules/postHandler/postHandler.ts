@@ -1,4 +1,3 @@
-import { NotFoundError, UnauthorizedError } from "../../utility/http-errors";
 import { User } from "../userHandler/user/model/user.model";
 import { SavedPostService } from "../userHandler/savedPost/savedPost.service";
 import { CommentService } from "./comment/comment.service";
@@ -11,6 +10,7 @@ import { PostService } from "./post/post.service";
 import { PostLikeService } from "./postLike/postLike.service";
 import { UpdatePostDto } from "./post/dto/updatePost.dto";
 import { UserRelation } from "../userHandler/userRelation/model/userRelation.model";
+import { UserRelationService } from "../userHandler/userRelation/userRelation.service";
 
 export class PostHandler {
     constructor(
@@ -18,7 +18,8 @@ export class PostHandler {
         private savedPostService: SavedPostService,
         private commentService: CommentService,
         private postLikeService: PostLikeService,
-        private commentLikeService: CommentLikeService
+        private commentLikeService: CommentLikeService,
+        private userRelationService: UserRelationService
     ) {}
     public async createPost(
         user: User,
@@ -58,7 +59,24 @@ export class PostHandler {
         const post = await this.postService.getPost(postId);
         const like_status = await this.getPostLikeStatus(user, post.id);
         const save_status = await this.getPostSaveStatus(user, post.id);
-        return toPostPage(post, baseUrl, like_status, save_status);
+        const follower_count = await this.userRelationService.getFollowerCount(
+            post.user.username
+        );
+        const like_count = await this.getPostLikeCount(post.id);
+        const saved_count = await this.getSavedPostCount(post.id);
+        const comment_count = await this.getCommentCount(post.id);
+
+        return toPostPage(
+            post.user,
+            post,
+            baseUrl,
+            follower_count,
+            like_status,
+            save_status,
+            like_count,
+            saved_count,
+            comment_count
+        );
     }
 
     public async likePostHandler(user: User, postId: string) {
@@ -142,10 +160,15 @@ export class PostHandler {
                     user,
                     comment.id
                 );
+                const like_count =
+                    await this.commentLikeService.getCommentLikeCount(
+                        comment.id
+                    );
                 const transformedComment = toPostCommentList(
                     comment,
                     likeStatus,
-                    baseUrl
+                    baseUrl,
+                    like_count
                 );
 
                 if (comment.children && comment.children.length > 0) {
@@ -175,5 +198,25 @@ export class PostHandler {
         limit: number
     ) {
         return await this.postService.getExplorePosts(followings, page, limit);
+    }
+
+    public async getPostCount(username: string) {
+        return await this.postService.getPostCount(username);
+    }
+
+    public async getSavedPostCount(userId: string) {
+        return await this.savedPostService.getSavedPostCount(userId);
+    }
+
+    public async getCommentCount(postId: string) {
+        return await this.commentService.getCommentCount(postId);
+    }
+
+    public async getPostLikeCount(postId: string): Promise<number> {
+        return await this.postLikeService.getPostLikeCount(postId);
+    }
+
+    public async getCommentLikeCount(postId: string) {
+        return await this.commentLikeService.getCommentLikeCount(postId);
     }
 }

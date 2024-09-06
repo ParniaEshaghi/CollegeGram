@@ -25,7 +25,4 @@ export class PostLikeEntity {
 
     @DeleteDateColumn()
     deletedAt!: Date;
-
-    @AfterInsert()
-    handleAfterInsert() {}
 }

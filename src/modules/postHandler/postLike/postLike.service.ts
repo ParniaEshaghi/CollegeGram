@@ -43,4 +43,8 @@ export class PostLikeService {
         await this.postLikeRepo.delete(user, post);
         return { message: "Post unliked" };
     }
+
+    public async getPostLikeCount(postId: string): Promise<number> {
+        return await this.postLikeRepo.getPostLikeCount(postId);
+    }
 }

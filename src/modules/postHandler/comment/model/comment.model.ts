@@ -6,7 +6,6 @@ export interface Comment {
     post: Post;
     user: User;
     text: string;
-    like_count: number;
     parent?: Comment;
     children?: Comment[];
 }
@@ -24,12 +23,14 @@ export type PostCommentList = Omit<Comment, "post" | "user"> & {
     firstname: string;
     lastname: string;
     like_status: boolean;
+    like_count: number;
 };
 
 export const toPostCommentList = (
     comment: Comment,
     like_status: boolean,
-    baseUrl: string
+    baseUrl: string,
+    like_count: number
 ): PostCommentList => {
     const { user, post, ...commentDetails } = comment;
     return {
@@ -41,6 +42,7 @@ export const toPostCommentList = (
         firstname: user.firstname,
         lastname: user.lastname,
         like_status,
+        like_count,
     };
 };
 

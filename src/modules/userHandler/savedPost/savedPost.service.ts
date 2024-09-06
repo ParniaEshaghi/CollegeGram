@@ -43,4 +43,8 @@ export class SavedPostService {
         await this.savedPostRepo.delete(user, post);
         return { message: "Post unsaved" };
     }
+
+    public async getSavedPostCount(postId: string) {
+        return await this.savedPostRepo.getPostSavedCount(postId);
+    }
 }

@@ -297,11 +297,20 @@ export class UserRelationService {
                 followStatus,
                 reverse_followStatus
             );
+            const follower_count = await this.getFollowerCount(
+                follower.username
+            );
+            const following_count = await this.getFollowingCount(
+                follower.username
+            );
+
             followerListData.push(
                 toFollowerFollowingListUser(
                     follower,
                     baseUrl,
-                    profileFollowStatus
+                    profileFollowStatus,
+                    follower_count,
+                    following_count
                 )
             );
         }
@@ -346,11 +355,19 @@ export class UserRelationService {
                 followStatus,
                 reverse_followStatus
             );
+            const follower_count = await this.getFollowerCount(
+                following.username
+            );
+            const following_count = await this.getFollowingCount(
+                following.username
+            );
             followingListData.push(
                 toFollowerFollowingListUser(
                     following,
                     baseUrl,
-                    profileFollowStatus
+                    profileFollowStatus,
+                    follower_count,
+                    following_count
                 )
             );
         }
@@ -401,8 +418,18 @@ export class UserRelationService {
                 followStatus,
                 reverse_followStatus
             );
+            const follower_count = await this.getFollowerCount(close.username);
+            const following_count = await this.getFollowingCount(
+                close.username
+            );
             closeListData.push(
-                toFollowerFollowingListUser(close, baseUrl, profileFollowStatus)
+                toFollowerFollowingListUser(
+                    close,
+                    baseUrl,
+                    profileFollowStatus,
+                    follower_count,
+                    following_count
+                )
             );
         }
 
@@ -444,8 +471,18 @@ export class UserRelationService {
                 followStatus,
                 reverse_followStatus
             );
+            const follower_count = await this.getFollowerCount(block.username);
+            const following_count = await this.getFollowingCount(
+                block.username
+            );
             blockListData.push(
-                toFollowerFollowingListUser(block, baseUrl, profileFollowStatus)
+                toFollowerFollowingListUser(
+                    block,
+                    baseUrl,
+                    profileFollowStatus,
+                    follower_count,
+                    following_count
+                )
             );
         }
 
@@ -462,5 +499,13 @@ export class UserRelationService {
 
     public async getAllBlockList(user: User): Promise<UserRelationEntity[]> {
         return await this.userRelationRepo.getAllBlockList(user);
+    }
+
+    public async getFollowerCount(username: string): Promise<number> {
+        return await this.userRelationRepo.getFollowerCount(username);
+    }
+
+    public async getFollowingCount(username: string): Promise<number> {
+        return await this.userRelationRepo.getFollowingCount(username);
     }
 }

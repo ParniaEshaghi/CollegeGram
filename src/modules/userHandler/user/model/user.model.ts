@@ -12,9 +12,6 @@ export interface User {
     lastname: string;
     profileStatus: "public" | "private";
     bio: string;
-    follower_count: number;
-    following_count: number;
-    post_count: number;
 }
 
 export interface CreateUser {
@@ -40,6 +37,9 @@ export const toUserWithoutPassword = (user: User): UserWithoutPassword => {
 };
 
 export type ProfileInfo = Omit<User, "password"> & {
+    follower_count: number;
+    following_count: number;
+    post_count: number;
     posts: any[];
     unreadNotifications: number;
 };
@@ -48,7 +48,10 @@ export const toProfileInfo = (
     user: User,
     posts: PostWithUsername[],
     baseUrl: string,
-    unreadNotifications: number
+    unreadNotifications: number,
+    follower_count: number,
+    following_count: number,
+    post_count: number
 ): ProfileInfo => {
     const { password, profilePicture, ...profileInfo } = user;
     return {
@@ -58,6 +61,9 @@ export const toProfileInfo = (
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",
         unreadNotifications: unreadNotifications,
+        follower_count,
+        following_count,
+        post_count,
     };
 };
 
@@ -74,15 +80,7 @@ export const toEditProfileInfo = (
     user: User,
     baseUrl: string
 ): EditProfileInfo => {
-    const {
-        username,
-        password,
-        follower_count,
-        following_count,
-        post_count,
-        profilePicture,
-        ...editProfileInfo
-    } = user;
+    const { username, password, profilePicture, ...editProfileInfo } = user;
     return {
         ...editProfileInfo,
         profilePicture: user.profilePicture

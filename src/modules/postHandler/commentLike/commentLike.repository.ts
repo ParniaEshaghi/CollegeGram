@@ -15,29 +15,13 @@ export class CommentLikeRepository {
     }
 
     public async create(user: User, comment: Comment): Promise<void> {
-        await this.appDataSource.manager.transaction(async (manager) => {
-            const commentRepo = manager.getRepository(CommentEntity);
-            const commentLikeRepo = manager.getRepository(CommentLikeEntity);
-            await commentLikeRepo.save({ user, comment });
-            await commentRepo.update(
-                { id: comment.id },
-                { like_count: () => "like_count + 1" }
-            );
-        });
+        await this.commentLikeRepo.save({ user, comment });
     }
 
     public async delete(user: User, comment: Comment): Promise<void> {
-        await this.appDataSource.manager.transaction(async (manager) => {
-            const commentRepo = manager.getRepository(CommentEntity);
-            const commentLikeRepo = manager.getRepository(CommentLikeEntity);
-            await commentLikeRepo.softDelete({
-                user: user,
-                comment: { id: comment.id },
-            });
-            await commentRepo.update(
-                { id: comment.id },
-                { like_count: () => "like_count - 1" }
-            );
+        await this.commentLikeRepo.softDelete({
+            user: user,
+            comment: { id: comment.id },
         });
     }
 
@@ -52,5 +36,12 @@ export class CommentLikeRepository {
             },
         });
         return response;
+    }
+
+    public async getCommentLikeCount(commentId: string): Promise<number> {
+        const commentLikeCount = await this.commentLikeRepo.count({
+            where: { comment: { id: commentId } },
+        });
+        return commentLikeCount;
     }
 }

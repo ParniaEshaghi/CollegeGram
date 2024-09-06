@@ -1,9 +1,7 @@
 import {
     BadRequestError,
     ForbiddenError,
-    HttpError,
     NotFoundError,
-    UnauthorizedError,
 } from "../../../utility/http-errors";
 import { User } from "../../userHandler/user/model/user.model";
 import { PostDto } from "./dto/post.dto";
@@ -141,5 +139,9 @@ export class PostService {
         limit: number
     ) {
         return await this.postRepo.getExplorePosts(followings, page, limit);
+    }
+
+    public async getPostCount(username: string) {
+        return await this.postRepo.getPostCount(username);
     }
 }

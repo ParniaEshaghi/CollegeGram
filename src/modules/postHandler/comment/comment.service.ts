@@ -39,4 +39,8 @@ export class CommentService {
     public async getComments(postId: string, page: number, limit: number) {
         return await this.commentRepo.getComments(postId, page, limit);
     }
+
+    public async getCommentCount(postId: string) {
+        return await this.commentRepo.getCommentCount(postId);
+    }
 }

@@ -63,9 +63,6 @@ export class NotificationEntity {
     })
     comment!: CommentEntity;
 
-    @Column({ default: false })
-    isRead!: boolean;
-
     @CreateDateColumn()
     createdAt!: Date;
 

@@ -1,3 +1,4 @@
+import { LargeNumberLike } from "crypto";
 import { PostWithUsername } from "../../../postHandler/post/model/post.model";
 import { UserEntity } from "../../user/entity/user.entity";
 import { User } from "../../user/model/user.model";
@@ -116,23 +117,24 @@ export const toProfile = (
     };
 };
 
-export type followerFollowingListUser = Omit<
-    User,
-    "password" | "post_count" | "email" | "profileStatus" | "bio"
-> & {
-    followStatus: PFollowStatus;
-    reverseFollowStatus: PFollowStatus;
-};
-
 export type UserList = Omit<
     User,
     "password" | "post_count" | "email" | "profileStatus" | "bio"
 >;
 
+export type followerFollowingListUser = UserList & {
+    followStatus: PFollowStatus;
+    reverseFollowStatus: PFollowStatus;
+    follower_count: number;
+    following_count: number;
+};
+
 export const toFollowerFollowingListUser = (
     user: User,
     baseUrl: string,
-    followStatus: ProfileFollowStatus
+    followStatus: ProfileFollowStatus,
+    follower_count: number,
+    following_count: number
 ): followerFollowingListUser => {
     return {
         username: user.username,
@@ -141,8 +143,8 @@ export const toFollowerFollowingListUser = (
             : "",
         firstname: user.firstname,
         lastname: user.lastname,
-        follower_count: user.follower_count,
-        following_count: user.following_count,
+        follower_count,
+        following_count,
         followStatus: followStatus.followStatus,
         reverseFollowStatus: followStatus.reverseFollowStatus,
     };
@@ -156,8 +158,6 @@ export const toUserList = (user: User, baseUrl: string): UserList => {
             : "",
         firstname: user.firstname,
         lastname: user.lastname,
-        follower_count: user.follower_count,
-        following_count: user.following_count,
     };
 };
 

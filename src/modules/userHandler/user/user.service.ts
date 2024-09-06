@@ -20,10 +20,6 @@ import jwt from "jsonwebtoken";
 import { LoginDto } from "./dto/login.dto";
 import { EditProfileDto } from "./dto/edit-profile.dto";
 import { ForgetPasswordService } from "../forgetPassword/forgetPassword.service";
-import {
-    PostWithUsername,
-    toProfilePost,
-} from "../../postHandler/post/model/post.model";
 
 export class UserService {
     constructor(

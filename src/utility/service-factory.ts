@@ -128,7 +128,8 @@ export class ServiceFactory {
             this.savedPostService,
             this.commentService,
             this.postLikeService,
-            this.commentLikeService
+            this.commentLikeService,
+            this.userRelationService
         );
 
         this.notificationRepo = new NotificationRepository(dataSource);
