@@ -27,15 +27,15 @@ services:
   #   network_mode: "host"
   #   depends_on:
   #     - app-back  
-  nginx:
-    image: nginx:alpine
-    network_mode: "host"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - app-back
-      - app-front
-      - db
+  # nginx:
+  #   image: nginx:alpine
+  #   network_mode: "host"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - app-back
+  #     - app-front
+  #     - db
     #ports:
      # - "80:80"
 
