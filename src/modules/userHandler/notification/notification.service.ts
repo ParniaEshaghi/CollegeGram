@@ -15,6 +15,7 @@ import { NotificationEntity } from "./entity/notification.entity";
 import { UserRelationEntity } from "../userRelation/entity/userRelation.entity";
 import { UserNotificationService } from "./userNotification/userNotification.service";
 import { toFollowerFollowingListUser } from "../userRelation/model/userRelation.model";
+import { toProfileFollowStatus } from "../userRelation/model/userRelation.model";
 
 export class NotificationService {
     constructor(
@@ -101,21 +102,44 @@ export class NotificationService {
         }
 
         const userNotifs = await this.getUserNotif(user, page, limit);
-        for (const userNotif of userNotifs.data) {
+
+        const userNotifications = [];
+
+        for (const data of userNotifs.data) {
             const notif =
                 await this.userNotificationsService.findByUserAndNotification(
-                    userNotif.recipient,
-                    userNotif
+                    data.recipient,
+                    data
                 );
 
             if (notif) {
-                userNotif.isRead = notif.isRead;
+                data.isRead = notif.isRead;
+                const followStatus =
+                    await this.userRelationService.getFollowStatus(
+                        data.recipient,
+                        data.sender.username
+                    );
+                const reverse_followStatus =
+                    await this.userRelationService.getFollowStatus(
+                        data.sender,
+                        data.recipient.username
+                    );
+
+                const profileFollowStatus = toProfileFollowStatus(
+                    followStatus,
+                    reverse_followStatus
+                );
+
+                userNotifications.push(
+                    toNotificationWithFollowStatus(data, profileFollowStatus)
+                );
+
                 await this.markNotificationAsRead(notif.id, user.username);
             }
         }
 
         const response: userNotificationsResponse = {
-            data: userNotifs.data.map((notif) =>
+            data: userNotifications.map((notif) =>
                 toShownNotification(notif, baseUrl)
             ),
             meta: {
@@ -180,8 +204,19 @@ export class NotificationService {
                         user,
                         fData.recipient.username
                     );
+                const reverse_followStatus =
+                    await this.userRelationService.getFollowStatus(
+                        fData.recipient,
+                        user.username
+                    );
+
+                const profileFollowStatus = toProfileFollowStatus(
+                    followStatus,
+                    reverse_followStatus
+                );
+
                 userFollowingNotifications.push(
-                    toNotificationWithFollowStatus(fData, followStatus)
+                    toNotificationWithFollowStatus(fData, profileFollowStatus)
                 );
 
                 await this.markNotificationAsRead(notif.id, user.username);

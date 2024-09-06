@@ -14,6 +14,8 @@ import {
     FollowStatus,
     toUserList,
     UserList,
+    ProfileFollowStatus,
+    PFollowStatus,
 } from "../../userRelation/model/userRelation.model";
 import { NotificationEntity } from "../entity/notification.entity";
 
@@ -81,14 +83,19 @@ export const toShownNotification = (
 };
 
 export type NotificationWithFollowStatus = Notification & {
-    followStatus: FollowStatus;
+    followStatus: PFollowStatus;
+    reverseFollowStatus: PFollowStatus;
 };
 
 export const toNotificationWithFollowStatus = (
     notification: NotificationEntity,
-    followStatus: FollowStatus
+    followStatus: ProfileFollowStatus
 ): NotificationWithFollowStatus => {
-    return { ...notification, followStatus };
+    return {
+        ...notification,
+        followStatus: followStatus.followStatus,
+        reverseFollowStatus: followStatus.reverseFollowStatus,
+    };
 };
 
 export type userFollowingNotificationsResponse = {
