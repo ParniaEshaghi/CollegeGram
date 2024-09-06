@@ -1,14 +1,26 @@
 import { NotFoundError } from "../../utility/http-errors";
-import { toProfilePost } from "../postHandler/post/model/post.model";
-import { PostService } from "../postHandler/post/post.service";
+import {
+    PostWithUsername,
+    toPostPage,
+    toProfilePost,
+} from "../postHandler/post/model/post.model";
+import { PostHandler } from "../postHandler/postHandler";
 import { NotificationService } from "./notification/notification.service";
 import { SavedPostService } from "./savedPost/savedPost.service";
 import { EditProfileDto } from "./user/dto/edit-profile.dto";
 import { LoginDto } from "./user/dto/login.dto";
 import { SignUpDto } from "./user/dto/signup.dto";
-import { User, UserWithoutPassword } from "./user/model/user.model";
+import {
+    toProfileInfo,
+    User,
+    UserWithoutPassword,
+} from "./user/model/user.model";
 import { UserService } from "./user/user.service";
-import { followerFollowingListUserResponse } from "./userRelation/model/userRelation.model";
+import {
+    followerFollowingListUserResponse,
+    toProfile,
+    toProfileFollowStatus,
+} from "./userRelation/model/userRelation.model";
 import { UserRelationService } from "./userRelation/userRelation.service";
 
 export class UserHandler {
@@ -17,7 +29,7 @@ export class UserHandler {
         private userRelationService: UserRelationService,
         private savedService: SavedPostService,
         private notificationService: NotificationService,
-        private postService: PostService
+        private postHandler: PostHandler
     ) {}
 
     public async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -62,15 +74,29 @@ export class UserHandler {
             (await this.notificationService.getAllUserFollowingsUnreadNotifications(
                 user
             ));
-        return this.userService.getProfileInfo(
-            user,
-            baseUrl,
-            unreadNotifications
-        );
+        const posts = await this.getUserPosts(user.username, baseUrl);
+        return toProfileInfo(user, posts, baseUrl, unreadNotifications);
     }
 
     public async getUserPosts(username: string, baseUrl: string) {
-        return this.userService.getUserPosts(username, baseUrl);
+        const user = await this.userService.getUserByUsername(username);
+        const posts = await this.userService.getUserPosts(username, baseUrl);
+        const profilePosts: PostWithUsername[] = [];
+        for (const post of posts) {
+            const like_status = await this.postHandler.getPostLikeStatus(
+                user,
+                post.id
+            );
+            const save_status = await this.postHandler.getPostSaveStatus(
+                user,
+                post.id
+            );
+
+            profilePosts.push(
+                toPostPage(post, baseUrl, like_status, save_status)
+            );
+        }
+        return profilePosts;
     }
 
     public async followHandler(user: User, following_username: string) {
@@ -120,11 +146,36 @@ export class UserHandler {
         username: string,
         baseUrl: string
     ) {
-        return this.userRelationService.userProfile(
-            session_user,
-            username,
-            baseUrl
+        const user = await this.userService.getUserByUsername(username);
+        const followStatus = await this.getFollowStatus(session_user, username);
+        const reverse_followStatus = await this.getFollowStatus(
+            user,
+            session_user.username
         );
+        const profileFollowStatus = toProfileFollowStatus(
+            followStatus,
+            reverse_followStatus
+        );
+
+        if (
+            profileFollowStatus.followStatus === "blocked" ||
+            profileFollowStatus.reverseFollowStatus === "blocked" ||
+            (user.profileStatus === "private" &&
+                profileFollowStatus.followStatus !== "followed")
+        ) {
+            return toProfile(user, profileFollowStatus, [], baseUrl);
+        }
+
+        const posts = await this.getUserPosts(username, baseUrl);
+        const normalPosts = posts.filter(
+            (post) => post.close_status === "normal"
+        );
+        if (followStatus === "followed") {
+            return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
+        } else if (followStatus === "close") {
+            return toProfile(user, profileFollowStatus, posts, baseUrl);
+        }
+        return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
     }
 
     public async followerList(
@@ -306,7 +357,7 @@ export class UserHandler {
         const followings = await this.userRelationService.allFolloweingList(
             user.username
         );
-        const allPosts = await this.postService.getExplorePosts(
+        const allPosts = await this.postHandler.getExplorePosts(
             followings,
             page,
             limit
@@ -321,17 +372,33 @@ export class UserHandler {
                         post.user.username
                     );
                 if (follow_status === "close") {
-                    shownPosts.push(post);
+                    const like_status =
+                        await this.postHandler.getPostLikeStatus(user, post.id);
+                    const save_status =
+                        await this.postHandler.getPostSaveStatus(user, post.id);
+
+                    shownPosts.push(
+                        toPostPage(post, baseUrl, like_status, save_status)
+                    );
                 }
             } else {
-                shownPosts.push(post);
+                const like_status = await this.postHandler.getPostLikeStatus(
+                    user,
+                    post.id
+                );
+                const save_status = await this.postHandler.getPostSaveStatus(
+                    user,
+                    post.id
+                );
+
+                shownPosts.push(
+                    toPostPage(post, baseUrl, like_status, save_status)
+                );
             }
         }
 
         const response = {
-            data: shownPosts.map((post) =>
-                toProfilePost(post.user, post, baseUrl)
-            ),
+            data: shownPosts,
             meta: {
                 page: page,
                 limit: limit,
@@ -341,5 +408,12 @@ export class UserHandler {
         };
 
         return response;
+    }
+
+    async getFollowStatus(user: User, following_username: string) {
+        return this.userRelationService.getFollowStatus(
+            user,
+            following_username
+        );
     }
 }

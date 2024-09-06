@@ -142,21 +142,9 @@ export class UserService {
         return toEditProfileInfo(updatedUser!, baseUrl);
     }
 
-    public async getProfileInfo(
-        user: User,
-        baseUrl: string,
-        unreadNotifications: number
-    ) {
-        const posts = await this.getUserPosts(user.username, baseUrl);
-        return toProfileInfo(user, posts, baseUrl, unreadNotifications);
-    }
-
     public async getUserPosts(username: string, baseUrl: string) {
         const user = await this.getUserByUsername(username);
         const posts = await this.userRepo.getUserPosts(username);
-        const profilePosts: PostWithUsername[] = posts.map((post) =>
-            toProfilePost(user, post, baseUrl)
-        );
-        return profilePosts;
+        return posts;
     }
 }

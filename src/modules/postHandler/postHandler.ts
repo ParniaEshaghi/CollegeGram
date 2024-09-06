@@ -10,6 +10,7 @@ import { PostWithUsername, toPostPage } from "./post/model/post.model";
 import { PostService } from "./post/post.service";
 import { PostLikeService } from "./postLike/postLike.service";
 import { UpdatePostDto } from "./post/dto/updatePost.dto";
+import { UserRelation } from "../userHandler/userRelation/model/userRelation.model";
 
 export class PostHandler {
     constructor(
@@ -55,17 +56,8 @@ export class PostHandler {
         baseUrl: string
     ): Promise<PostWithUsername> {
         const post = await this.postService.getPost(postId);
-
-        const like_status = await this.postLikeService.getLikeStatus(
-            user,
-            post.id
-        );
-
-        const save_status = await this.savedPostService.getPostSaveStatus(
-            user,
-            post.id
-        );
-
+        const like_status = await this.getPostLikeStatus(user, post.id);
+        const save_status = await this.getPostSaveStatus(user, post.id);
         return toPostPage(post, baseUrl, like_status, save_status);
     }
 
@@ -120,7 +112,7 @@ export class PostHandler {
         limit: number,
         baseUrl: string
     ) {
-        const post = this.postService.getPost(postId);
+        const post = await this.postService.getPost(postId);
 
         const commentList = await this.commentService.getComments(
             postId,
@@ -167,5 +159,21 @@ export class PostHandler {
                 return transformedComment;
             })
         );
+    }
+
+    public async getPostSaveStatus(user: User, commentId: string) {
+        return this.savedPostService.getPostSaveStatus(user, commentId);
+    }
+
+    public async getPostLikeStatus(user: User, postId: string) {
+        return this.postLikeService.getLikeStatus(user, postId);
+    }
+
+    public async getExplorePosts(
+        followings: UserRelation[],
+        page: number,
+        limit: number
+    ) {
+        return await this.postService.getExplorePosts(followings, page, limit);
     }
 }

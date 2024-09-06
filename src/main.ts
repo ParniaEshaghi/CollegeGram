@@ -5,7 +5,6 @@ import { ServiceFactory } from "./utility/service-factory";
 
 const PORT = 3000;
 
-
 declare global {
     namespace Express {
         interface Request {
