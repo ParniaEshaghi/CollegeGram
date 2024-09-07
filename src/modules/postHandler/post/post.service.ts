@@ -43,7 +43,7 @@ export class PostService {
         };
 
         const createdPost = await this.postRepo.create(newPost);
-        return toPostWithUsername(createdPost, baseUrl);
+        return toPostWithUsername(user, createdPost, baseUrl);
     }
 
     private async checkMentions(mentions: string[], user: User): Promise<void> {
@@ -122,7 +122,7 @@ export class PostService {
         };
 
         const updatedPost = await this.postRepo.update(editedPost);
-        return toPostWithUsername(updatedPost, baseUrl);
+        return toPostWithUsername(user, updatedPost, baseUrl);
     }
 
     public async getPost(postId: string): Promise<Post> {
