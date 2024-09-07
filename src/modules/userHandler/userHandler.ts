@@ -190,25 +190,65 @@ export class UserHandler {
             reverse_followStatus
         );
 
+        const follower_count = await this.userRelationService.getFollowerCount(
+            user.username
+        );
+        const following_count =
+            await this.userRelationService.getFollowingCount(user.username);
+        const post_count = await this.postHandler.getPostCount(user.username);
+
         if (
             profileFollowStatus.followStatus === "blocked" ||
             profileFollowStatus.reverseFollowStatus === "blocked" ||
             (user.profileStatus === "private" &&
                 profileFollowStatus.followStatus !== "followed")
         ) {
-            return toProfile(user, profileFollowStatus, [], baseUrl);
+            return toProfile(
+                user,
+                profileFollowStatus,
+                [],
+                baseUrl,
+                follower_count,
+                following_count,
+                post_count
+            );
         }
 
         const posts = await this.getUserPosts(username, baseUrl);
         const normalPosts = posts.filter(
             (post) => post.close_status === "normal"
         );
+
         if (followStatus === "followed") {
-            return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
+            return toProfile(
+                user,
+                profileFollowStatus,
+                normalPosts,
+                baseUrl,
+                follower_count,
+                following_count,
+                post_count
+            );
         } else if (followStatus === "close") {
-            return toProfile(user, profileFollowStatus, posts, baseUrl);
+            return toProfile(
+                user,
+                profileFollowStatus,
+                posts,
+                baseUrl,
+                follower_count,
+                following_count,
+                post_count
+            );
         }
-        return toProfile(user, profileFollowStatus, normalPosts, baseUrl);
+        return toProfile(
+            user,
+            profileFollowStatus,
+            normalPosts,
+            baseUrl,
+            follower_count,
+            following_count,
+            post_count
+        );
     }
 
     public async followerList(

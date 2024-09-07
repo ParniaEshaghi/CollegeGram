@@ -31,6 +31,9 @@ export type UserProfile = Omit<User, "password" | "email" | "profileStatus"> & {
     followStatus: PFollowStatus;
     reverseFollowStatus: PFollowStatus;
     posts: PostWithUsername[];
+    follower_count: number;
+    following_count: number;
+    post_count: number;
 };
 
 export type PFollowStatus =
@@ -103,7 +106,10 @@ export const toProfile = (
     user: User,
     followStatus: ProfileFollowStatus,
     posts: PostWithUsername[],
-    baseUrl: string
+    baseUrl: string,
+    follower_count: number,
+    following_count: number,
+    post_count: number
 ): UserProfile => {
     const { password, email, profilePicture, ...profileInfo } = user;
     return {
@@ -114,6 +120,9 @@ export const toProfile = (
         posts,
         followStatus: followStatus.followStatus,
         reverseFollowStatus: followStatus.reverseFollowStatus,
+        follower_count,
+        following_count,
+        post_count,
     };
 };
 

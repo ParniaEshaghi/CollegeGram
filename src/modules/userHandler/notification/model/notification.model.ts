@@ -6,6 +6,7 @@ import {
 import {
     Post,
     PostWithUsername,
+    toPostWithImage,
     toPostWithUsername,
 } from "../../../postHandler/post/model/post.model";
 import { User } from "../../user/model/user.model";
@@ -59,7 +60,7 @@ export type ShownNotification = {
     recipient: UserList;
     sender: UserList;
     type: NotificationTypes;
-    post?: PostWithUsername;
+    post?: Post;
     comment?: Comment;
 };
 
@@ -74,7 +75,7 @@ export const toShownNotification = (
         id: notification.id,
         recipient: toUserList(recipient, baseUrl),
         sender: toUserList(sender, baseUrl),
-        post: post ? toPostWithUsername(post.user, post, baseUrl) : undefined,
+        post: post ? toPostWithImage(post, baseUrl) : undefined,
         comment: comment ? comment : undefined,
     };
 };

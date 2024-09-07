@@ -10,6 +10,16 @@ export interface Post {
     close_status: "close" | "normal";
 }
 
+export const toPostWithImage = (post: Post, baseUrl: string): Post => {
+    const { images, ...postDetails } = post;
+    return {
+        ...postDetails,
+        images: post.images.map(
+            (image) => `${baseUrl}/api/images/posts/${image}`
+        ),
+    };
+};
+
 export type CreatePost = Omit<Post, "id">;
 
 export type UpdatePost = Post;
