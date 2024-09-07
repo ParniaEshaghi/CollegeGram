@@ -55,4 +55,18 @@ export class UserNotificationRepository {
             );
         }
     }
+
+    public async checkExistance(
+        user: User,
+        notification: Notification
+    ): Promise<UserNotification | null> {
+        const response = await this.userNotificationRepo.findOne({
+            where: {
+                user: { username: user.username },
+                notification: { id: notification.id },
+            },
+        });
+
+        return response;
+    }
 }

@@ -66,13 +66,17 @@ export class UserHandler {
     }
 
     public async getProfileInfo(user: User, baseUrl: string) {
-        const unreadNotifications =
-            (await this.notificationService.getAllUserUnreadNotifications(
+        const unreadUserNotifications =
+            await this.notificationService.getAllUserUnreadNotifications(user);
+
+        const unreadUserFollowingNotifications =
+            await this.notificationService.getAllUserFollowingsUnreadNotifications(
                 user
-            )) +
-            (await this.notificationService.getAllUserFollowingsUnreadNotifications(
-                user
-            ));
+            );
+
+        // const unreadNotifications =
+        //     unreadUserNotifications + unreadUserFollowingNotifications;
+
         const posts = await this.getUserPosts(user.username, baseUrl);
         const follower_count = await this.userRelationService.getFollowerCount(
             user.username
@@ -84,7 +88,8 @@ export class UserHandler {
             user,
             posts,
             baseUrl,
-            unreadNotifications,
+            unreadUserNotifications,
+            unreadUserFollowingNotifications,
             follower_count,
             following_count,
             post_count

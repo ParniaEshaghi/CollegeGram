@@ -42,13 +42,16 @@ export type ProfileInfo = Omit<User, "password"> & {
     post_count: number;
     posts: any[];
     unreadNotifications: number;
+    unreadUserNotifications: number;
+    unreadUserFollowingNotifications: number;
 };
 
 export const toProfileInfo = (
     user: User,
     posts: PostWithUsername[],
     baseUrl: string,
-    unreadNotifications: number,
+    unreadUserNotifications: number,
+    unreadUserFollowingNotifications: number,
     follower_count: number,
     following_count: number,
     post_count: number
@@ -60,7 +63,10 @@ export const toProfileInfo = (
         profilePicture: user.profilePicture
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",
-        unreadNotifications: unreadNotifications,
+        unreadNotifications:
+            unreadUserNotifications + unreadUserFollowingNotifications,
+        unreadUserNotifications: unreadUserNotifications,
+        unreadUserFollowingNotifications: unreadUserFollowingNotifications,
         follower_count,
         following_count,
         post_count,

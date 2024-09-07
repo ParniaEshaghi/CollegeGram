@@ -53,4 +53,13 @@ export class UserNotificationService {
     public async getSenderFollowers(user: User) {
         return this.userRelationService.allFolloweList(user);
     }
+
+    public async getNotifReadStatus(user: User, notification: Notification) {
+        const isRead = await this.userNotificationRepo.checkExistance(
+            user,
+            notification
+        );
+        const notif_read_status = isRead ? true : false;
+        return notif_read_status;
+    }
 }

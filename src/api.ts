@@ -29,7 +29,7 @@ export const makeApp = (
                 "http://37.32.6.230",
                 "http://localhost:3000",
                 "http://localhost:5173",
-                "http://collegegram.outofmatrixxx.ir",
+                "https://minus-one.dev1403.rahnemacollege.ir",
             ],
             exposedHeaders: ["set-cookie", "ajax_redirect"],
             preflightContinue: true,

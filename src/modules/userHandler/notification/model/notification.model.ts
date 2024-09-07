@@ -36,8 +36,12 @@ export interface Notification {
     type: NotificationTypes;
     post?: Post;
     comment?: Comment;
-    isRead?: boolean;
+    // isRead: boolean;
 }
+
+export type NotificationWithRead = Notification & {
+    isRead: boolean;
+};
 
 export type CreateNotification = Omit<Notification, "id">;
 
@@ -63,10 +67,11 @@ export type ShownNotification = {
     type: NotificationTypes;
     post?: Post;
     comment?: Comment;
+    isRead: boolean;
 };
 
 export const toShownNotification = (
-    notification: Notification,
+    notification: NotificationWithRead,
     baseUrl: string
 ): ShownNotification => {
     const { recipient, sender, comment, post, ...commentDetails } =
@@ -78,6 +83,7 @@ export const toShownNotification = (
         sender: toUserList(sender, baseUrl),
         post: post ? toPostWithImage(post, baseUrl) : undefined,
         comment: comment ? comment : undefined,
+        isRead: notification.isRead,
     };
 };
 
@@ -94,6 +100,16 @@ export const toNotificationWithFollowStatus = (
         ...notification,
         followStatus: followStatus.followStatus,
         reverseFollowStatus: followStatus.reverseFollowStatus,
+    };
+};
+
+export const toNotificationWithFollowStatusWithIsRead = (
+    notification: NotificationWithFollowStatus,
+    isRead: boolean
+): NotificationWithRead => {
+    return {
+        ...notification,
+        isRead: isRead,
     };
 };
 

@@ -16,7 +16,7 @@ const swaggerOptions = {
                 url: "http://37.32.6.230",
             },
             {
-                url: "http://collegegram.outofmatrixxx.ir",
+                url: "https://minus-one.dev1403.rahnemacollege.ir",
             },
         ],
     },

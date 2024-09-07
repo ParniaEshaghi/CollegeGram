@@ -8,6 +8,8 @@ import {
     toShownNotification,
     toNotificationWithFollowStatus,
     userNotificationsResponse,
+    NotificationWithRead,
+    toNotificationWithFollowStatusWithIsRead,
 } from "./model/notification.model";
 import { NotificationRepository } from "./notification.repository";
 import { UserRelationService } from "../userRelation/userRelation.service";
@@ -103,7 +105,7 @@ export class NotificationService {
 
         const userNotifs = await this.getUserNotif(user, page, limit);
 
-        const userNotifications = [];
+        const userNotifications: NotificationWithRead[] = [];
 
         for (const data of userNotifs.data) {
             const notif =
@@ -129,8 +131,22 @@ export class NotificationService {
                     reverse_followStatus
                 );
 
+                const notifWithFollowStatus = toNotificationWithFollowStatus(
+                    data,
+                    profileFollowStatus
+                );
+
+                const notifReadStatus =
+                    await this.userNotificationsService.getNotifReadStatus(
+                        user,
+                        data
+                    );
+
                 userNotifications.push(
-                    toNotificationWithFollowStatus(data, profileFollowStatus)
+                    toNotificationWithFollowStatusWithIsRead(
+                        notifWithFollowStatus,
+                        notifReadStatus
+                    )
                 );
 
                 await this.markNotificationAsRead(notif.id, user.username);
@@ -213,8 +229,26 @@ export class NotificationService {
                     reverse_followStatus
                 );
 
+                // userFollowingNotifications.push(
+                //     toNotificationWithFollowStatus(fData, profileFollowStatus)
+                // );
+
+                const notifWithFollowStatus = toNotificationWithFollowStatus(
+                    fData,
+                    profileFollowStatus
+                );
+
+                const notifReadStatus =
+                    await this.userNotificationsService.getNotifReadStatus(
+                        user,
+                        fData
+                    );
+
                 userFollowingNotifications.push(
-                    toNotificationWithFollowStatus(fData, profileFollowStatus)
+                    toNotificationWithFollowStatusWithIsRead(
+                        notifWithFollowStatus,
+                        notifReadStatus
+                    )
                 );
 
                 await this.markNotificationAsRead(notif.id, user.username);
