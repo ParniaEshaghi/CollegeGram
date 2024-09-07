@@ -31,18 +31,18 @@ export type PostPage = PostWithUsername & {
 };
 
 export const toPostWithUsername = (
+    post_user: User,
     post: Post,
     baseUrl: string
 ): PostWithUsername => {
     const { user, images, ...postDetails } = post;
-    console.log(post);
     return {
         ...postDetails,
-        username: user.username,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        profilePicture: user.profilePicture
-            ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+        username: post_user.username,
+        firstname: post_user.firstname,
+        lastname: post_user.lastname,
+        profilePicture: post_user.profilePicture
+            ? `${baseUrl}/api/images/profiles/${post_user.profilePicture}`
             : "",
         images: post.images.map(
             (image) => `${baseUrl}/api/images/posts/${image}`

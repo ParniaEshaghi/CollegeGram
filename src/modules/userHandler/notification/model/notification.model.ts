@@ -74,7 +74,7 @@ export const toShownNotification = (
         id: notification.id,
         recipient: toUserList(recipient, baseUrl),
         sender: toUserList(sender, baseUrl),
-        post: post ? toPostWithUsername(post, baseUrl) : undefined,
+        post: post ? toPostWithUsername(post.user, post, baseUrl) : undefined,
         comment: comment ? comment : undefined,
     };
 };
