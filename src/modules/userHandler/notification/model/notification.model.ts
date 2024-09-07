@@ -36,6 +36,7 @@ export interface Notification {
     type: NotificationTypes;
     post?: Post;
     comment?: Comment;
+    isRead?: boolean;
 }
 
 export type CreateNotification = Omit<Notification, "id">;
