@@ -196,7 +196,7 @@ export class UserRelationService {
             followStatus: "blocked",
         };
         if (followStatus !== "blocked") {
-            this.userRelationRepo.deleteLastReverseRelation(relation);
+            await this.userRelationRepo.deleteLastReverseRelation(relation);
         }
         await this.userRelationRepo.createBlocked(relation);
         return { message: "User blocked" };
