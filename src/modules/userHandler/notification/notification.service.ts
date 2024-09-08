@@ -16,7 +16,6 @@ import { UserRelationService } from "../userRelation/userRelation.service";
 import { NotificationEntity } from "./entity/notification.entity";
 import { UserRelationEntity } from "../userRelation/entity/userRelation.entity";
 import { UserNotificationService } from "./userNotification/userNotification.service";
-import { toFollowerFollowingListUser } from "../userRelation/model/userRelation.model";
 import { toProfileFollowStatus } from "../userRelation/model/userRelation.model";
 
 export class NotificationService {
@@ -196,11 +195,9 @@ export class NotificationService {
             (fData) =>
                 fData.recipient.username != user.username &&
                 (fData.type === "comment" ||
-                    fData.type === "followAccept" ||
-                    fData.type === "followBackAccept" ||
-                    fData.type === "followBackRequest" ||
+                    fData.type === "mention" ||
                     fData.type === "followed" ||
-                    fData.type === "likePost")
+                    fData.type === "like")
         );
 
         const userFollowingNotifications = [];
@@ -331,12 +328,10 @@ export class NotificationService {
                 if (notif) {
                     if (
                         notif.isRead == false &&
-                        (notif.notification.type === "comment" ||
-                            notif.notification.type === "followAccept" ||
-                            notif.notification.type === "followBackAccept" ||
-                            notif.notification.type === "followBackRequest" ||
-                            notif.notification.type === "followed" ||
-                            notif.notification.type === "likePost")
+                        (fData.type === "comment" ||
+                            fData.type === "mention" ||
+                            fData.type === "followed" ||
+                            fData.type === "like")
                     ) {
                         totalUserFollowingsUnreadNotifications += 1;
                     }
