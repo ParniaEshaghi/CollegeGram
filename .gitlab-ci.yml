@@ -38,6 +38,7 @@ build:
     - docker tag back-v1:${CI_COMMIT_SHA} registry.hamdocker.ir/mrmahdifardi/back-v1:latest
     # Push the image to the Docker registry
     - docker push registry.hamdocker.ir/mrmahdifardi/back-v1:latest
+    
 
 deploy:
   stage: deploy
