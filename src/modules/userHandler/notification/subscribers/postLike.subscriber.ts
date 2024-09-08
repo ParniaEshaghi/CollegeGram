@@ -33,7 +33,7 @@ export class PostLikeSubscriber
         const notification: CreateNotification = {
             recipient: event.entity.post.user,
             sender: event.entity.user,
-            type: "likePost",
+            type: "like",
             post: event.entity.post,
         };
         const notif = await notificationRepo.save(notification);

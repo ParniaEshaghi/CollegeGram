@@ -144,7 +144,7 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
             const notification: CreateNotification = {
                 recipient: mentionedUser,
                 sender: event.entity.user,
-                type: "tags",
+                type: "mention",
                 post: event.entity,
             };
             return notification;
@@ -162,7 +162,7 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                 const notification: CreateNotification = {
                     recipient: mentionedUser,
                     sender: event.entity.user,
-                    type: "tags",
+                    type: "mention",
                     post: entity,
                 };
                 return notification;

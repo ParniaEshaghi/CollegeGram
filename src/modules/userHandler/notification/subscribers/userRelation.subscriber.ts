@@ -20,8 +20,7 @@ export class UserRelationSubscriber
 {
     constructor(
         private notificationService: NotificationService,
-        private userNotificationsService: UserNotificationService,
-        private userRelationService: UserRelationService
+        private userNotificationsService: UserNotificationService
     ) {}
 
     listenTo() {
@@ -46,10 +45,12 @@ export class UserRelationSubscriber
                     type: "followRequest",
                 });
             }
-
-            const notif = await notificationRepo.save(
-                await this.followedNotification(event)
-            );
+            const notification: CreateNotification = {
+                recipient: event.entity.following,
+                sender: event.entity.follower,
+                type: "followed",
+            };
+            const notif = await notificationRepo.save(notification);
 
             const userNotification =
                 await this.userNotificationsService.userNotif(
@@ -79,57 +80,12 @@ export class UserRelationSubscriber
             }
         }
 
-        if (event.entity.followStatus === "request rejected") {
-            await notificationRepo.softDelete({
-                recipient: event.entity.following,
-                sender: event.entity.follower,
-                type: "followRequest",
-            });
-
-            const oldNotification =
-                await this.notificationService.getNotification(
-                    event.entity.follower,
-                    event.entity.following,
-                    "followBackRequest"
-                );
-
-            if (oldNotification) {
-                await notificationRepo.save({
-                    id: oldNotification.id,
-                    type: "followed",
-                });
-            }
-        }
-
-        if (event.entity.followStatus === "request rescinded") {
-            const oldNotification =
-                await this.notificationService.getNotification(
-                    event.entity.follower,
-                    event.entity.following,
-                    "followBackRequest"
-                );
-
-            if (oldNotification) {
-                await notificationRepo.save({
-                    id: oldNotification.id,
-                    type: "followed",
-                });
-            }
-
-            await notificationRepo.softDelete({
-                recipient: event.entity.following,
-                sender: event.entity.follower,
-                type: "followRequest",
-            });
-        }
-
         if (event.entity.followStatus === "request pending") {
             const notification: CreateNotification = {
                 recipient: event.entity.following,
                 sender: event.entity.follower,
                 type: "followRequest",
             };
-
             const notif = await notificationRepo.save(notification);
 
             const userNotification =
@@ -140,29 +96,13 @@ export class UserRelationSubscriber
             if (userNotification) {
                 await userNotificationRepo.save(userNotification);
             }
-
-            // ya khoda
-
-            const oldNotification =
-                await this.notificationService.getNotification(
-                    event.entity.follower,
-                    event.entity.following,
-                    "followed"
-                );
-
-            if (oldNotification) {
-                await notificationRepo.save({
-                    id: oldNotification.id,
-                    type: "followBackRequest",
-                });
-            }
         }
 
         if (event.entity.followStatus == "request accepted") {
             const notification: CreateNotification = {
-                recipient: event.entity.follower,
-                sender: event.entity.following,
-                type: "followAccept",
+                recipient: event.entity.following,
+                sender: event.entity.follower,
+                type: "requestAccepted",
             };
             const notif = await notificationRepo.save(notification);
 
@@ -174,65 +114,17 @@ export class UserRelationSubscriber
             if (userNotification) {
                 await userNotificationRepo.save(userNotification);
             }
-
-            const oldNotification =
-                await this.notificationService.getNotification(
-                    event.entity.follower,
-                    event.entity.following,
-                    "followBackRequest"
-                );
-
-            if (oldNotification) {
-                await notificationRepo.save({
-                    id: oldNotification.id,
-                    type: "followBackAccept",
-                });
-            }
         }
-    }
 
-    async followedNotification(event: InsertEvent<UserRelationEntity>) {
-        const followStatus = await this.userRelationService.getFollowStatus(
-            event.entity.following,
-            event.entity.follower.username
-        );
-        let type: NotificationTypes;
         if (
-            followStatus === "close" ||
-            followStatus === "followed" ||
-            followStatus === "request accepted"
+            event.entity.followStatus == "request rejected" ||
+            event.entity.followStatus == "request rescinded"
         ) {
-            type = "followBackAccept";
-        } else if (followStatus === "request pending") {
-            type = "followBackRequest";
-        } else {
-            type = "followed";
+            await notificationRepo.softDelete({
+                recipient: event.entity.following,
+                sender: event.entity.follower,
+                type: "followRequest",
+            });
         }
-        const notification: CreateNotification = {
-            recipient: event.entity.following,
-            sender: event.entity.follower,
-            type: type,
-        };
-        return notification;
-    }
-
-    async followBackNotification(event: InsertEvent<UserRelationEntity>) {
-        const followStatus = await this.userRelationService.getFollowStatus(
-            event.entity.following,
-            event.entity.follower.username
-        );
-        let type: NotificationTypes;
-
-        if (followStatus === "request pending") {
-            type = "followBackRequest";
-        } else {
-            type = "followed";
-        }
-        const notification: CreateNotification = {
-            recipient: event.entity.following,
-            sender: event.entity.follower,
-            type: type,
-        };
-        return notification;
     }
 }

@@ -1,8 +1,4 @@
-import {
-    Comment,
-    CommentWithUsername,
-    toCommentWithUsername,
-} from "../../../postHandler/comment/model/comment.model";
+import { Comment } from "../../../postHandler/comment/model/comment.model";
 import {
     Post,
     PostWithUsername,
@@ -11,7 +7,6 @@ import {
 } from "../../../postHandler/post/model/post.model";
 import { User } from "../../user/model/user.model";
 import {
-    FollowStatus,
     toUserList,
     UserList,
     ProfileFollowStatus,
@@ -20,14 +15,12 @@ import {
 import { NotificationEntity } from "../entity/notification.entity";
 
 export type NotificationTypes =
-    | "tags"
-    | "likePost"
-    | "followAccept"
+    | "requestAccepted"
     | "followRequest"
     | "followed"
-    | "followBackRequest"
-    | "followBackAccept"
-    | "comment";
+    | "comment"
+    | "mention"
+    | "like";
 
 export interface Notification {
     id: string;
@@ -36,7 +29,6 @@ export interface Notification {
     type: NotificationTypes;
     post?: Post;
     comment?: Comment;
-    // isRead: boolean;
 }
 
 export type NotificationWithRead = Notification & {

@@ -161,8 +161,7 @@ export class ServiceFactory {
 
         this.userRelationSub = new UserRelationSubscriber(
             this.notificationService,
-            this.userNotificationsService,
-            this.userRelationService
+            this.userNotificationsService
         );
 
         dataSource.subscribers.push(this.userRelationSub);

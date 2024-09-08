@@ -41,14 +41,12 @@ export class NotificationEntity {
     @Column({
         type: "enum",
         enum: [
-            "tags",
-            "likePost",
-            "followAccept",
+            "requestAccepted",
             "followRequest",
             "followed",
-            "followBackRequest",
-            "followBackAccept",
             "comment",
+            "mention",
+            "like",
         ],
     })
     type!: NotificationTypes;
