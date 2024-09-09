@@ -3,6 +3,7 @@ import {
     Column,
     CreateDateColumn,
     Entity,
+    ManyToMany,
     OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
@@ -14,6 +15,8 @@ import { CommentLikeEntity } from "../../../postHandler/commentLike/entity/comme
 import { UserRelationEntity } from "../../userRelation/entity/userRelation.entity";
 import { NotificationEntity } from "../../notification/entity/notification.entity";
 import { UserNotificationEntity } from "../../notification/userNotification/entity/userNotification.entity";
+import { MessageEntity } from "../../message/entity/message.entity";
+import { ThreadEntity } from "../../thread/entity/thread.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -80,6 +83,12 @@ export class UserEntity {
         (userNotification) => userNotification.user
     )
     userNotifications!: UserNotificationEntity[];
+
+    @OneToMany(() => MessageEntity, (message) => message.sender)
+    messages!: MessageEntity[];
+
+    @ManyToMany(() => ThreadEntity, (thread) => thread.participants)
+    threads!: ThreadEntity[];
 
     @CreateDateColumn()
     createdAt!: Date;

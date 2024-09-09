@@ -10,6 +10,8 @@ import { SavedPostsEntity } from "./modules/userHandler/savedPost/entity/savedPo
 import { CommentLikeEntity } from "./modules/postHandler/commentLike/entity/commentLike.entity";
 import { NotificationEntity } from "./modules/userHandler/notification/entity/notification.entity";
 import { UserNotificationEntity } from "./modules/userHandler/notification/userNotification/entity/userNotification.entity";
+import { MessageEntity } from "./modules/userHandler/message/entity/message.entity";
+import { ThreadEntity } from "./modules/userHandler/thread/entity/thread.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -31,6 +33,8 @@ export const AppDataSource = new DataSource({
         SavedPostsEntity,
         NotificationEntity,
         UserNotificationEntity,
+        MessageEntity,
+        ThreadEntity,
     ],
     migrations: [],
     subscribers: [],
