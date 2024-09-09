@@ -1,4 +1,4 @@
-import { DataSource, In, Repository } from "typeorm";
+import { ArrayContains, DataSource, In, Repository } from "typeorm";
 import { CreatePost, Post, UpdatePost } from "./model/post.model";
 import { PostEntity } from "./entity/post.entity";
 import { UserEntity } from "../../userHandler/user/entity/user.entity";
@@ -59,5 +59,26 @@ export class PostRepository {
             where: { user: { username } },
         });
         return postCount;
+    }
+
+    public async getMentionedPosts(
+        username: string,
+        page: number,
+        limit: number
+    ) {
+        const [response, total] = await this.postRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: {
+                mentions: ArrayContains([username]),
+            },
+            relations: ["user"],
+
+            order: {
+                createdAt: "DESC",
+            },
+        });
+
+        return { data: response, total: total };
     }
 }

@@ -219,4 +219,13 @@ export class PostHandler {
     public async getCommentLikeCount(postId: string) {
         return await this.commentLikeService.getCommentLikeCount(postId);
     }
+
+    public async getMentionedPosts(
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        return await this.postService.getMentionedPosts(username, page, limit);
+    }
 }
