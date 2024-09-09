@@ -1,3 +1,4 @@
+import { BadRequestError } from "../../../../utility/http-errors";
 import { User } from "../../user/model/user.model";
 import { UserService } from "../../user/user.service";
 import { UserRelationService } from "../../userRelation/userRelation.service";
@@ -55,11 +56,13 @@ export class UserNotificationService {
     }
 
     public async getNotifReadStatus(user: User, notification: Notification) {
-        const isRead = await this.userNotificationRepo.checkExistance(
+        const notif = await this.userNotificationRepo.checkExistance(
             user,
             notification
         );
-        const notif_read_status = isRead ? true : false;
-        return notif_read_status;
+        if (!notif) {
+            throw BadRequestError;
+        }
+        return notif.isRead;
     }
 }
