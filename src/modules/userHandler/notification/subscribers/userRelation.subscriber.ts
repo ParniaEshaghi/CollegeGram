@@ -44,6 +44,21 @@ export class UserRelationSubscriber
                     sender: event.entity.follower,
                     type: "followRequest",
                 });
+                const notification: CreateNotification = {
+                    recipient: event.entity.follower,
+                    sender: event.entity.following,
+                    type: "requestAccepted",
+                };
+                const notif = await notificationRepo.save(notification);
+
+                const userNotification =
+                    await this.userNotificationsService.userNotif(
+                        event.entity.follower.username,
+                        notif
+                    );
+                if (userNotification) {
+                    await userNotificationRepo.save(userNotification);
+                }
             }
             const notification: CreateNotification = {
                 recipient: event.entity.following,
@@ -91,24 +106,6 @@ export class UserRelationSubscriber
             const userNotification =
                 await this.userNotificationsService.userNotif(
                     event.entity.following.username,
-                    notif
-                );
-            if (userNotification) {
-                await userNotificationRepo.save(userNotification);
-            }
-        }
-
-        if (event.entity.followStatus == "request accepted") {
-            const notification: CreateNotification = {
-                recipient: event.entity.following,
-                sender: event.entity.follower,
-                type: "requestAccepted",
-            };
-            const notif = await notificationRepo.save(notification);
-
-            const userNotification =
-                await this.userNotificationsService.userNotif(
-                    event.entity.follower.username,
                     notif
                 );
             if (userNotification) {
