@@ -144,4 +144,12 @@ export class PostService {
     public async getPostCount(username: string) {
         return await this.postRepo.getPostCount(username);
     }
+
+    public async getMentionedPosts(
+        username: string,
+        page: number,
+        limit: number
+    ) {
+        return await this.postRepo.getMentionedPosts(username, page, limit);
+    }
 }
