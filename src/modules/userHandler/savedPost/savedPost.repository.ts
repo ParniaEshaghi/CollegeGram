@@ -1,7 +1,6 @@
 import { DataSource, Repository } from "typeorm";
 import { SavedPostsEntity } from "./entity/savedPost.entity";
 import { Post } from "../../postHandler/post/model/post.model";
-import { PostEntity } from "../../postHandler/post/entity/post.entity";
 import { SavedPost } from "./model/savedPost.model";
 import { User } from "../user/model/user.model";
 
@@ -41,5 +40,21 @@ export class SavedPostRepository {
             where: { post: { id: postId } },
         });
         return postSavedCount;
+    }
+
+    public async getSavedPosts(username: string, page: number, limit: number) {
+        const [response, total] = await this.savedPostRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: {
+                user: { username },
+            },
+            relations: ["user", "post", "post.user"],
+            order: {
+                createdAt: "DESC",
+            },
+        });
+
+        return { data: response.map((record) => record.post), total: total };
     }
 }

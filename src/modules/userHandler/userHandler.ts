@@ -556,7 +556,73 @@ export class UserHandler {
 
         const shownPosts = [];
         for (const post of mentionedPosts.data) {
-            if (post.close_status === "close") {
+            const like_status = await this.postHandler.getPostLikeStatus(
+                user,
+                post.id
+            );
+            const save_status = await this.postHandler.getPostSaveStatus(
+                user,
+                post.id
+            );
+
+            const follower_count =
+                await this.userRelationService.getFollowerCount(
+                    post.user.username
+                );
+            const like_count = await this.postHandler.getPostLikeCount(post.id);
+            const saved_count = await this.postHandler.getSavedPostCount(
+                post.id
+            );
+            const comment_count = await this.postHandler.getCommentCount(
+                post.id
+            );
+
+            shownPosts.push(
+                toPostPage(
+                    post.user,
+                    post,
+                    baseUrl,
+                    follower_count,
+                    like_status,
+                    save_status,
+                    like_count,
+                    saved_count,
+                    comment_count
+                )
+            );
+        }
+
+        const response = {
+            data: shownPosts,
+            meta: {
+                page: page,
+                limit: limit,
+                total: shownPosts.length,
+                totalPage: Math.ceil(shownPosts.length / limit),
+            },
+        };
+
+        return response;
+    }
+
+    public async getSavedPosts(
+        user: User,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        const savedPosts = await this.savedService.getSavedPosts(
+            user.username,
+            page,
+            limit
+        );
+
+        const shownPosts = [];
+        for (const post of savedPosts.data) {
+            if (
+                post.close_status === "close" &&
+                post.user.username !== user.username
+            ) {
                 const follow_status =
                     await this.userRelationService.getFollowStatus(
                         user,

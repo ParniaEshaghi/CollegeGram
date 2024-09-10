@@ -17,6 +17,7 @@ import { NotificationEntity } from "../../notification/entity/notification.entit
 import { UserNotificationEntity } from "../../notification/userNotification/entity/userNotification.entity";
 import { MessageEntity } from "../../message/entity/message.entity";
 import { ThreadEntity } from "../../thread/entity/thread.entity";
+import { SavedPostsEntity } from "../../savedPost/entity/savedPost.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -69,8 +70,8 @@ export class UserEntity {
     @OneToMany(() => CommentLikeEntity, (relation) => relation.user)
     commentLikes!: CommentLikeEntity[];
 
-    @OneToMany(() => CommentEntity, (relation) => relation.user)
-    savedPosts!: CommentEntity[];
+    @OneToMany(() => SavedPostsEntity, (relation) => relation.user)
+    savedPosts!: SavedPostsEntity[];
 
     @OneToMany(() => NotificationEntity, (relation) => relation.recipient)
     recipientNotifications!: NotificationEntity[];
