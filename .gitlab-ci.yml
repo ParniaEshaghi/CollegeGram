@@ -48,7 +48,7 @@ deploy:
     - ssh -v ubuntu@37.32.6.230 "
       cd /home/ubuntu/back-dockerized/cgram-back &&
       docker login -u mrmahdifardi -p 9gdU9jib42RjAGVxA1! registry.hamdocker.ir &&
-      docker-compose pull &&
       docker-compose down &&
+      docker-compose pull &&
       docker-compose up -d
       "
