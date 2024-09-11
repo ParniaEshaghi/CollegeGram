@@ -47,4 +47,8 @@ export class SavedPostService {
     public async getSavedPostCount(postId: string) {
         return await this.savedPostRepo.getPostSavedCount(postId);
     }
+
+    public async getSavedPosts(username: string, page: number, limit: number) {
+        return await this.savedPostRepo.getSavedPosts(username, page, limit);
+    }
 }
