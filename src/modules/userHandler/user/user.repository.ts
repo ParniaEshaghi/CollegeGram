@@ -38,7 +38,7 @@ export class UserRepository {
             username: user.username,
             password: await this.hashPassword(user.password),
             email: user.email,
-    });
+        });
     }
 
     public async updatePassword(
