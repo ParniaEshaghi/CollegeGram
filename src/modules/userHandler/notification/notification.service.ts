@@ -10,6 +10,7 @@ import {
     userNotificationsResponse,
     NotificationWithRead,
     toNotificationWithFollowStatusWithIsRead,
+    toShownSenderFollowerNotification,
 } from "./model/notification.model";
 import { NotificationRepository } from "./notification.repository";
 import { UserRelationService } from "../userRelation/userRelation.service";
@@ -254,7 +255,7 @@ export class NotificationService {
 
         const response: userNotificationsResponse = {
             data: userFollowingNotifications.map((notif) =>
-                toShownNotification(notif, baseUrl)
+                toShownSenderFollowerNotification(notif, baseUrl)
             ),
             meta: {
                 page: page,
