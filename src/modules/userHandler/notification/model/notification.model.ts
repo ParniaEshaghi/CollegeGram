@@ -79,6 +79,23 @@ export const toShownNotification = (
     };
 };
 
+export const toShownSenderFollowerNotification = (
+    notification: NotificationWithRead,
+    baseUrl: string
+): ShownNotification => {
+    const { recipient, sender, comment, post, ...commentDetails } =
+        notification;
+    return {
+        ...commentDetails,
+        id: notification.id,
+        recipient: toUserList(sender, baseUrl),
+        sender: toUserList(recipient, baseUrl),
+        post: post ? toPostWithImage(post, baseUrl) : undefined,
+        comment: comment ? comment : undefined,
+        isRead: notification.isRead,
+    };
+};
+
 export type NotificationWithFollowStatus = Notification & {
     followStatus: PFollowStatus;
     reverseFollowStatus: PFollowStatus;
