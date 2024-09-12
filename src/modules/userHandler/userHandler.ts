@@ -4,8 +4,10 @@ import {
     toPostPage,
 } from "../postHandler/post/model/post.model";
 import { PostHandler } from "../postHandler/postHandler";
+import { MessageService } from "./message/message.service";
 import { NotificationService } from "./notification/notification.service";
 import { SavedPostService } from "./savedPost/savedPost.service";
+import { Thread } from "./thread/model/thread.model";
 import { ThreadService } from "./thread/thread.service";
 import { EditProfileDto } from "./user/dto/edit-profile.dto";
 import { LoginDto } from "./user/dto/login.dto";
@@ -32,7 +34,8 @@ export class UserHandler {
         private savedService: SavedPostService,
         private notificationService: NotificationService,
         private postHandler: PostHandler,
-        private threadService: ThreadService
+        private threadService: ThreadService,
+        private messageService: MessageService
     ) {}
 
     public async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -820,6 +823,20 @@ export class UserHandler {
             page,
             limit,
             baseUrl
+        );
+    }
+
+    public async newMessage(
+        sender: User,
+        thread: Thread,
+        text?: string,
+        image?: string
+    ) {
+        return await this.messageService.newMessage(
+            sender,
+            thread,
+            text,
+            image
         );
     }
 }

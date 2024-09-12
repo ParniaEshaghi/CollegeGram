@@ -13,7 +13,6 @@ import { makePostRouter } from "./routes/post.route";
 import { UserHandler } from "./modules/userHandler/userHandler";
 import { Server as SocketIOServer } from "socket.io";
 import http from "http";
-import { auth } from "./middlewares/auth.middleware";
 import { socketAuth } from "./middlewares/socketAuth.middleware";
 
 export const makeApp = (
@@ -60,13 +59,14 @@ export const makeApp = (
     io.on("connection", (socket) => {
         console.log("user connected");
         socket.on("joinThread", async (username, page = 1, limit = 10) => {
-            return await userHandler.getThread(
+            const data = await userHandler.getThread(
                 socket.request.user,
                 username,
                 page,
                 limit,
                 socket.request.base_url
             );
+            socket.emit("response", data);
         });
     });
 
