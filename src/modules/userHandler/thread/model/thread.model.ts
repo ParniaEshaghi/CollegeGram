@@ -3,11 +3,12 @@ import { Message } from "../../message/model/message.model";
 import { User } from "../../user/model/user.model";
 
 export interface Thread {
+    id: string;
     participants: User[];
     messages: Message[];
 }
 
-export type CreateThread = Omit<Thread, "messages">;
+export type CreateThread = Omit<Thread, "messages" | "id">;
 
 export interface ListThread {
     username: string;

@@ -9,18 +9,25 @@ export class MessageService {
     public async newMessage(
         sender: User,
         thread: Thread,
+        base_url: string,
         text?: string,
         image?: string
     ) {
-        return await this.messageRepo.create({ sender, thread, text, image });
+        const newMesg = await this.messageRepo.create({
+            sender,
+            thread,
+            text,
+            image,
+        });
+        return toShownMessage(newMesg, base_url);
     }
 
     public async getThreadUnreadCount(thread: Thread) {
         return await this.messageRepo.getThreadUnreadCount(thread);
     }
 
-    public async getThreadLastMessage(thread: Thread) {
-        return await this.messageRepo.getThreadLastMessage(thread);
+    public async getThreadLastMessage(threadId: string) {
+        return await this.messageRepo.getThreadLastMessage(threadId);
     }
 
     public async getThreadMessages(

@@ -828,13 +828,16 @@ export class UserHandler {
 
     public async newMessage(
         sender: User,
-        thread: Thread,
+        threadId: string,
+        base_url: string,
         text?: string,
         image?: string
     ) {
+        const thread = await this.threadService.getThreadById(threadId);
         return await this.messageService.newMessage(
             sender,
             thread,
+            base_url,
             text,
             image
         );

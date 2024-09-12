@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../utility/http-errors";
 import { MessageService } from "../message/message.service";
 import { User } from "../user/model/user.model";
 import { UserService } from "../user/user.service";
@@ -27,12 +28,12 @@ export class ThreadService {
             const unreadMessages =
                 await this.messageService.getThreadUnreadCount(thread);
             const lastMessage = await this.messageService.getThreadLastMessage(
-                thread
+                thread.id
             );
             const otherParticipant = thread.participants.filter(
                 (participant) => participant.username !== user.username
             );
-
+            console.log(lastMessage);
             shownThreads.push(
                 toListThread(
                     otherParticipant[0],
@@ -71,6 +72,8 @@ export class ThreadService {
             otherParticipant,
         ]);
 
+        console.log(existingThread);
+
         const thread = existingThread
             ? existingThread
             : await this.addNewThread([user, otherParticipant]);
@@ -84,6 +87,7 @@ export class ThreadService {
 
         const response = {
             data: threadMessages.data,
+            threadId: thread.id,
             meta: {
                 page: page,
                 limit: limit,
@@ -93,5 +97,14 @@ export class ThreadService {
         };
 
         return response;
+    }
+
+    public async getThreadById(threadId: string) {
+        const thread = await this.threadRepo.getThreadById(threadId);
+        if (!thread) {
+            throw new NotFoundError();
+        }
+
+        return thread;
     }
 }

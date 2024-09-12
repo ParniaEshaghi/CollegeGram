@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { UserHandler } from "../modules/userHandler/userHandler";
-import { auth as expressAuth } from "./auth.middleware"; 
+import { auth as expressAuth } from "./auth.middleware";
 import { Socket } from "socket.io";
 
 // Wrapper function to adapt Express middleware for Socket.IO
@@ -34,6 +34,8 @@ export const socketAuth = (userHandler: UserHandler) => {
                 console.error("Middleware error:", err);
                 next(err);
             } else {
+                socket.request.base_url = req.base_url;
+                socket.request.user = req.user;
                 next(); // Continue to next middleware or connection handler
             }
         };

@@ -66,7 +66,25 @@ export const makeApp = (
                 limit,
                 socket.request.base_url
             );
-            socket.emit("response", data);
+
+            socket.join(data.threadId);
+
+            socket.emit("history", data);
+
+            socket.on("newMessage", async (message) => {
+                const newMessageResponse = await userHandler.newMessage(
+                    socket.request.user,
+                    data.threadId,
+                    socket.request.base_url,
+                    message
+                );
+                // socket.emit("newMessage", newMessageResponse);
+                io.to(data.threadId).emit("newMessage", newMessageResponse);
+                // socket.broadcast
+                //     .to(data.threadId)
+                //     .emit("newMessage", newMessageResponse);
+                // socket.broadcast.emit("newMessage", newMessageResponse);
+            });
         });
     });
 

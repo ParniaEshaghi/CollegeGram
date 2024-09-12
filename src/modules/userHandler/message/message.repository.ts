@@ -9,7 +9,7 @@ export class MessageRepository {
         this.messageRepo = appDataSource.getRepository(MessageEntity);
     }
 
-    public async create(message: CreateMessage): Promise<Message> {
+    public async create(message: CreateMessage): Promise<MessageEntity> {
         return await this.messageRepo.save(message);
     }
 
@@ -20,9 +20,16 @@ export class MessageRepository {
         return threadUnreadCount;
     }
 
-    public async getThreadLastMessage(thread: Thread): Promise<MessageEntity> {
+    public async getThreadLastMessage(
+        threadId: string
+    ): Promise<MessageEntity> {
         const lastMessage = await this.messageRepo.find({
-            where: { thread: thread },
+            where: {
+                thread: {
+                    id: threadId,
+                },
+            },
+            relations: ["thread", "sender"],
             take: 1,
             order: { createdAt: "DESC" },
         });
@@ -39,9 +46,11 @@ export class MessageRepository {
             skip: (page - 1) * limit,
             take: limit,
             where: {
-                thread: thread,
+                thread: {
+                    id: thread.id,
+                },
             },
-            relations: ["sender"],
+            relations: ["thread", "sender"],
 
             order: {
                 createdAt: "DESC",
