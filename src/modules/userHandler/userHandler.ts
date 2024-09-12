@@ -6,6 +6,7 @@ import {
 import { PostHandler } from "../postHandler/postHandler";
 import { NotificationService } from "./notification/notification.service";
 import { SavedPostService } from "./savedPost/savedPost.service";
+import { ThreadService } from "./thread/thread.service";
 import { EditProfileDto } from "./user/dto/edit-profile.dto";
 import { LoginDto } from "./user/dto/login.dto";
 import { SignUpDto } from "./user/dto/signup.dto";
@@ -28,7 +29,8 @@ export class UserHandler {
         private userRelationService: UserRelationService,
         private savedService: SavedPostService,
         private notificationService: NotificationService,
-        private postHandler: PostHandler
+        private postHandler: PostHandler,
+        private threadService: ThreadService
     ) {}
 
     public async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -711,5 +713,19 @@ export class UserHandler {
         };
 
         return response;
+    }
+
+    public async getUserThreads(
+        user: User,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        return await this.threadService.getUserThreads(
+            user,
+            page,
+            limit,
+            baseUrl
+        );
     }
 }

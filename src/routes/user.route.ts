@@ -234,6 +234,15 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         );
     });
 
+        app.get("/messages", auth(userHandler), (req, res) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.getUserThreads(req.user, page, limit, req.base_url)
+        );
+    });
+
     app.get("/:username", auth(userHandler), (req, res) => {
         const username = req.params.username;
         handleExpress(res, () =>
