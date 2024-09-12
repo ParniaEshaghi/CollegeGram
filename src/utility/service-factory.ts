@@ -148,19 +148,14 @@ export class ServiceFactory {
         );
 
         this.postLikeSub = new PostLikeSubscriber(
-            this.notificationService,
             this.userNotificationsService
         );
         dataSource.subscribers.push(this.postLikeSub);
 
-        this.commentSub = new CommentSubscriber(
-            this.notificationService,
-            this.userNotificationsService
-        );
+        this.commentSub = new CommentSubscriber(this.userNotificationsService);
         dataSource.subscribers.push(this.commentSub);
 
         this.userRelationSub = new UserRelationSubscriber(
-            this.notificationService,
             this.userNotificationsService
         );
 
@@ -169,8 +164,7 @@ export class ServiceFactory {
         this.postSub = new PostSubscriber(
             this.notificationService,
             this.userService,
-            this.userNotificationsService,
-            this.userRelationService
+            this.userNotificationsService
         );
         dataSource.subscribers.push(this.postSub);
     }

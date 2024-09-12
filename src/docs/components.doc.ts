@@ -30,10 +30,14 @@
  *           type: integer
  *         unreadNotifications:
  *           type: integer
+ *         unreadUserNotifications:
+ *           type: integer
+ *         unreadUserFollowingNotifications:
+ *           type: integer
  *         posts:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/Post'
+ *             $ref: '#/components/schemas/PostWithLikeAndSaveStatus'
  *     AnotherUserProfile:
  *       type: object
  *       properties:
@@ -69,7 +73,7 @@
  *         posts:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/Post'
+ *             $ref: '#/components/schemas/PostWithLikeAndSaveStatus'
  *         followStatus:
  *           type: string
  *           enum:
@@ -77,7 +81,14 @@
  *             - not followed
  *             - requested
  *             - blocked
- *             - user blocked
+ *         reverseFollowStatus:
+ *           type: string
+ *           enum:
+ *             - followed
+ *             - not followed
+ *             - requested
+ *             - blocked
+ *             - close friend
  *     ListUser:
  *       type: object
  *       properties:
@@ -210,11 +221,10 @@
  *           type: string
  *           enum:
  *             - followed
- *             - followBack
  *             - followRequest
- *             - followAccept
- *             - likePost
- *             - tags
+ *             - requestAccepted
+ *             - like
+ *             - mention
  *             - comment
  *         isRead:
  *           type: boolean
@@ -263,6 +273,21 @@
  *               type: string
  *             text:
  *               type: string
+ *         followStatus:
+ *           type: string
+ *           enum:
+ *             - followed
+ *             - not followed
+ *             - requested
+ *             - blocked
+ *         reverseFollowStatus:
+ *           type: string
+ *           enum:
+ *             - followed
+ *             - not followed
+ *             - requested
+ *             - blocked
+ *             - close friend
  *     Meta:
  *       type: object
  *       properties:

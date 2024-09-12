@@ -2,14 +2,12 @@ import { UnauthorizedError } from "../../../utility/http-errors";
 import { User } from "../user/model/user.model";
 
 import {
-    CreateNotification,
-    Notification,
-    NotificationTypes,
     toShownNotification,
     toNotificationWithFollowStatus,
     userNotificationsResponse,
     NotificationWithRead,
     toNotificationWithFollowStatusWithIsRead,
+    Notification,
     toShownSenderFollowerNotification,
 } from "./model/notification.model";
 import { NotificationRepository } from "./notification.repository";
@@ -26,25 +24,37 @@ export class NotificationService {
         private userNotificationsService: UserNotificationService
     ) {}
 
-    public async createNotification(notification: CreateNotification) {
-        return await this.notificationRepo.create(notification);
+    public async createUserNotif(username: string, notif: Notification) {
+        const userNotification = await this.userNotificationsService.userNotif(
+            username,
+            notif
+        );
+        if (userNotification) {
+            await this.userNotificationsService.createUserNotification(
+                userNotification
+            );
+        }
     }
 
-    // for test
-    public findByType(type: NotificationTypes): Promise<Notification[]> {
-        return this.notificationRepo.findByType(type);
-    }
-
-    public getNotification(
-        recipient: User,
-        sender: User,
-        type: NotificationTypes
+    public async createSenderFollowersUserNotif(
+        user: User,
+        notif: Notification
     ) {
-        return this.notificationRepo.getNotification(recipient, sender, type);
-    }
+        const senderFollowers =
+            await this.userNotificationsService.getSenderFollowers(user);
 
-    public deleteNotification(notification: Notification) {
-        return this.notificationRepo.delete(notification);
+        for (const senderFollower of senderFollowers) {
+            const userNotification =
+                await this.userNotificationsService.userNotif(
+                    senderFollower.follower.username,
+                    notif
+                );
+            if (userNotification) {
+                await this.userNotificationsService.createUserNotification(
+                    userNotification
+                );
+            }
+        }
     }
 
     private markNotificationAsRead(userNotifId: string, username: string) {
