@@ -149,12 +149,23 @@ export class ServiceFactory {
             this.userNotificationsService
         );
 
+        this.messageRepo = new MessageRepository(dataSource);
+        this.messageService = new MessageService(this.messageRepo);
+
+        this.threadRepo = new ThreadRepository(dataSource);
+        this.ThreadService = new ThreadService(
+            this.threadRepo,
+            this.messageService,
+            this.userService
+        );
+
         this.userHandler = new UserHandler(
             this.userService,
             this.userRelationService,
             this.savedPostService,
             this.notificationService,
-            this.postHandler
+            this.postHandler,
+            this.ThreadService
         );
 
         this.postLikeSub = new PostLikeSubscriber(
@@ -177,15 +188,6 @@ export class ServiceFactory {
             this.userNotificationsService
         );
         dataSource.subscribers.push(this.postSub);
-
-        this.messageRepo = new MessageRepository(dataSource);
-        this.messageService = new MessageService(this.messageRepo);
-
-        this.threadRepo = new ThreadRepository(dataSource);
-        this.ThreadService = new ThreadService(
-            this.threadRepo,
-            this.messageService
-        );
     }
 
     getUserService(): UserService {
