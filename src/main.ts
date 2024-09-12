@@ -15,6 +15,14 @@ declare global {
     }
 }
 
+declare module "http" {
+    interface IncomingMessage {
+        user: User;
+        token: string;
+        base_url: string;
+    }
+}
+
 const run = async () => {
     const dataSource = await AppDataSource.initialize();
     const serviceFactory = new ServiceFactory(dataSource);

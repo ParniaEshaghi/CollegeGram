@@ -1,11 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { UserService } from "../modules/userHandler/user/user.service";
-import { AuthenticationFailError, HttpError } from "../utility/http-errors";
+import { AuthenticationFailError } from "../utility/http-errors";
 import { UserHandler } from "../modules/userHandler/userHandler";
-import { Server as SocketIOServer, Socket } from "socket.io";
-import { User } from "../modules/userHandler/user/model/user.model";
-import { IncomingMessage } from "http";
 
 export interface DecodedToken {
     username: string;
@@ -43,14 +39,4 @@ export const auth =
         } catch (error) {
             res.status(401).send({ error: "Authentication failed." });
         }
-    };
-
-export interface AuthenticatedSocket extends Socket {
-    request: IncomingMessage & { user: User }; // Add the `user` property
-}
-
-export const wrapExpressMiddlewareForSocketIO =
-    (auth: (req: Request, res: Response, next: NextFunction) => void) =>
-    (socket: AuthenticatedSocket, next: NextFunction) => {
-        auth(socket.request, {} as Response, next);
     };

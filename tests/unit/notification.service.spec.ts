@@ -166,8 +166,8 @@ describe("Notification service test suite", () => {
                 );
 
             const notification = notifications.data[0];
-            expect(notification.recipient.username).toEqual(user1!.username);
-            expect(notification.sender.username).toEqual(user2!.username);
+            expect(notification.recipient.username).toEqual(user2!.username);
+            expect(notification.sender.username).toEqual(user1!.username);
             expect(notification.type).toEqual("like");
         });
 
@@ -322,8 +322,8 @@ describe("Notification service test suite", () => {
                 );
 
             const notification = notifications.data[0];
-            expect(notification.recipient.username).toEqual(user1!.username);
-            expect(notification.sender.username).toEqual(user2!.username);
+            expect(notification.recipient.username).toEqual(user2!.username);
+            expect(notification.sender.username).toEqual(user1!.username);
             expect(notification.type).toEqual("comment");
         });
     });
@@ -500,8 +500,8 @@ describe("Notification service test suite", () => {
                 );
 
             const notification = notifications.data[0];
-            expect(notification.recipient.username).toEqual(user1!.username);
-            expect(notification.sender.username).toEqual(user2!.username);
+            expect(notification.recipient.username).toEqual(user2!.username);
+            expect(notification.sender.username).toEqual(user1!.username);
             expect(notification.type).toEqual("followed");
         });
 
