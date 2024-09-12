@@ -14,6 +14,7 @@ import { UserHandler } from "./modules/userHandler/userHandler";
 import { Server as SocketIOServer } from "socket.io";
 import http from "http";
 import { auth } from "./middlewares/auth.middleware";
+import { socketAuth } from "./middlewares/socketAuth.middleware";
 
 export const makeApp = (
     dataSource: DataSource,
@@ -21,23 +22,6 @@ export const makeApp = (
     postHandler: PostHandler
 ) => {
     const app = express();
-
-    const httpServer = http.createServer(app);
-    const io = new SocketIOServer(httpServer);
-
-    io.engine.use(auth(userHandler));
-
-    io.on("connection", (socket) => {
-        socket.on("joinThread", async (username, page = 1, limit = 10) => {
-            return await userHandler.getThread(
-                socket.request.user,
-                username,
-                page,
-                limit,
-                socket.request.base_url
-            );
-        });
-    });
 
     app.use(cookieParser());
     app.use(express.json());
@@ -68,5 +52,23 @@ export const makeApp = (
 
     app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-    return app;
+    const httpServer = http.createServer(app);
+    const io = new SocketIOServer(httpServer);
+
+    io.use(socketAuth(userHandler));
+
+    io.on("connection", (socket) => {
+        console.log("user connected");
+        socket.on("joinThread", async (username, page = 1, limit = 10) => {
+            return await userHandler.getThread(
+                socket.request.user,
+                username,
+                page,
+                limit,
+                socket.request.base_url
+            );
+        });
+    });
+
+    return httpServer;
 };

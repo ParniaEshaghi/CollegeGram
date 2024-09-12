@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { AuthenticationFailError } from "../utility/http-errors";
+import { AuthenticationFailError, HttpError } from "../utility/http-errors";
 import { UserHandler } from "../modules/userHandler/userHandler";
 
 export interface DecodedToken {
