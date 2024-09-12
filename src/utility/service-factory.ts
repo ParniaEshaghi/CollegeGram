@@ -26,6 +26,10 @@ import { UserRelationSubscriber } from "../modules/userHandler/notification/subs
 import { PostSubscriber } from "../modules/userHandler/notification/subscribers/post.subscriber";
 import { UserNotificationRepository } from "../modules/userHandler/notification/userNotification/userNotification.repository";
 import { UserNotificationService } from "../modules/userHandler/notification/userNotification/userNotification.service";
+import { MessageRepository } from "../modules/userHandler/message/message.repository";
+import { MessageService } from "../modules/userHandler/message/message.service";
+import { ThreadRepository } from "../modules/userHandler/thread/thread.repository";
+import { ThreadService } from "../modules/userHandler/thread/thread.service";
 
 export class ServiceFactory {
     private dataSource: DataSource;
@@ -61,6 +65,12 @@ export class ServiceFactory {
 
     private userNotificationRepo: UserNotificationRepository;
     private userNotificationsService: UserNotificationService;
+
+    private messageRepo: MessageRepository;
+    private messageService: MessageService;
+
+    private threadRepo: ThreadRepository;
+    private ThreadService: ThreadService;
 
     constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
@@ -167,6 +177,15 @@ export class ServiceFactory {
             this.userNotificationsService
         );
         dataSource.subscribers.push(this.postSub);
+
+        this.messageRepo = new MessageRepository(dataSource);
+        this.messageService = new MessageService(this.messageRepo);
+
+        this.threadRepo = new ThreadRepository(dataSource);
+        this.ThreadService = new ThreadService(
+            this.threadRepo,
+            this.messageService
+        );
     }
 
     getUserService(): UserService {
@@ -199,6 +218,14 @@ export class ServiceFactory {
 
     getNotificationService(): NotificationService {
         return this.notificationService;
+    }
+
+    getMessageService(): MessageService {
+        return this.messageService;
+    }
+
+    getThreadService(): ThreadService {
+        return this.ThreadService;
     }
 
     getPostHandler(): PostHandler {

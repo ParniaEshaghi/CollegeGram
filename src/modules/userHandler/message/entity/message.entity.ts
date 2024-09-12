@@ -7,6 +7,8 @@ import {
 } from "typeorm";
 import { UserEntity } from "../../user/entity/user.entity";
 import { ThreadEntity } from "../../thread/entity/thread.entity";
+import { Thread } from "../../thread/model/thread.model";
+import { User } from "../../user/model/user.model";
 
 @Entity("messages")
 export class MessageEntity {
@@ -14,10 +16,10 @@ export class MessageEntity {
     id!: string;
 
     @ManyToOne(() => UserEntity, (user) => user.messages)
-    sender!: UserEntity;
+    sender!: User;
 
     @ManyToOne(() => ThreadEntity, (thread) => thread.messages)
-    thread!: ThreadEntity;
+    thread!: Thread;
 
     @Column({ nullable: true })
     text!: string;
@@ -25,7 +27,7 @@ export class MessageEntity {
     @Column({ nullable: true })
     image!: string;
 
-    @Column()
+    @Column({ default: false })
     isRead!: boolean;
 
     @CreateDateColumn()

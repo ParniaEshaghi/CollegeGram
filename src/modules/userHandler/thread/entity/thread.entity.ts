@@ -7,6 +7,8 @@ import {
 } from "typeorm";
 import { MessageEntity } from "../../message/entity/message.entity";
 import { UserEntity } from "../../user/entity/user.entity";
+import { User } from "../../user/model/user.model";
+import { Message } from "../../message/model/message.model";
 
 @Entity("threads")
 export class ThreadEntity {
@@ -14,7 +16,7 @@ export class ThreadEntity {
     id!: string;
 
     @OneToMany(() => MessageEntity, (message) => message.thread)
-    messages!: MessageEntity[];
+    messages!: Message[];
 
     @ManyToMany(() => UserEntity)
     // @JoinTable({
@@ -23,5 +25,5 @@ export class ThreadEntity {
     //     inverseJoinColumn: { name: "user_id", referencedColumnName: "id" },
     // })
     @JoinTable()
-    participants!: UserEntity[];
+    participants!: User[];
 }

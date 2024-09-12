@@ -11,6 +11,8 @@ import { SavedPostsEntity } from "../modules/userHandler/savedPost/entity/savedP
 import { CommentLikeEntity } from "../modules/postHandler/commentLike/entity/commentLike.entity";
 import { NotificationEntity } from "../modules/userHandler/notification/entity/notification.entity";
 import { UserNotificationEntity } from "../modules/userHandler/notification/userNotification/entity/userNotification.entity";
+import { MessageEntity } from "../modules/userHandler/message/entity/message.entity";
+import { ThreadEntity } from "../modules/userHandler/thread/entity/thread.entity";
 
 export const createTestDb = async () => {
     // Create a new in-memory database
@@ -58,6 +60,8 @@ export const createTestDb = async () => {
             SavedPostsEntity,
             NotificationEntity,
             UserNotificationEntity,
+            MessageEntity,
+            ThreadEntity,
         ],
         synchronize: true,
         logging: false,
