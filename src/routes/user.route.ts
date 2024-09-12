@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { query, Router } from "express";
 import { signUpDto } from "../modules/userHandler/user/dto/signup.dto";
 import { handleExpress } from "../utility/handle-express";
 import { loginDto } from "../modules/userHandler/user/dto/login.dto";
@@ -222,6 +222,25 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
         handleExpress(res, () =>
             userHandler.getMentionedPosts(req.user, page, limit, req.base_url)
+        );
+    });
+
+    app.get("/searchsuggestions/:query", auth(userHandler), (req, res) => {
+        const query = req.params.query;
+        const limit = parseInt(req.query.limit as string) || 5;
+
+        handleExpress(res, () =>
+            userHandler.getUserSearchSuggestion(query, req.base_url, limit)
+        );
+    });
+
+    app.get("/usersearch/:query", auth(userHandler), (req, res) => {
+        const query = req.params.query;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.userSearch(req.user, query, req.base_url, page, limit)
         );
     });
 

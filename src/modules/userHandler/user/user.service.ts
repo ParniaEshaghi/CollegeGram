@@ -9,8 +9,11 @@ import { SignUpDto } from "./dto/signup.dto";
 import {
     toEditProfileInfo,
     toProfileInfo,
+    toUserSuggestion,
     toUserWithoutPassword,
     User,
+    UserSearchSuggestion,
+    userSearchUser,
     UserWithoutPassword,
 } from "./model/user.model";
 import { UserRepository } from "./user.repository";
@@ -142,5 +145,31 @@ export class UserService {
         const user = await this.getUserByUsername(username);
         const posts = await this.userRepo.getUserPosts(username);
         return posts;
+    }
+
+    public async getUserSearchSuggestion(
+        query: string,
+        baseUrl: string,
+        limit: number
+    ) {
+        const queryResponse = await this.userRepo.getUserSearchSuggestion(
+            query,
+            limit
+        );
+        if (queryResponse) {
+            return queryResponse.map((qr) => toUserSuggestion(qr, baseUrl));
+        }
+
+        return [];
+    }
+
+    public async userSearch(
+        // user: User,
+        query: string,
+        // baseUrl: string,
+        page: number,
+        limit: number
+    ) {
+        return await this.userRepo.userSearch(query, page, limit);
     }
 }

@@ -13,6 +13,8 @@ import { SignUpDto } from "./user/dto/signup.dto";
 import {
     toProfileInfo,
     User,
+    userSearchResponse,
+    userSearchUser,
     UserWithoutPassword,
 } from "./user/model/user.model";
 import { UserService } from "./user/user.service";
@@ -713,6 +715,82 @@ export class UserHandler {
         };
 
         return response;
+    }
+
+    public async getUserSearchSuggestion(
+        query: string,
+        baseUrl: string,
+        limit: number
+    ) {
+        return await this.userService.getUserSearchSuggestion(
+            query,
+            baseUrl,
+            limit
+        );
+    }
+
+    public async userSearch(
+        user: User,
+        query: string,
+        baseUrl: string,
+        page: number,
+        limit: number
+    ): Promise<userSearchResponse> {
+        const { data, total } = await this.userService.userSearch(
+            query,
+            page,
+            limit
+        );
+
+        let userSearchUserList: userSearchUser[] = [];
+
+        for (const userSearch of data) {
+            const followStatus = await this.userRelationService.getFollowStatus(
+                user,
+                userSearch.username
+            );
+            const reverse_followStatus =
+                await this.userRelationService.getFollowStatus(
+                    userSearch,
+                    user.username
+                );
+
+            const profileFollowStatus = toProfileFollowStatus(
+                followStatus,
+                reverse_followStatus
+            );
+
+            const follower_count =
+                await this.userRelationService.getFollowerCount(
+                    userSearch.username
+                );
+
+            const searchUser: userSearchUser = {
+                username: userSearch.username,
+                firstname: userSearch.firstname,
+                lastname: userSearch.lastname,
+                followStatus: profileFollowStatus.followStatus,
+                reverseFollowStatus: profileFollowStatus.reverseFollowStatus,
+                profileStatus: userSearch.profileStatus,
+                profilePicture: userSearch.profilePicture
+                    ? `${baseUrl}/api/images/profiles/${userSearch.profilePicture}`
+                    : "",
+                follower_count: follower_count,
+            };
+            userSearchUserList.push(searchUser);
+        }
+
+        userSearchUserList.sort((a, b) => b.follower_count - a.follower_count);
+
+        return {
+            data: userSearchUserList,
+            meta: {
+                page: page,
+                limit: limit,
+                total: total,
+                totalPage: Math.ceil(total / limit),
+            },
+        };
     }
 
     public async getUserThreads(

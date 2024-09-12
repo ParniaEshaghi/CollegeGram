@@ -1,4 +1,4 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, Like, Repository } from "typeorm";
 import { UserEntity } from "./entity/user.entity";
 import { CreateUser, UpdateProfile, User } from "./model/user.model";
 import { Post } from "../../postHandler/post/model/post.model";
@@ -88,5 +88,41 @@ export class UserRepository {
         }
 
         return [];
+    }
+
+    public async getUserSearchSuggestion(
+        query: string,
+        limit: number = 5
+    ): Promise<User[] | null> {
+        const [response, total] = await this.userRepo.findAndCount({
+            take: limit,
+            where: [
+                { username: Like(`%${query}%`) },
+                { firstname: Like(`%${query}%`) },
+                { lastname: Like(`%${query}%`) },
+            ],
+            order: {
+                createdAt: "DESC",
+            },
+        });
+
+        return response;
+    }
+
+    public async userSearch(query: string, page: number, limit: number) {
+        const [response, total] = await this.userRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: [
+                { username: Like(`%${query}%`) },
+                { firstname: Like(`%${query}%`) },
+                { lastname: Like(`%${query}%`) },
+            ],
+            order: {
+                createdAt: "DESC",
+            },
+        });
+
+        return { data: response, total: total };
     }
 }
