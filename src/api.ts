@@ -11,6 +11,9 @@ import swaggerUi from "swagger-ui-express";
 import swaggerDocs from "./swagger-options";
 import { makePostRouter } from "./routes/post.route";
 import { UserHandler } from "./modules/userHandler/userHandler";
+import { Server as SocketIOServer } from "socket.io";
+import http from "http";
+import { auth, AuthenticatedSocket, wrapExpressMiddlewareForSocketIO } from "./middlewares/auth.middleware";
 
 export const makeApp = (
     dataSource: DataSource,
@@ -18,6 +21,17 @@ export const makeApp = (
     postHandler: PostHandler
 ) => {
     const app = express();
+
+    const httpServer = http.createServer(app);
+    const io = new SocketIOServer(httpServer);
+
+    io.engine.use(wrapExpressMiddlewareForSocketIO(auth(userHandler)));
+
+    io.on("connection", (socket) => {
+        socket.on("joinThread", async (username, page = 1, limit = 10) => {
+            return await userHandler.getThread(socket.request.user, username, page, limit, socket.request.base_url);
+        });
+    });
 
     app.use(cookieParser());
     app.use(express.json());

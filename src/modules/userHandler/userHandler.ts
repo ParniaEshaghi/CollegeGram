@@ -806,4 +806,20 @@ export class UserHandler {
             baseUrl
         );
     }
+
+    public async getThread(
+        user: User,
+        username: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        return await this.threadService.getThread(
+            user,
+            username,
+            page,
+            limit,
+            baseUrl
+        );
+    }
 }
