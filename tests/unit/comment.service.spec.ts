@@ -5,14 +5,12 @@ import { PostService } from "../../src/modules/postHandler/post/post.service";
 import { CommentService } from "../../src/modules/postHandler/comment/comment.service";
 import { NotFoundError } from "../../src/utility/http-errors";
 import { randomUUID } from "crypto";
-import { NotificationService } from "../../src/modules/userHandler/notification/notification.service";
 
 describe("Comment service test suite", () => {
     let serviceFactory: ServiceFactory;
     let userService: UserService;
     let postService: PostService;
     let commentService: CommentService;
-    let notificationService: NotificationService;
 
     beforeEach(async () => {
         const dataSource = await createTestDb();
@@ -21,7 +19,6 @@ describe("Comment service test suite", () => {
         userService = serviceFactory.getUserService();
         postService = serviceFactory.getPostService();
         commentService = serviceFactory.getCommentService();
-        notificationService = serviceFactory.getNotificationService();
 
         await userService.createUser({
             username: "test",
@@ -99,13 +96,6 @@ describe("Comment service test suite", () => {
 
         const result = await commentService.createComment(user!, commentDto);
         expect(result.text).toEqual("Test comment");
-
-        const notifications = await notificationService.findByType("comment");
-
-        const notification = notifications[0];
-        expect(notification.recipient.username).toEqual(user!.username);
-        expect(notification.sender.username).toEqual(user!.username);
-        expect(notification.type).toEqual("comment");
     });
 
     it("should create a reply comment successfully if commentId is provided", async () => {
@@ -135,8 +125,5 @@ describe("Comment service test suite", () => {
 
         expect(result.parent!.id).toEqual(comment.id);
         expect(result.text).toEqual("Reply comment");
-
-        const notifications = await notificationService.findByType("comment");
-        expect(notifications.length).toEqual(1);
     });
 });

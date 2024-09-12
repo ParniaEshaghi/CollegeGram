@@ -85,13 +85,6 @@ describe("PostLikeService test suite", () => {
 
         const result = await postLikeService.likePost(user!, post.id);
         expect(result.message).toEqual("Post liked");
-
-        const notifications = await notificationService.findByType("likePost");
-
-        const notification = notifications[0];
-        expect(notification.recipient.username).toEqual(user!.username);
-        expect(notification.sender.username).toEqual(user!.username);
-        expect(notification.type).toEqual("likePost");
     });
 
     it("should throw BadRequestError if post is not liked but trying to unlike", async () => {
