@@ -67,6 +67,10 @@ export class ThreadService {
         const otherParticipant = await this.userService.getUserByUsername(
             username
         );
+
+        if (!otherParticipant) {
+            throw new NotFoundError();
+        }
         const existingThread = await this.threadRepo.getThreadByParticipants([
             user,
             otherParticipant,
