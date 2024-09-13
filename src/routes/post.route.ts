@@ -11,7 +11,7 @@ import { updatePostDto } from "../modules/postHandler/post/dto/updatePost.dto";
 
 export const makePostRouter = (
     userHandler: UserHandler,
-    postHandlerService: PostHandler
+    postHandler: PostHandler
 ) => {
     const app = Router();
 
@@ -41,23 +41,10 @@ export const makePostRouter = (
         handleExpress(
             res,
             async () =>
-                await postHandlerService.createPost(
+                await postHandler.createPost(
                     req.user,
                     dto,
                     postImageFilenames,
-                    req.base_url
-                )
-        );
-    });
-
-    app.get("/:postid", auth(userHandler), (req, res) => {
-        const postId: string = req.params.postid;
-        handleExpress(
-            res,
-            async () =>
-                await postHandlerService.getPostByPostId(
-                    req.user,
-                    postId,
                     req.base_url
                 )
         );
@@ -90,7 +77,7 @@ export const makePostRouter = (
             const postImageFilenames = images.map((file) => file.filename);
 
             handleExpress(res, () =>
-                postHandlerService.updatePost(
+                postHandler.updatePost(
                     req.user,
                     postid,
                     dto,
@@ -103,16 +90,12 @@ export const makePostRouter = (
 
     app.post("/comment", auth(userHandler), (req, res) => {
         const dto = commentDto.parse(req.body);
-        handleExpress(res, () =>
-            postHandlerService.createComment(req.user, dto)
-        );
+        handleExpress(res, () => postHandler.createComment(req.user, dto));
     });
 
     app.post("/likepost/:postid", auth(userHandler), (req, res) => {
         const postid = req.params.postid;
-        handleExpress(res, () =>
-            postHandlerService.likePostHandler(req.user, postid)
-        );
+        handleExpress(res, () => postHandler.likePostHandler(req.user, postid));
     });
 
     // app.post("/unlikepost/:postid", auth(userHandler), (req, res) => {
@@ -125,7 +108,7 @@ export const makePostRouter = (
     app.post("/likecomment/:commentid", auth(userHandler), (req, res) => {
         const commentid = req.params.commentid;
         handleExpress(res, () =>
-            postHandlerService.likeCommentHandler(req.user, commentid)
+            postHandler.likeCommentHandler(req.user, commentid)
         );
     });
 
@@ -141,13 +124,39 @@ export const makePostRouter = (
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
         handleExpress(res, () =>
-            postHandlerService.commentList(
-                req.user,
-                postid,
-                page,
-                limit,
-                req.base_url
-            )
+            postHandler.commentList(req.user, postid, page, limit, req.base_url)
+        );
+    });
+
+    app.get("/searchsuggestions/:query", auth(userHandler), (req, res) => {
+        const query = req.params.query;
+        const limit = parseInt(req.query.limit as string) || 5;
+
+        handleExpress(res, () =>
+            postHandler.getPostSearchSuggestion(query, limit)
+        );
+    });
+
+    app.get("/postsearch/:query", auth(userHandler), (req, res) => {
+        const query = req.params.query;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.postSearch(req.user, query, page, limit, req.base_url)
+        );
+    });
+
+    app.get("/:postid", auth(userHandler), (req, res) => {
+        const postId: string = req.params.postid;
+        handleExpress(
+            res,
+            async () =>
+                await postHandler.getPostByPostId(
+                    req.user,
+                    postId,
+                    req.base_url
+                )
         );
     });
 
