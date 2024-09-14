@@ -152,4 +152,28 @@ export class PostService {
     ) {
         return await this.postRepo.getMentionedPosts(username, page, limit);
     }
+
+    public async getPostSearchSuggestion(query: string, limit: number) {
+        const queryResponse = await this.postRepo.getPostSearchSuggestion(
+            query,
+            limit
+        );
+        if (!queryResponse) {
+            return [];
+        }
+        const tags: string[] = [];
+        for (const post of queryResponse) {
+            const matchingTags = post.tags.filter((tag: string) =>
+                tag.toLowerCase().includes(query.toLowerCase())
+            );
+
+            tags.push(...matchingTags);
+        }
+
+        return tags;
+    }
+
+    public async postSearch(query: string, page: number, limit: number) {
+        return await this.postRepo.postSearch(query, page, limit);
+    }
 }
