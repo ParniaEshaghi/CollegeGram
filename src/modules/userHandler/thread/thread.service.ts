@@ -76,8 +76,6 @@ export class ThreadService {
             otherParticipant,
         ]);
 
-        console.log(existingThread);
-
         const thread = existingThread
             ? existingThread
             : await this.addNewThread([user, otherParticipant]);

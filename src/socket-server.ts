@@ -14,6 +14,7 @@ export const setupSocketServer = (
 
     io.on("connection", (socket) => {
         console.log("user connected");
+        let threadId: string;
 
         socket.on("joinThread", async (username, page = 1, limit = 10) => {
             try {
@@ -26,38 +27,19 @@ export const setupSocketServer = (
                 );
 
                 const rooms = Array.from(socket.rooms);
+
                 rooms.forEach((room) => {
                     if (room !== socket.id) {
                         socket.leave(room);
                     }
                 });
 
+                // Join the new thread room
+                threadId = data.threadId;
                 socket.join(data.threadId);
-                socket.emit("history", data);
 
-                socket.on("newMessage", async (message) => {
-                    try {
-                        const newMessageResponse = await userHandler.newMessage(
-                            socket.request.user,
-                            data.threadId,
-                            socket.request.base_url,
-                            message
-                        );
-                        // socket.emit("newMessage", newMessageResponse);
-                        io.to(data.threadId).emit(
-                            "newMessage",
-                            newMessageResponse
-                        );
-                        // socket.broadcast
-                        //     .to(data.threadId)
-                        //     .emit("newMessage", newMessageResponse);
-                        // socket.broadcast.emit("newMessage", newMessageResponse);
-                    } catch (error) {
-                        socket.emit("error", {
-                            message: "Failed to send message.",
-                        });
-                    }
-                });
+                // Emit the history for the thread
+                socket.emit("history", data);
             } catch (error) {
                 if (error instanceof NotFoundError) {
                     socket.emit("error", {
@@ -70,6 +52,28 @@ export const setupSocketServer = (
                         status: 500,
                     });
                 }
+            }
+        });
+
+        socket.on("newMessage", async (message) => {
+            try {
+                const newMessageResponse = await userHandler.newMessage(
+                    socket.request.user,
+                    threadId,
+                    socket.request.base_url,
+                    message
+                );
+
+                // socket.emit("newMessage", newMessageResponse);
+                io.to(threadId).emit("newMessage", newMessageResponse);
+                // socket.broadcast
+                //     .to(data.threadId)
+                //     .emit("newMessage", newMessageResponse);
+                // socket.broadcast.emit("newMessage", newMessageResponse);
+            } catch (error) {
+                socket.emit("error", {
+                    message: "Failed to send message.",
+                });
             }
         });
     });
