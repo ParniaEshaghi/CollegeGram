@@ -186,7 +186,9 @@ export class PostService {
             ? postSearchHistory.map((data) => data.query)
             : [];
 
-        return { suggest: tags, history: history };
+        const tagsSet = new Set(tags);
+        const uniqueTags = Array.from(tagsSet);
+        return { suggest: uniqueTags, history: history };
     }
 
     public async postSearch(
