@@ -181,7 +181,7 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/PostWithLikeAndSaveStatus'
+ *               $ref: '#/components/schemas/Post'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
  *       401:
@@ -319,4 +319,54 @@
  *         $ref: '#/components/responses/Unauthorized'
  *       404:
  *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /api/user/mentions:
+ *   get:
+ *     tags: [Posts]
+ *     summary: Get mentioned posts
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Post'
+ *                 meta:
+ *                   $ref: '#/components/schemas/Meta'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/user/savedposts:
+ *   get:
+ *     tags: [Posts]
+ *     summary: Get saved posts
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Post'
+ *                 meta:
+ *                   $ref: '#/components/schemas/Meta'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
  */
