@@ -11,6 +11,7 @@ export const setupSocketServer = (
     userHandler: UserHandler
 ) => {
     const io = new SocketIOServer(httpServer, {
+        path: "/api/socket.io",
         cors: {
             credentials: true,
             origin: [
