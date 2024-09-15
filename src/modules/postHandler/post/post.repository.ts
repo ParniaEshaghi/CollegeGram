@@ -1,4 +1,13 @@
-import { ArrayContains, DataSource, In, Like, Raw, Repository } from "typeorm";
+import {
+    Any,
+    ArrayContains,
+    DataSource,
+    ILike,
+    In,
+    Like,
+    Raw,
+    Repository,
+} from "typeorm";
 import { CreatePost, Post, UpdatePost } from "./model/post.model";
 import { PostEntity } from "./entity/post.entity";
 import { UserEntity } from "../../userHandler/user/entity/user.entity";
@@ -86,40 +95,37 @@ export class PostRepository {
         query: string,
         limit: number = 5
     ): Promise<Post[] | null> {
-        const [response, total] = await this.postRepo.findAndCount({
-            take: limit,
-            where: {
-                tags: Raw(
-                    (alias) => `${alias} @> ARRAY['${query}']::varchar[]`
-                ),
-            },
-            order: {
-                createdAt: "DESC",
-            },
-            relations: ["user"],
-        });
+        const posts = await this.postRepo
+            .createQueryBuilder("post")
+            .leftJoinAndSelect("post.user", "user")
+            .where(
+                "LOWER(ARRAY_TO_STRING(post.tags, ',')) LIKE LOWER(:query)",
+                { query: `%${query}%` }
+            )
+            .orderBy("post.createdAt", "DESC")
+            .take(limit)
+            .getMany();
 
-        return response;
+        return posts;
     }
 
     public async postSearch(query: string, page: number, limit: number) {
-        const [response, total] = await this.postRepo.findAndCount({
-            skip: (page - 1) * limit,
-            take: limit,
-            where: [
-                { caption: Like(`%${query}%`) },
-                {
-                    tags: Raw(
-                        (alias) => `${alias} @> ARRAY['${query}']::varchar[]`
-                    ),
-                },
-            ],
-            order: {
-                createdAt: "DESC",
-            },
-            relations: ["user"],
-        });
+        const response = await this.postRepo
+            .createQueryBuilder("post")
+            .leftJoinAndSelect("post.user", "user")
+            .where("post.caption ILIKE :query", { query: `%${query}%` })
+            .orWhere(
+                "LOWER(ARRAY_TO_STRING(post.tags, ',')) LIKE LOWER(:query)",
+                { query: `%${query}%` }
+            )
+            .orderBy("post.createdAt", "DESC")
+            .skip((page - 1) * limit)
+            .take(limit)
+            .getManyAndCount();
 
-        return { data: response, total: total };
+        return {
+            data: response[0],
+            total: response[1],
+        };
     }
 }
