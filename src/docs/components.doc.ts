@@ -34,6 +34,8 @@
  *           type: integer
  *         unreadUserFollowingNotifications:
  *           type: integer
+ *         unreadMessages:
+ *           type: integer
  *         posts:
  *           type: array
  *           items:
@@ -104,6 +106,36 @@
  *           type: integer
  *         following_count:
  *           type: integer
+ *     SearchUser:
+ *       type: object
+ *       properties:
+ *         username:
+ *           type: string
+ *         profilePicture:
+ *           type: string
+ *         firstname:
+ *           type: string
+ *         lastname:
+ *           type: string
+ *         follower_count:
+ *           type: integer
+ *         following_count:
+ *           type: integer
+ *         followStatus:
+ *           type: string
+ *           enum:
+ *             - followed
+ *             - not followed
+ *             - requested
+ *             - blocked
+ *         reverseFollowStatus:
+ *           type: string
+ *           enum:
+ *             - followed
+ *             - not followed
+ *             - requested
+ *             - blocked
+ *             - close friend
  *     Post:
  *       type: object
  *       properties:
@@ -147,6 +179,12 @@
  *             - normal
  *             - close
  *           description: Visibility status of the post.
+ *         like_status:
+ *           type: boolean
+ *           description: Whether the post is liked by the current user.
+ *         save_status:
+ *           type: boolean
+ *           description: Whether the post is saved by the current user.
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -156,18 +194,7 @@
  *         deletedAt:
  *           type: string
  *           format: date-time
- *           nullable: true
- *     PostWithLikeAndSaveStatus:
- *       allof:
- *         - $ref: '#/components/schemas/Post'
- *         - type: object
- *           properties:
- *             like_status:
- *               type: boolean
- *               description: Whether the post is liked by the current user.
- *             save_status:
- *               type: boolean
- *               description: Whether the post is saved by the current user.
+ *           nullable: true          
  *     Comment:
  *       type: object
  *       properties:
@@ -288,6 +315,31 @@
  *             - requested
  *             - blocked
  *             - close friend
+ *     Thread:
+ *       type: object
+ *       properties:
+ *         username:
+ *           type: string
+ *         firstname:
+ *           type: string
+ *         lastname:
+ *           type: string
+ *         profilePicture:
+ *           type: string
+ *         unreadMessages:
+ *           type: integer
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *         lastMessageSenderUsername:
+ *           type: string
+ *         lastMessageType:
+ *           type: string
+ *           enum: [text, image]
+ *         lastMessageText:
+ *           type: string
+ *           example: "hello world"
+ *           description: The last text message sent. If the last message type is not text, this field is optional.
  *     Meta:
  *       type: object
  *       properties:
