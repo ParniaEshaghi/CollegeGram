@@ -26,6 +26,14 @@ import { UserRelationSubscriber } from "../modules/userHandler/notification/subs
 import { PostSubscriber } from "../modules/userHandler/notification/subscribers/post.subscriber";
 import { UserNotificationRepository } from "../modules/userHandler/notification/userNotification/userNotification.repository";
 import { UserNotificationService } from "../modules/userHandler/notification/userNotification/userNotification.service";
+import { MessageRepository } from "../modules/userHandler/message/message.repository";
+import { MessageService } from "../modules/userHandler/message/message.service";
+import { ThreadRepository } from "../modules/userHandler/thread/thread.repository";
+import { ThreadService } from "../modules/userHandler/thread/thread.service";
+import { UserSearchHistoryRepository } from "../modules/userHandler/userSearchHistory/userSearchHistory.repository";
+import { UserSearchHistoryService } from "../modules/userHandler/userSearchHistory/userSearchHistory.service";
+import { PostSearchHistoryRepository } from "../modules/postHandler/postSearchHistory/postSearchHistory.repository";
+import { PostSearchHistoryService } from "../modules/postHandler/postSearchHistory/postSearchHistory.service";
 
 export class ServiceFactory {
     private dataSource: DataSource;
@@ -62,6 +70,18 @@ export class ServiceFactory {
     private userNotificationRepo: UserNotificationRepository;
     private userNotificationsService: UserNotificationService;
 
+    private messageRepo: MessageRepository;
+    private messageService: MessageService;
+
+    private threadRepo: ThreadRepository;
+    private ThreadService: ThreadService;
+
+    private userSearchHistoryRepo: UserSearchHistoryRepository;
+    private userSearchHistoryService: UserSearchHistoryService;
+
+    private postSearchHistoryRepo: PostSearchHistoryRepository;
+    private postSearchHistoryService: PostSearchHistoryService;
+
     constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
 
@@ -77,9 +97,27 @@ export class ServiceFactory {
         this.userRelationRepository = new UserRelationRepository(
             this.dataSource
         );
+
+        this.userSearchHistoryRepo = new UserSearchHistoryRepository(
+            this.dataSource
+        );
+
+        this.userSearchHistoryService = new UserSearchHistoryService(
+            this.userSearchHistoryRepo
+        );
+
+        this.postSearchHistoryRepo = new PostSearchHistoryRepository(
+            this.dataSource
+        );
+
+        this.postSearchHistoryService = new PostSearchHistoryService(
+            this.postSearchHistoryRepo
+        );
+
         this.userService = new UserService(
             this.userRepository,
-            this.forgetPasswordService
+            this.forgetPasswordService,
+            this.userSearchHistoryService
         );
         this.userRelationService = new UserRelationService(
             this.userRelationRepository,
@@ -89,7 +127,8 @@ export class ServiceFactory {
         this.postService = new PostService(
             this.postRepository,
             this.userService,
-            this.userRelationService
+            this.userRelationService,
+            this.postSearchHistoryService
         );
         this.commentRepository = new CommentRepository(this.dataSource);
         this.commentService = new CommentService(
@@ -139,28 +178,35 @@ export class ServiceFactory {
             this.userNotificationsService
         );
 
+        this.messageRepo = new MessageRepository(dataSource);
+        this.messageService = new MessageService(this.messageRepo);
+
+        this.threadRepo = new ThreadRepository(dataSource);
+        this.ThreadService = new ThreadService(
+            this.threadRepo,
+            this.messageService,
+            this.userService
+        );
+
         this.userHandler = new UserHandler(
             this.userService,
             this.userRelationService,
             this.savedPostService,
             this.notificationService,
-            this.postHandler
+            this.postHandler,
+            this.ThreadService,
+            this.messageService
         );
 
         this.postLikeSub = new PostLikeSubscriber(
-            this.notificationService,
             this.userNotificationsService
         );
         dataSource.subscribers.push(this.postLikeSub);
 
-        this.commentSub = new CommentSubscriber(
-            this.notificationService,
-            this.userNotificationsService
-        );
+        this.commentSub = new CommentSubscriber(this.userNotificationsService);
         dataSource.subscribers.push(this.commentSub);
 
         this.userRelationSub = new UserRelationSubscriber(
-            this.notificationService,
             this.userNotificationsService
         );
 
@@ -169,8 +215,7 @@ export class ServiceFactory {
         this.postSub = new PostSubscriber(
             this.notificationService,
             this.userService,
-            this.userNotificationsService,
-            this.userRelationService
+            this.userNotificationsService
         );
         dataSource.subscribers.push(this.postSub);
     }
@@ -205,6 +250,14 @@ export class ServiceFactory {
 
     getNotificationService(): NotificationService {
         return this.notificationService;
+    }
+
+    getMessageService(): MessageService {
+        return this.messageService;
+    }
+
+    getThreadService(): ThreadService {
+        return this.ThreadService;
     }
 
     getPostHandler(): PostHandler {

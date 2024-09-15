@@ -6,11 +6,12 @@ import nodemailer from "nodemailer";
 import { randomUUID } from "crypto";
 import { PostDto } from "../../src/modules/postHandler/post/dto/post.dto";
 import { ServiceFactory } from "../../src/utility/service-factory";
+import http from "http"
 
 jest.mock("nodemailer");
 
 describe("User route test suite", () => {
-    let app: Express;
+    let app: http.Server;
     let serviceFactory: ServiceFactory;
 
     let sendMailMock: jest.Mock;

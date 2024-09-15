@@ -17,12 +17,14 @@ import { UpdatePostDto } from "./dto/updatePost.dto";
 import { UserService } from "../../userHandler/user/user.service";
 import { UserRelation } from "../../userHandler/userRelation/model/userRelation.model";
 import { UserRelationService } from "../../userHandler/userRelation/userRelation.service";
+import { PostSearchHistoryService } from "../postSearchHistory/postSearchHistory.service";
 
 export class PostService {
     constructor(
         private postRepo: PostRepository,
         private userService: UserService,
-        private userRelationService: UserRelationService
+        private userRelationService: UserRelationService,
+        private postSearchHistoryService: PostSearchHistoryService
     ) {}
 
     public async createPost(
@@ -151,5 +153,52 @@ export class PostService {
         limit: number
     ) {
         return await this.postRepo.getMentionedPosts(username, page, limit);
+    }
+
+    public async getPostSearchSuggestion(
+        user: User,
+        query: string,
+        limit: number
+    ) {
+        const queryResponse = await this.postRepo.getPostSearchSuggestion(
+            query,
+            limit
+        );
+        if (!queryResponse) {
+            return [];
+        }
+        const tags: string[] = [];
+        for (const post of queryResponse) {
+            const matchingTags = post.tags.filter((tag: string) =>
+                tag.toLowerCase().includes(query.toLowerCase())
+            );
+
+            tags.push(...matchingTags);
+        }
+
+        const postSearchHistory =
+            await this.postSearchHistoryService.getPostSearchHistory(
+                user,
+                limit
+            );
+        
+        const history = postSearchHistory
+            ? postSearchHistory.map((data) => data.query)
+            : [];
+
+        return { tags: tags, history: history };
+    }
+
+    public async postSearch(
+        user: User,
+        query: string,
+        page: number,
+        limit: number
+    ) {
+        await this.postSearchHistoryService.createPostSearchHistory(
+            user,
+            query
+        );
+        return await this.postRepo.postSearch(query, page, limit);
     }
 }

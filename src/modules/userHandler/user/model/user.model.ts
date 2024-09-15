@@ -2,6 +2,7 @@ import {
     Post,
     PostWithUsername,
 } from "../../../postHandler/post/model/post.model";
+import { PFollowStatus } from "../../userRelation/model/userRelation.model";
 
 export interface User {
     username: string;
@@ -44,6 +45,7 @@ export type ProfileInfo = Omit<User, "password"> & {
     unreadNotifications: number;
     unreadUserNotifications: number;
     unreadUserFollowingNotifications: number;
+    unreadMessages: number;
 };
 
 export const toProfileInfo = (
@@ -54,7 +56,8 @@ export const toProfileInfo = (
     unreadUserFollowingNotifications: number,
     follower_count: number,
     following_count: number,
-    post_count: number
+    post_count: number,
+    unreadMessages: number
 ): ProfileInfo => {
     const { password, profilePicture, ...profileInfo } = user;
     return {
@@ -70,6 +73,7 @@ export const toProfileInfo = (
         follower_count,
         following_count,
         post_count,
+        unreadMessages,
     };
 };
 
@@ -92,5 +96,40 @@ export const toEditProfileInfo = (
         profilePicture: user.profilePicture
             ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
             : "",
+    };
+};
+
+export type UserSearchSuggestion = Omit<
+    User,
+    "password" | "email" | "profileStatus" | "bio"
+>;
+
+export const toUserSuggestion = (
+    user: User,
+    baseUrl: string
+): UserSearchSuggestion => {
+    const { username, firstname, lastname, profilePicture } = user;
+    return {
+        username,
+        firstname,
+        lastname,
+        profilePicture: user.profilePicture
+            ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+            : "",
+    };
+};
+export type userSearchUser = Omit<User, "password" | "email" | "bio"> & {
+    followStatus: PFollowStatus;
+    reverseFollowStatus: PFollowStatus;
+    follower_count: number;
+};
+
+export type userSearchResponse = {
+    data: userSearchUser[];
+    meta: {
+        total: number;
+        page: number;
+        totalPage: number;
+        limit: number;
     };
 };

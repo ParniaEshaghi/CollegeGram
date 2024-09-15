@@ -16,10 +16,17 @@ export class PostLikeRepository {
     }
 
     public async delete(user: User, post: Post): Promise<void> {
-        await this.postLikeRepo.softDelete({
-            user: user,
-            post: { id: post.id },
+        const postLike = await this.postLikeRepo.findOne({
+            where: {
+                user: { username: user.username },
+                post: { id: post.id },
+            },
+            relations: ["user"],
         });
+
+        if (postLike) {
+            await this.postLikeRepo.softRemove(postLike);
+        }
     }
 
     public async checkExistance(

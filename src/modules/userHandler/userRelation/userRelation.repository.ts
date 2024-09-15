@@ -2,7 +2,6 @@ import { DataSource, In, Repository } from "typeorm";
 import { UserRelationEntity } from "./entity/userRelation.entity";
 import { followerFollowing, UserRelation } from "./model/userRelation.model";
 import { User } from "../user/model/user.model";
-import { UserEntity } from "../user/entity/user.entity";
 
 export class UserRelationRepository {
     private userRelationRepo: Repository<UserRelationEntity>;

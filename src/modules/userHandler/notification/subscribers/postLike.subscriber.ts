@@ -2,44 +2,46 @@ import {
     EntitySubscriberInterface,
     EventSubscriber,
     InsertEvent,
+    SoftRemoveEvent,
 } from "typeorm";
 import { PostLikeEntity } from "../../../postHandler/postLike/entity/postLike.entity";
 import { CreateNotification } from "../model/notification.model";
-import { NotificationService } from "../notification.service";
-import { UserNotificationService } from "../userNotification/userNotification.service";
 import { NotificationEntity } from "../entity/notification.entity";
+import { UserNotificationService } from "../userNotification/userNotification.service";
 import { UserNotificationEntity } from "../userNotification/entity/userNotification.entity";
 
 @EventSubscriber()
 export class PostLikeSubscriber
     implements EntitySubscriberInterface<PostLikeEntity>
 {
-    constructor(
-        private notificationService: NotificationService,
-        private userNotificationsService: UserNotificationService
-    ) {}
+    constructor(private userNotificationsService: UserNotificationService) {}
 
     listenTo() {
         return PostLikeEntity;
     }
 
     async afterInsert(event: InsertEvent<PostLikeEntity>): Promise<void> {
+        const entity = event.entity as PostLikeEntity;
+
         const notificationRepo =
             event.manager.getRepository(NotificationEntity);
         const userNotificationRepo = event.manager.getRepository(
             UserNotificationEntity
         );
 
+        if (entity.user.username === entity.post.user.username) {
+            return;
+        }
         const notification: CreateNotification = {
-            recipient: event.entity.post.user,
-            sender: event.entity.user,
+            recipient: entity.post.user,
+            sender: entity.user,
             type: "like",
-            post: event.entity.post,
+            post: entity.post,
         };
         const notif = await notificationRepo.save(notification);
 
         const userNotification = await this.userNotificationsService.userNotif(
-            event.entity.post.user.username,
+            entity.post.user.username,
             notif
         );
         if (userNotification) {
@@ -47,12 +49,10 @@ export class PostLikeSubscriber
         }
 
         const senderFollowers =
-            await this.userNotificationsService.getSenderFollowers(
-                event.entity.user
-            );
+            await this.userNotificationsService.getSenderFollowers(entity.user);
 
         for (const senderFollower of senderFollowers) {
-            if (senderFollower.follower.id != event.entity.post.user.id) {
+            if (senderFollower.follower.id != entity.post.user.id) {
                 const userNotification =
                     await this.userNotificationsService.userNotif(
                         senderFollower.follower.username,
@@ -62,6 +62,27 @@ export class PostLikeSubscriber
                     await userNotificationRepo.save(userNotification);
                 }
             }
+        }
+    }
+
+    async afterSoftRemove(
+        event: SoftRemoveEvent<PostLikeEntity>
+    ): Promise<void> {
+        const entity = event.entity as PostLikeEntity;
+
+        const notificationRepo =
+            event.manager.getRepository(NotificationEntity);
+
+        const notif = await notificationRepo.findOne({
+            where: {
+                sender: entity.user,
+                type: "like",
+            },
+            relations: ["userNotifications"],
+        });
+
+        if (notif) {
+            await notificationRepo.softRemove(notif);
         }
     }
 }

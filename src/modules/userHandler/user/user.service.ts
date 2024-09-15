@@ -9,8 +9,11 @@ import { SignUpDto } from "./dto/signup.dto";
 import {
     toEditProfileInfo,
     toProfileInfo,
+    toUserSuggestion,
     toUserWithoutPassword,
     User,
+    UserSearchSuggestion,
+    userSearchUser,
     UserWithoutPassword,
 } from "./model/user.model";
 import { UserRepository } from "./user.repository";
@@ -20,11 +23,13 @@ import jwt from "jsonwebtoken";
 import { LoginDto } from "./dto/login.dto";
 import { EditProfileDto } from "./dto/edit-profile.dto";
 import { ForgetPasswordService } from "../forgetPassword/forgetPassword.service";
+import { UserSearchHistoryService } from "../userSearchHistory/userSearchHistory.service";
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
-        private forgetPasswordService: ForgetPasswordService
+        private forgetPasswordService: ForgetPasswordService,
+        private userSearchHistoryService: UserSearchHistoryService
     ) {}
 
     async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -142,5 +147,49 @@ export class UserService {
         const user = await this.getUserByUsername(username);
         const posts = await this.userRepo.getUserPosts(username);
         return posts;
+    }
+
+    public async getUserSearchSuggestion(
+        user: User,
+        query: string,
+        baseUrl: string,
+        limit: number
+    ) {
+        const queryResponse = await this.userRepo.getUserSearchSuggestion(
+            query,
+            limit
+        );
+
+        const historyResult =
+            await this.userSearchHistoryService.getUserSearchHistory(
+                user,
+                limit
+            );
+
+        const suggestions = queryResponse
+            ? queryResponse.map((qr) => toUserSuggestion(qr, baseUrl))
+            : [];
+
+        const history = historyResult
+            ? historyResult.map((data) => data.query)
+            : [];
+
+        return {
+            suggestions: suggestions,
+            history: history,
+        };
+    }
+
+    public async userSearch(
+        user: User,
+        query: string,
+        page: number,
+        limit: number
+    ) {
+        await this.userSearchHistoryService.createUserSearchHistory(
+            user,
+            query
+        );
+        return await this.userRepo.userSearch(query, page, limit);
     }
 }

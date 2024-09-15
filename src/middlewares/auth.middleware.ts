@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { UserService } from "../modules/userHandler/user/user.service";
 import { AuthenticationFailError, HttpError } from "../utility/http-errors";
 import { UserHandler } from "../modules/userHandler/userHandler";
 

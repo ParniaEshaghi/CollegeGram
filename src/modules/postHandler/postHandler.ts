@@ -223,9 +223,29 @@ export class PostHandler {
     public async getMentionedPosts(
         username: string,
         page: number,
-        limit: number,
-        baseUrl: string
+        limit: number
     ) {
         return await this.postService.getMentionedPosts(username, page, limit);
+    }
+
+    public async getPostSearchSuggestion(
+        user: User,
+        query: string,
+        limit: number
+    ) {
+        return await this.postService.getPostSearchSuggestion(
+            user,
+            query,
+            limit
+        );
+    }
+
+    public async postSearch(
+        user: User,
+        query: string,
+        page: number,
+        limit: number
+    ) {
+        return await this.postService.postSearch(user, query, page, limit);
     }
 }

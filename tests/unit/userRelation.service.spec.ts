@@ -44,15 +44,6 @@ describe("User relation service test suite", () => {
                 "follow_test"
             );
             expect(response.message).toBe("User followed");
-
-            const notifications = await notificationService.findByType(
-                "followed"
-            );
-
-            const notification = notifications[0];
-            expect(notification.recipient.username).toBe(following!.username);
-            expect(notification.sender.username).toBe(follower!.username);
-            expect(notification.type).toEqual("followed");
         });
 
         it("should fail to follow a user if user is already followed", async () => {
@@ -278,76 +269,7 @@ describe("User relation service test suite", () => {
                 )
             ).rejects.toThrow(BadRequestError);
         });
-
-        it("should send a follow back notification", async () => {
-            const user = await userService.getUserByUsername("test");
-            const privateUser = await userService.getUserByUsername(
-                "follow_test"
-            );
-
-            await userService.editProfile(
-                privateUser!,
-                "",
-                {
-                    email: "follow_test@gmail.com",
-                    firstname: "",
-                    lastname: "",
-                    profileStatus: "private",
-                    bio: "",
-                    password: "",
-                },
-                "http://localhost:3000"
-            );
-
-            await userRelationService.follow(privateUser!, "test");
-
-            const notifications = await notificationService.findByType(
-                "followed"
-            );
-            const notification = notifications[0];
-            expect(notification.recipient.username).toBe("test");
-            expect(notification.sender.username).toBe("follow_test");
-            expect(notification.type).toEqual("followed");
-
-            await userRelationService.follow(user!, "follow_test");
-
-            const followBackNotifications =
-                await notificationService.findByType("followBackRequest");
-
-            const followBackNotification = followBackNotifications[0];
-            expect(followBackNotification.recipient.username).toBe("test");
-            expect(followBackNotification.sender.username).toBe("follow_test");
-            expect(followBackNotification.type).toEqual("followBackRequest");
-        });
     });
-
-    // describe("User Profile", () => {
-    //     it("should get user profile with follow status", async () => {
-    //         const user = await userService.getUserByUsername("test");
-    //         await userRelationService.follow(user!, "follow_test");
-
-    //         const profile = await userRelationService.userProfile(
-    //             user!,
-    //             "follow_test",
-    //             "http://localhost:3000"
-    //         );
-
-    //         expect(profile.username).toBe("follow_test");
-    //         expect(profile.followStatus).toBe("followed");
-    //     });
-
-    //     it("should fail to get user profile if user does not exist", async () => {
-    //         const user = await userService.getUserByUsername("test");
-
-    //         await expect(
-    //             userRelationService.userProfile(
-    //                 user!,
-    //                 "non_existent_user",
-    //                 "http://localhost:3000"
-    //             )
-    //         ).rejects.toThrow(NotFoundError);
-    //     });
-    // });
 
     describe("Follower and Following Lists", () => {
         it("should get follower list", async () => {

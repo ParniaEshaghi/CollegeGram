@@ -285,7 +285,7 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Post'
+ *                     $ref: '#/components/schemas/PostWithLikeAndSaveStatus'
  *                 meta:
  *                   $ref: '#/components/schemas/Meta'
  *       401:

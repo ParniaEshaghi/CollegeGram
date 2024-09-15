@@ -4,25 +4,21 @@ import {
     InsertEvent,
     UpdateEvent,
 } from "typeorm";
-import { PostLikeEntity } from "../../../postHandler/postLike/entity/postLike.entity";
-import { CreateNotification, Notification } from "../model/notification.model";
-import { NotificationService } from "../notification.service";
+import { CreateNotification } from "../model/notification.model";
 import { PostEntity } from "../../../postHandler/post/entity/post.entity";
 import { UserService } from "../../user/user.service";
 import { User } from "../../user/model/user.model";
 import { UserNotificationService } from "../userNotification/userNotification.service";
-import { CreateUserNotification } from "../userNotification/model/userNotification.model";
-import { UserRelationService } from "../../userRelation/userRelation.service";
 import { NotificationEntity } from "../entity/notification.entity";
 import { UserNotificationEntity } from "../userNotification/entity/userNotification.entity";
+import { NotificationService } from "../notification.service";
 
 @EventSubscriber()
 export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
     constructor(
         private notificationService: NotificationService,
         private userService: UserService,
-        private userNotificationsService: UserNotificationService,
-        private userRelationService: UserRelationService
+        private userNotificationsService: UserNotificationService
     ) {}
 
     listenTo() {
@@ -40,7 +36,65 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
                 );
 
                 for (const mention of entity.mentions) {
-                    const notification = await this.tagsNotification(
+                    if (entity.user.username !== mention) {
+                        const notification = await this.tagsNotification(
+                            event,
+                            mention
+                        );
+                        if (notification) {
+                            const notif = await notificationRepo.save(
+                                notification
+                            );
+                            const userNotification =
+                                await this.userNotificationsService.userNotif(
+                                    mention,
+                                    notif
+                                );
+
+                            if (userNotification) {
+                                await userNotificationRepo.save(
+                                    userNotification
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    async afterUpdate(event: UpdateEvent<PostEntity>): Promise<void> {
+        const entity = event.entity;
+        if (entity) {
+            const notificationRepo =
+                event.manager.getRepository(NotificationEntity);
+            const userNotificationRepo = event.manager.getRepository(
+                UserNotificationEntity
+            );
+
+            const oldNotifs = await notificationRepo.find({
+                where: {
+                    type: "mention",
+                    post: { id: entity.id },
+                },
+                relations: ["recipient", "userNotifications", "post"],
+            });
+
+            for (const notif of oldNotifs) {
+                if (!entity.mentions.includes(notif.recipient.username)) {
+                    await notificationRepo.softRemove(notif);
+                }
+            }
+            const oldMentions = oldNotifs.map(
+                (notif) => notif.recipient.username
+            );
+
+            for (const mention of entity.mentions) {
+                if (
+                    entity.user.username !== mention &&
+                    !oldMentions.includes(mention)
+                ) {
+                    const notification = await this.tagsUpdateNotification(
                         event,
                         mention
                     );
@@ -54,76 +108,6 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
 
                         if (userNotification) {
                             await userNotificationRepo.save(userNotification);
-                        }
-
-                        const senderFollowers =
-                            await this.userNotificationsService.getSenderFollowers(
-                                entity.user
-                            );
-
-                        for (const senderFollower of senderFollowers) {
-                            if (senderFollower.follower.username != mention) {
-                                const userNotification =
-                                    await this.userNotificationsService.userNotif(
-                                        senderFollower.follower.username,
-                                        notif
-                                    );
-                                if (userNotification) {
-                                    await userNotificationRepo.save(
-                                        userNotification
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    async afterUpdate(event: UpdateEvent<PostEntity>): Promise<void> {
-        const entity = event.entity as PostEntity;
-        if ("mentions" in entity && entity.mentions.length > 0) {
-            const notificationRepo =
-                event.manager.getRepository(NotificationEntity);
-            const userNotificationRepo = event.manager.getRepository(
-                UserNotificationEntity
-            );
-
-            for (const mention of entity.mentions) {
-                const notification = await this.tagsUpdateNotification(
-                    event,
-                    mention
-                );
-                if (notification) {
-                    const notif = await notificationRepo.save(notification);
-                    const userNotification =
-                        await this.userNotificationsService.userNotif(
-                            mention,
-                            notif
-                        );
-
-                    if (userNotification) {
-                        await userNotificationRepo.save(userNotification);
-                    }
-
-                    const senderFollowers =
-                        await this.userNotificationsService.getSenderFollowers(
-                            entity.user
-                        );
-
-                    for (const senderFollower of senderFollowers) {
-                        if (senderFollower.follower.username != mention) {
-                            const followerNotification =
-                                await this.userNotificationsService.userNotif(
-                                    senderFollower.follower.username,
-                                    notif
-                                );
-                            if (followerNotification) {
-                                await userNotificationRepo.save(
-                                    followerNotification
-                                );
-                            }
                         }
                     }
                 }
@@ -156,12 +140,13 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
         mention: string
     ): Promise<CreateNotification | undefined> {
         const entity = event.entity as PostEntity;
-        if (event.entity) {
+        if (entity) {
             const mentionedUser = await this.getUserByUsername(mention);
+
             if (mentionedUser) {
                 const notification: CreateNotification = {
                     recipient: mentionedUser,
-                    sender: event.entity.user,
+                    sender: entity.user,
                     type: "mention",
                     post: entity,
                 };

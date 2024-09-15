@@ -1,9 +1,7 @@
 import { Comment } from "../../../postHandler/comment/model/comment.model";
 import {
     Post,
-    PostWithUsername,
     toPostWithImage,
-    toPostWithUsername,
 } from "../../../postHandler/post/model/post.model";
 import { User } from "../../user/model/user.model";
 import {

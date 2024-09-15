@@ -18,6 +18,7 @@ import { UserNotificationEntity } from "../../notification/userNotification/enti
 import { MessageEntity } from "../../message/entity/message.entity";
 import { ThreadEntity } from "../../thread/entity/thread.entity";
 import { SavedPostsEntity } from "../../savedPost/entity/savedPost.entity";
+import { PostSearchHistoryEntity } from "../../../postHandler/postSearchHistory/entity/postSearchHistory.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -90,6 +91,12 @@ export class UserEntity {
 
     @ManyToMany(() => ThreadEntity, (thread) => thread.participants)
     threads!: ThreadEntity[];
+
+    @OneToMany(() => PostSearchHistoryEntity, (history) => history.user)
+    postSearchHistory!: PostSearchHistoryEntity[];
+
+    @OneToMany(() => UserNotificationEntity, (history) => history.user)
+    userSearchHistory!: UserNotificationEntity[];
 
     @CreateDateColumn()
     createdAt!: Date;

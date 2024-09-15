@@ -1,4 +1,4 @@
-import { ArrayContains, DataSource, In, Repository } from "typeorm";
+import { ArrayContains, DataSource, In, Like, Raw, Repository } from "typeorm";
 import { CreatePost, Post, UpdatePost } from "./model/post.model";
 import { PostEntity } from "./entity/post.entity";
 import { UserEntity } from "../../userHandler/user/entity/user.entity";
@@ -77,6 +77,47 @@ export class PostRepository {
             order: {
                 createdAt: "DESC",
             },
+        });
+
+        return { data: response, total: total };
+    }
+
+    public async getPostSearchSuggestion(
+        query: string,
+        limit: number = 5
+    ): Promise<Post[] | null> {
+        const [response, total] = await this.postRepo.findAndCount({
+            take: limit,
+            where: {
+                tags: Raw(
+                    (alias) => `${alias} @> ARRAY['${query}']::varchar[]`
+                ),
+            },
+            order: {
+                createdAt: "DESC",
+            },
+            relations: ["user"],
+        });
+
+        return response;
+    }
+
+    public async postSearch(query: string, page: number, limit: number) {
+        const [response, total] = await this.postRepo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: [
+                { caption: Like(`%${query}%`) },
+                {
+                    tags: Raw(
+                        (alias) => `${alias} @> ARRAY['${query}']::varchar[]`
+                    ),
+                },
+            ],
+            order: {
+                createdAt: "DESC",
+            },
+            relations: ["user"],
         });
 
         return { data: response, total: total };

@@ -11,6 +11,8 @@ import swaggerUi from "swagger-ui-express";
 import swaggerDocs from "./swagger-options";
 import { makePostRouter } from "./routes/post.route";
 import { UserHandler } from "./modules/userHandler/userHandler";
+import http from "http";
+import { setupSocketServer } from "./socket-server";
 
 export const makeApp = (
     dataSource: DataSource,
@@ -48,5 +50,8 @@ export const makeApp = (
 
     app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-    return app;
+    const httpServer = http.createServer(app);
+    setupSocketServer(httpServer, userHandler);
+
+    return httpServer;
 };

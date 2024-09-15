@@ -33,7 +33,7 @@ export class NotificationEntity {
         () => UserNotificationEntity,
         (userNotification) => userNotification.notification,
         {
-            onDelete: "CASCADE",
+            cascade: true,
         }
     )
     userNotifications!: UserNotificationEntity[];
