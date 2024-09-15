@@ -160,24 +160,22 @@ export class UserService {
             limit
         );
 
-        const history =
+        const historyResult =
             await this.userSearchHistoryService.getUserSearchHistory(
                 user,
                 limit
             );
 
-        if (queryResponse) {
-            const suggestions = queryResponse.map((qr) =>
-                toUserSuggestion(qr, baseUrl)
-            );
-            return {
-                suggestions: suggestions,
-                history: history,
-            };
-        }
+        const suggestions = queryResponse
+            ? queryResponse.map((qr) => toUserSuggestion(qr, baseUrl))
+            : [];
+
+        const history = historyResult
+            ? historyResult.map((data) => data.query)
+            : [];
 
         return {
-            suggestions: [],
+            suggestions: suggestions,
             history: history,
         };
     }
