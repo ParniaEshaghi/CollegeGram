@@ -1,13 +1,13 @@
+import e from "express";
 import { NotFoundError } from "../../utility/http-errors";
 import {
+    Post,
     PostWithUsername,
     toPostPage,
 } from "../postHandler/post/model/post.model";
 import { PostHandler } from "../postHandler/postHandler";
-import { MessageService } from "./message/message.service";
 import { NotificationService } from "./notification/notification.service";
 import { SavedPostService } from "./savedPost/savedPost.service";
-import { Thread } from "./thread/model/thread.model";
 import { ThreadService } from "./thread/thread.service";
 import { EditProfileDto } from "./user/dto/edit-profile.dto";
 import { LoginDto } from "./user/dto/login.dto";
@@ -26,6 +26,7 @@ import {
     toProfileFollowStatus,
 } from "./userRelation/model/userRelation.model";
 import { UserRelationService } from "./userRelation/userRelation.service";
+import { MessageService } from "./message/message.service";
 
 export class UserHandler {
     constructor(
@@ -71,7 +72,6 @@ export class UserHandler {
             baseUrl
         );
     }
-
     public async getProfileInfo(user: User, baseUrl: string) {
         const unreadUserNotifications =
             await this.notificationService.getAllUserUnreadNotifications(user);
@@ -460,74 +460,16 @@ export class UserHandler {
                         post.user.username
                     );
                 if (follow_status === "close") {
-                    const like_status =
-                        await this.postHandler.getPostLikeStatus(user, post.id);
-                    const save_status =
-                        await this.postHandler.getPostSaveStatus(user, post.id);
-
-                    const follower_count =
-                        await this.userRelationService.getFollowerCount(
-                            post.user.username
-                        );
-                    const like_count = await this.postHandler.getPostLikeCount(
-                        post.id
+                    const shownPost = await this.toShownPost(
+                        user,
+                        post,
+                        baseUrl
                     );
-                    const saved_count =
-                        await this.postHandler.getSavedPostCount(post.id);
-                    const comment_count =
-                        await this.postHandler.getCommentCount(post.id);
-
-                    shownPosts.push(
-                        toPostPage(
-                            post.user,
-                            post,
-                            baseUrl,
-                            follower_count,
-                            like_status,
-                            save_status,
-                            like_count,
-                            saved_count,
-                            comment_count
-                        )
-                    );
+                    shownPosts.push(shownPost);
                 }
             } else {
-                const like_status = await this.postHandler.getPostLikeStatus(
-                    user,
-                    post.id
-                );
-                const save_status = await this.postHandler.getPostSaveStatus(
-                    user,
-                    post.id
-                );
-
-                const follower_count =
-                    await this.userRelationService.getFollowerCount(
-                        post.user.username
-                    );
-                const like_count = await this.postHandler.getPostLikeCount(
-                    post.id
-                );
-                const saved_count = await this.postHandler.getSavedPostCount(
-                    post.id
-                );
-                const comment_count = await this.postHandler.getCommentCount(
-                    post.id
-                );
-
-                shownPosts.push(
-                    toPostPage(
-                        post.user,
-                        post,
-                        baseUrl,
-                        follower_count,
-                        like_status,
-                        save_status,
-                        like_count,
-                        saved_count,
-                        comment_count
-                    )
-                );
+                const shownPost = await this.toShownPost(user, post, baseUrl);
+                shownPosts.push(shownPost);
             }
         }
 
@@ -560,46 +502,13 @@ export class UserHandler {
         const mentionedPosts = await this.postHandler.getMentionedPosts(
             user.username,
             page,
-            limit,
-            baseUrl
+            limit
         );
 
         const shownPosts = [];
         for (const post of mentionedPosts.data) {
-            const like_status = await this.postHandler.getPostLikeStatus(
-                user,
-                post.id
-            );
-            const save_status = await this.postHandler.getPostSaveStatus(
-                user,
-                post.id
-            );
-
-            const follower_count =
-                await this.userRelationService.getFollowerCount(
-                    post.user.username
-                );
-            const like_count = await this.postHandler.getPostLikeCount(post.id);
-            const saved_count = await this.postHandler.getSavedPostCount(
-                post.id
-            );
-            const comment_count = await this.postHandler.getCommentCount(
-                post.id
-            );
-
-            shownPosts.push(
-                toPostPage(
-                    post.user,
-                    post,
-                    baseUrl,
-                    follower_count,
-                    like_status,
-                    save_status,
-                    like_count,
-                    saved_count,
-                    comment_count
-                )
-            );
+            const shownPost = await this.toShownPost(user, post, baseUrl);
+            shownPosts.push(shownPost);
         }
 
         const response = {
@@ -629,84 +538,40 @@ export class UserHandler {
 
         const shownPosts = [];
         for (const post of savedPosts.data) {
+            const follow_status =
+                await this.userRelationService.getFollowStatus(
+                    user,
+                    post.user.username
+                );
+            const reverse_follow_status =
+                await this.userRelationService.getFollowStatus(
+                    post.user,
+                    user.username
+                );
             if (
-                post.close_status === "close" &&
-                post.user.username !== user.username
+                follow_status === "blocked" ||
+                reverse_follow_status === "blocked"
             ) {
-                const follow_status =
-                    await this.userRelationService.getFollowStatus(
-                        user,
-                        post.user.username
-                    );
-                if (follow_status === "close") {
-                    const like_status =
-                        await this.postHandler.getPostLikeStatus(user, post.id);
-                    const save_status =
-                        await this.postHandler.getPostSaveStatus(user, post.id);
-
-                    const follower_count =
-                        await this.userRelationService.getFollowerCount(
-                            post.user.username
-                        );
-                    const like_count = await this.postHandler.getPostLikeCount(
-                        post.id
-                    );
-                    const saved_count =
-                        await this.postHandler.getSavedPostCount(post.id);
-                    const comment_count =
-                        await this.postHandler.getCommentCount(post.id);
-
-                    shownPosts.push(
-                        toPostPage(
-                            post.user,
+                continue;
+            } else if (post.user.profileStatus === "private") {
+                if (follow_status === "followed" || follow_status === "close") {
+                    if (
+                        post.close_status === "close" &&
+                        follow_status === "followed"
+                    ) {
+                        continue;
+                    } else {
+                        const shownPost = await this.toShownPost(
+                            user,
                             post,
-                            baseUrl,
-                            follower_count,
-                            like_status,
-                            save_status,
-                            like_count,
-                            saved_count,
-                            comment_count
-                        )
-                    );
+                            baseUrl
+                        );
+                        shownPosts.push(shownPost);
+                    }
                 }
             } else {
-                const like_status = await this.postHandler.getPostLikeStatus(
-                    user,
-                    post.id
-                );
-                const save_status = await this.postHandler.getPostSaveStatus(
-                    user,
-                    post.id
-                );
-
-                const follower_count =
-                    await this.userRelationService.getFollowerCount(
-                        post.user.username
-                    );
-                const like_count = await this.postHandler.getPostLikeCount(
-                    post.id
-                );
-                const saved_count = await this.postHandler.getSavedPostCount(
-                    post.id
-                );
-                const comment_count = await this.postHandler.getCommentCount(
-                    post.id
-                );
-
-                shownPosts.push(
-                    toPostPage(
-                        post.user,
-                        post,
-                        baseUrl,
-                        follower_count,
-                        like_status,
-                        save_status,
-                        like_count,
-                        saved_count,
-                        comment_count
-                    )
-                );
+                const shownPost = await this.toShownPost(user, post, baseUrl);
+                shownPosts.push(shownPost);
             }
         }
 
@@ -845,6 +710,97 @@ export class UserHandler {
             base_url,
             text,
             image
+        );
+    }
+
+    public async postSearch(
+        user: User,
+        query: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        const posts = await this.postHandler.postSearch(query, page, limit);
+
+        const shownPosts = [];
+        for (const post of posts.data) {
+            const follow_status =
+                await this.userRelationService.getFollowStatus(
+                    user,
+                    post.user.username
+                );
+            const reverse_follow_status =
+                await this.userRelationService.getFollowStatus(
+                    post.user,
+                    user.username
+                );
+            if (
+                follow_status === "blocked" ||
+                reverse_follow_status === "blocked"
+            ) {
+                continue;
+            } else if (post.user.profileStatus === "private") {
+                if (follow_status === "followed" || follow_status === "close") {
+                    if (
+                        post.close_status === "close" &&
+                        follow_status === "followed"
+                    ) {
+                        continue;
+                    } else {
+                        const shownPost = await this.toShownPost(
+                            user,
+                            post,
+                            baseUrl
+                        );
+                        shownPosts.push(shownPost);
+                    }
+                }
+            } else {
+                const shownPost = await this.toShownPost(user, post, baseUrl);
+                shownPosts.push(shownPost);
+            }
+        }
+
+        const response = {
+            data: shownPosts,
+            meta: {
+                page: page,
+                limit: limit,
+                total: shownPosts.length,
+                totalPage: Math.ceil(shownPosts.length / limit),
+            },
+        };
+
+        return response;
+    }
+
+    private async toShownPost(user: User, post: Post, baseUrl: string) {
+        const like_status = await this.postHandler.getPostLikeStatus(
+            user,
+            post.id
+        );
+        const save_status = await this.postHandler.getPostSaveStatus(
+            user,
+            post.id
+        );
+
+        const follower_count = await this.userRelationService.getFollowerCount(
+            post.user.username
+        );
+        const like_count = await this.postHandler.getPostLikeCount(post.id);
+        const saved_count = await this.postHandler.getSavedPostCount(post.id);
+        const comment_count = await this.postHandler.getCommentCount(post.id);
+
+        return toPostPage(
+            post.user,
+            post,
+            baseUrl,
+            follower_count,
+            like_status,
+            save_status,
+            like_count,
+            saved_count,
+            comment_count
         );
     }
 }
