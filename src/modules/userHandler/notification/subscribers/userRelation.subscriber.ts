@@ -31,6 +31,10 @@ export class UserRelationSubscriber
             UserNotificationEntity
         );
 
+        if (entity.follower.username === entity.following.username) {
+            return;
+        }
+
         if (
             entity.followStatus === "request accepted" ||
             entity.followStatus === "followed"
