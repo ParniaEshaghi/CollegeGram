@@ -30,7 +30,6 @@ export const setupSocketServer = (
     io.use(socketSetBaseUrl);
 
     io.on("connection", (socket) => {
-        console.log("user connected");
         let roomId: string;
 
         socket.on("joinThread", async (username) => {
@@ -136,22 +135,14 @@ export const setupSocketServer = (
             }
         );
 
-        // socket.on("newMessage", async (message) => {
-        //     try {
-        //         const newMessageResponse = await userHandler.newMessage(
-        //             socket.request.user,
-        //             roomId,
-        //             socket.request.base_url,
-        //             message
-        //         );
-
-        //         io.to(roomId).emit("newMessage", newMessageResponse);
-        //     } catch (error) {
-        //         socket.emit("error", {
-        //             message: "Failed to send message.",
-        //         });
-        //     }
-        // });
+        socket.on("disconnect", (reason) => {
+            if (roomId) {
+                socket.leave(roomId);
+                io.to(roomId).emit("userDisconnected", {
+                    message: "User has left the thread",
+                });
+            }
+        });
     });
 
     return io;
