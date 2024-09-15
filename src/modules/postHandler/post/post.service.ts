@@ -181,8 +181,12 @@ export class PostService {
                 user,
                 limit
             );
+        
+        const history = postSearchHistory
+            ? postSearchHistory.map((data) => data.query)
+            : [];
 
-        return { tags: tags, history: postSearchHistory };
+        return { tags: tags, history: history };
     }
 
     public async postSearch(

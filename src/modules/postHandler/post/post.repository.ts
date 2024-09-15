@@ -1,4 +1,4 @@
-import { ArrayContains, DataSource, In, Like, Repository } from "typeorm";
+import { ArrayContains, DataSource, In, Like, Raw, Repository } from "typeorm";
 import { CreatePost, Post, UpdatePost } from "./model/post.model";
 import { PostEntity } from "./entity/post.entity";
 import { UserEntity } from "../../userHandler/user/entity/user.entity";
@@ -88,7 +88,11 @@ export class PostRepository {
     ): Promise<Post[] | null> {
         const [response, total] = await this.postRepo.findAndCount({
             take: limit,
-            where: [{ tags: ArrayContains(Like(`%${query}%`)) }],
+            where: {
+                tags: Raw(
+                    (alias) => `${alias} @> ARRAY['${query}']::varchar[]`
+                ),
+            },
             order: {
                 createdAt: "DESC",
             },
@@ -104,7 +108,11 @@ export class PostRepository {
             take: limit,
             where: [
                 { caption: Like(`%${query}%`) },
-                { tags: ArrayContains(Like(`%${query}%`)) },
+                {
+                    tags: Raw(
+                        (alias) => `${alias} @> ARRAY['${query}']::varchar[]`
+                    ),
+                },
             ],
             order: {
                 createdAt: "DESC",

@@ -1,11 +1,13 @@
 import { User } from "../../userHandler/user/model/user.model";
-import { PostSearchHistory } from "./model/postSearchHistory.model";
 import { PostSearchHistoryRepository } from "./postSearchHistory.repository";
 
 export class PostSearchHistoryService {
     constructor(private postSearchHistoryRepo: PostSearchHistoryRepository) {}
     public async createPostSearchHistory(user: User, query: string) {
-        return await this.postSearchHistoryRepo.create(user, query);
+        const duplicateStatus = await this.handleDuplicates(user, query);
+        if (!duplicateStatus) {
+            await this.postSearchHistoryRepo.create(user, query);
+        }
     }
 
     public async getPostSearchHistory(user: User, limit: number) {
@@ -13,5 +15,19 @@ export class PostSearchHistoryService {
             user,
             limit
         );
+    }
+
+    private async handleDuplicates(user: User, query: string) {
+        const LIMIT = 5;
+        const history = await this.getPostSearchHistory(user, LIMIT);
+        if (!history) {
+            return false;
+        }
+        for (const record of history) {
+            if (record.query === query) {
+                return true;
+            }
+        }
+        return false;
     }
 }
