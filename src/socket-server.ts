@@ -14,31 +14,53 @@ export const setupSocketServer = (
 
     io.on("connection", (socket) => {
         console.log("user connected");
-        let threadId: string;
+        let roomId: string;
 
-        socket.on("joinThread", async (username, page = 1, limit = 10) => {
+        socket.on("joinThread", async (username) => {
             try {
-                const data = await userHandler.getThread(
+                const threadId = await userHandler.getThread(
                     socket.request.user,
-                    username,
-                    page,
-                    limit,
-                    socket.request.base_url
+                    username
                 );
 
                 const rooms = Array.from(socket.rooms);
-
                 rooms.forEach((room) => {
                     if (room !== socket.id) {
                         socket.leave(room);
                     }
                 });
 
-                // Join the new thread room
-                threadId = data.threadId;
-                socket.join(data.threadId);
+                roomId = threadId;
+                socket.join(roomId);
 
-                // Emit the history for the thread
+                socket.emit("connection", {
+                    message: `Joined thread with ${username}`,
+                    status: 200,
+                });
+            } catch (error) {
+                if (error instanceof NotFoundError) {
+                    socket.emit("error", {
+                        message: "User not found",
+                        status: 404,
+                    });
+                } else {
+                    socket.emit("error", {
+                        message: "An unexpected error occurred",
+                        status: 500,
+                    });
+                }
+            }
+        });
+
+        socket.on("threadHistory", async (page = 1, limit = 10) => {
+            try {
+                const data = await userHandler.getThreadHistory(
+                    roomId,
+                    page,
+                    limit,
+                    socket.request.base_url
+                );
+
                 socket.emit("history", data);
             } catch (error) {
                 if (error instanceof NotFoundError) {
@@ -59,17 +81,12 @@ export const setupSocketServer = (
             try {
                 const newMessageResponse = await userHandler.newMessage(
                     socket.request.user,
-                    threadId,
+                    roomId,
                     socket.request.base_url,
                     message
                 );
 
-                // socket.emit("newMessage", newMessageResponse);
-                io.to(threadId).emit("newMessage", newMessageResponse);
-                // socket.broadcast
-                //     .to(data.threadId)
-                //     .emit("newMessage", newMessageResponse);
-                // socket.broadcast.emit("newMessage", newMessageResponse);
+                io.to(roomId).emit("newMessage", newMessageResponse);
             } catch (error) {
                 socket.emit("error", {
                     message: "Failed to send message.",

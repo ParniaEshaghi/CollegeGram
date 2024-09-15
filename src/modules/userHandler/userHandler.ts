@@ -813,13 +813,21 @@ export class UserHandler {
     public async getThread(
         user: User,
         username: string,
-        page: number,
-        limit: number,
-        baseUrl: string
     ) {
         return await this.threadService.getThread(
             user,
             username,
+        );
+    }
+
+    public async getThreadHistory(
+        threadId: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        return await this.threadService.getThreadHistory(
+            threadId,
             page,
             limit,
             baseUrl

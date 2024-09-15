@@ -60,9 +60,6 @@ export class ThreadService {
     public async getThread(
         user: User,
         username: string,
-        page: number,
-        limit: number,
-        baseUrl: string
     ) {
         const otherParticipant = await this.userService.getUserByUsername(
             username
@@ -80,6 +77,17 @@ export class ThreadService {
             ? existingThread
             : await this.addNewThread([user, otherParticipant]);
 
+        return thread.id;
+    }
+
+    public async getThreadHistory(
+        threadId: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        const thread = await this.getThreadById(threadId);
+
         const threadMessages = await this.messageService.getThreadMessages(
             thread,
             page,
@@ -89,7 +97,6 @@ export class ThreadService {
 
         const response = {
             data: threadMessages.data,
-            threadId: thread.id,
             meta: {
                 page: page,
                 limit: limit,
@@ -106,7 +113,6 @@ export class ThreadService {
         if (!thread) {
             throw new NotFoundError();
         }
-
         return thread;
     }
 }
