@@ -175,7 +175,7 @@ export class UserService {
             : [];
 
         return {
-            suggestions: suggestions,
+            suggest: suggestions,
             history: history,
         };
     }

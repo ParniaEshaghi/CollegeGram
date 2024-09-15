@@ -716,6 +716,18 @@ export class UserHandler {
         );
     }
 
+    public async getPostSearchSuggestion(
+        user: User,
+        query: string,
+        limit: number
+    ) {
+        return await this.postHandler.getPostSearchSuggestion(
+            user,
+            query,
+            limit
+        );
+    }
+
     public async postSearch(
         user: User,
         query: string,
@@ -780,6 +792,40 @@ export class UserHandler {
         };
 
         return response;
+    }
+
+    public async suggestionHandler(
+        user: User,
+        userQuery: string,
+        postQuery: string,
+        limit: number,
+        baseUrl: string
+    ) {
+        if (userQuery) {
+            return await this.getUserSearchSuggestion(
+                user,
+                userQuery,
+                baseUrl,
+                limit
+            );
+        } else if (postQuery) {
+            return await this.getPostSearchSuggestion(user, postQuery, limit);
+        }
+    }
+
+    public async searchHandler(
+        user: User,
+        userQuery: string,
+        postQuery: string,
+        page: number,
+        limit: number,
+        baseUrl: string
+    ) {
+        if (userQuery) {
+            return await this.userSearch(user, userQuery, baseUrl, page, limit);
+        } else if (postQuery) {
+            return await this.postSearch(user, postQuery, page, limit, baseUrl);
+        }
     }
 
     private async toShownPost(user: User, post: Post, baseUrl: string) {
