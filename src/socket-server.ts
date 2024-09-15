@@ -3,14 +3,31 @@ import { UserHandler } from "./modules/userHandler/userHandler";
 import { socketAuth } from "./middlewares/socketAuth.middleware";
 import http from "http";
 import { NotFoundError } from "./utility/http-errors";
+import { saveImage } from "./utility/save-image";
+import { socketSetBaseUrl } from "./middlewares/socketSetBaseUrl.middleware";
 
 export const setupSocketServer = (
     httpServer: http.Server,
     userHandler: UserHandler
 ) => {
-    const io = new SocketIOServer(httpServer);
+    const io = new SocketIOServer(httpServer, {
+        cors: {
+            credentials: true,
+            origin: [
+                "http://37.32.6.230",
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "https://minus-one.dev1403.rahnemacollege.ir",
+            ],
+            exposedHeaders: ["set-cookie", "ajax_redirect"],
+            preflightContinue: true,
+            methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+            optionsSuccessStatus: 200,
+        },
+    });
 
     io.use(socketAuth(userHandler));
+    io.use(socketSetBaseUrl);
 
     io.on("connection", (socket) => {
         console.log("user connected");
@@ -33,7 +50,7 @@ export const setupSocketServer = (
                 roomId = threadId;
                 socket.join(roomId);
 
-                socket.emit("connection", {
+                io.to(roomId).emit("connection", {
                     message: `Joined thread with ${username}`,
                     status: 200,
                 });
@@ -77,22 +94,64 @@ export const setupSocketServer = (
             }
         });
 
-        socket.on("newMessage", async (message) => {
-            try {
-                const newMessageResponse = await userHandler.newMessage(
-                    socket.request.user,
-                    roomId,
-                    socket.request.base_url,
-                    message
-                );
+        socket.on(
+            "newMessage",
+            async (data: { text?: string; image?: string }) => {
+                try {
+                    if (data.image) {
+                        const imageBuffer = Buffer.from(data.image, "base64");
+                        const image = await saveImage(imageBuffer);
 
-                io.to(roomId).emit("newMessage", newMessageResponse);
-            } catch (error) {
-                socket.emit("error", {
-                    message: "Failed to send message.",
-                });
+                        const newImageMessage = await userHandler.newMessage(
+                            socket.request.user,
+                            roomId,
+                            socket.request.base_url,
+                            undefined,
+                            image
+                        );
+
+                        io.to(roomId).emit("newMessage", newImageMessage);
+                    } else if (data.text) {
+                        const newMessageResponse = await userHandler.newMessage(
+                            socket.request.user,
+                            roomId,
+                            socket.request.base_url,
+                            data.text,
+                            undefined
+                        );
+
+                        io.to(roomId).emit("newMessage", newMessageResponse);
+                    } else {
+                        socket.emit("error", {
+                            message:
+                                "Invalid message format. Must contain either text or image.",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error in newMessage handler:", error);
+                    socket.emit("error", {
+                        message: "Failed to send message.",
+                    });
+                }
             }
-        });
+        );
+
+        // socket.on("newMessage", async (message) => {
+        //     try {
+        //         const newMessageResponse = await userHandler.newMessage(
+        //             socket.request.user,
+        //             roomId,
+        //             socket.request.base_url,
+        //             message
+        //         );
+
+        //         io.to(roomId).emit("newMessage", newMessageResponse);
+        //     } catch (error) {
+        //         socket.emit("error", {
+        //             message: "Failed to send message.",
+        //         });
+        //     }
+        // });
     });
 
     return io;
