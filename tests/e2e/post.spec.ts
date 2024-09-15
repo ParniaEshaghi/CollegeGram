@@ -5,9 +5,10 @@ import { createTestDb } from "../../src/utility/test-db";
 import { PostDto } from "../../src/modules/postHandler/post/dto/post.dto";
 import { ServiceFactory } from "../../src/utility/service-factory";
 import { UpdatePostDto } from "../../src/modules/postHandler/post/dto/updatePost.dto";
+import http from "http"
 
 describe("Post route test suite", () => {
-    let app: Express;
+    let app: http.Server;
     let serviceFactory: ServiceFactory;
 
     beforeAll(async () => {
