@@ -249,6 +249,40 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         );
     });
 
+    app.get("/suggestions", auth(userHandler), (req, res) => {
+        const user = req.query.user as string;
+        const post = req.query.post as string;
+        const limit = parseInt(req.query.limit as string) || 5;
+
+        handleExpress(res, () =>
+            userHandler.suggestionHandler(
+                req.user,
+                user,
+                post,
+                limit,
+                req.base_url
+            )
+        );
+    });
+
+    app.get("/search", auth(userHandler), (req, res) => {
+        const user = req.query.user as string;
+        const post = req.query.post as string;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        handleExpress(res, () =>
+            userHandler.searchHandler(
+                req.user,
+                user,
+                post,
+                page,
+                limit,
+                req.base_url
+            )
+        );
+    });
+
     app.get("/savedposts", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
