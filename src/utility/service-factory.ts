@@ -30,6 +30,10 @@ import { MessageRepository } from "../modules/userHandler/message/message.reposi
 import { MessageService } from "../modules/userHandler/message/message.service";
 import { ThreadRepository } from "../modules/userHandler/thread/thread.repository";
 import { ThreadService } from "../modules/userHandler/thread/thread.service";
+import { UserSearchHistoryRepository } from "../modules/userHandler/userSearchHistory/userSearchHistory.repository";
+import { UserSearchHistoryService } from "../modules/userHandler/userSearchHistory/userSearchHistory.service";
+import { PostSearchHistoryRepository } from "../modules/postHandler/postSearchHistory/postSearchHistory.repository";
+import { PostSearchHistoryService } from "../modules/postHandler/postSearchHistory/postSearchHistory.service";
 
 export class ServiceFactory {
     private dataSource: DataSource;
@@ -72,6 +76,12 @@ export class ServiceFactory {
     private threadRepo: ThreadRepository;
     private ThreadService: ThreadService;
 
+    private userSearchHistoryRepo: UserSearchHistoryRepository;
+    private userSearchHistoryService: UserSearchHistoryService;
+
+    private postSearchHistoryRepo: PostSearchHistoryRepository;
+    private postSearchHistoryService: PostSearchHistoryService;
+
     constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
 
@@ -87,9 +97,27 @@ export class ServiceFactory {
         this.userRelationRepository = new UserRelationRepository(
             this.dataSource
         );
+
+        this.userSearchHistoryRepo = new UserSearchHistoryRepository(
+            this.dataSource
+        );
+
+        this.userSearchHistoryService = new UserSearchHistoryService(
+            this.userSearchHistoryRepo
+        );
+
+        this.postSearchHistoryRepo = new PostSearchHistoryRepository(
+            this.dataSource
+        );
+
+        this.postSearchHistoryService = new PostSearchHistoryService(
+            this.postSearchHistoryRepo
+        );
+
         this.userService = new UserService(
             this.userRepository,
-            this.forgetPasswordService
+            this.forgetPasswordService,
+            this.userSearchHistoryService
         );
         this.userRelationService = new UserRelationService(
             this.userRelationRepository,
@@ -99,7 +127,8 @@ export class ServiceFactory {
         this.postService = new PostService(
             this.postRepository,
             this.userService,
-            this.userRelationService
+            this.userRelationService,
+            this.postSearchHistoryService
         );
         this.commentRepository = new CommentRepository(this.dataSource);
         this.commentService = new CommentService(

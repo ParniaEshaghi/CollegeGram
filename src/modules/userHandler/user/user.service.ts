@@ -23,11 +23,13 @@ import jwt from "jsonwebtoken";
 import { LoginDto } from "./dto/login.dto";
 import { EditProfileDto } from "./dto/edit-profile.dto";
 import { ForgetPasswordService } from "../forgetPassword/forgetPassword.service";
+import { UserSearchHistoryService } from "../userSearchHistory/userSearchHistory.service";
 
 export class UserService {
     constructor(
         private userRepo: UserRepository,
-        private forgetPasswordService: ForgetPasswordService
+        private forgetPasswordService: ForgetPasswordService,
+        private userSearchHistoryService: UserSearchHistoryService
     ) {}
 
     async createUser(dto: SignUpDto): Promise<UserWithoutPassword> {
@@ -148,6 +150,7 @@ export class UserService {
     }
 
     public async getUserSearchSuggestion(
+        user: User,
         query: string,
         baseUrl: string,
         limit: number
@@ -156,20 +159,39 @@ export class UserService {
             query,
             limit
         );
+
+        const history =
+            await this.userSearchHistoryService.getUserSearchHistory(
+                user,
+                limit
+            );
+
         if (queryResponse) {
-            return queryResponse.map((qr) => toUserSuggestion(qr, baseUrl));
+            const suggestions = queryResponse.map((qr) =>
+                toUserSuggestion(qr, baseUrl)
+            );
+            return {
+                suggestions: suggestions,
+                history: history,
+            };
         }
 
-        return [];
+        return {
+            suggestions: [],
+            history: history,
+        };
     }
 
     public async userSearch(
-        // user: User,
+        user: User,
         query: string,
-        // baseUrl: string,
         page: number,
         limit: number
     ) {
+        await this.userSearchHistoryService.createUserSearchHistory(
+            user,
+            query
+        );
         return await this.userRepo.userSearch(query, page, limit);
     }
 }

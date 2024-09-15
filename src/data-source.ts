@@ -12,6 +12,8 @@ import { NotificationEntity } from "./modules/userHandler/notification/entity/no
 import { UserNotificationEntity } from "./modules/userHandler/notification/userNotification/entity/userNotification.entity";
 import { MessageEntity } from "./modules/userHandler/message/entity/message.entity";
 import { ThreadEntity } from "./modules/userHandler/thread/entity/thread.entity";
+import { PostSearchHistoryEntity } from "./modules/postHandler/postSearchHistory/entity/postSearchHistory.entity";
+import { UserSearchHistoryEntity } from "./modules/userHandler/userSearchHistory/entity/userSearchHistory.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -35,6 +37,8 @@ export const AppDataSource = new DataSource({
         UserNotificationEntity,
         MessageEntity,
         ThreadEntity,
+        PostSearchHistoryEntity,
+        UserSearchHistoryEntity,
     ],
     migrations: [],
     subscribers: [],

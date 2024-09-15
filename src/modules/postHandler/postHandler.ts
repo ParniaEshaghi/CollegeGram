@@ -228,11 +228,24 @@ export class PostHandler {
         return await this.postService.getMentionedPosts(username, page, limit);
     }
 
-    public async getPostSearchSuggestion(query: string, limit: number) {
-        return await this.postService.getPostSearchSuggestion(query, limit);
+    public async getPostSearchSuggestion(
+        user: User,
+        query: string,
+        limit: number
+    ) {
+        return await this.postService.getPostSearchSuggestion(
+            user,
+            query,
+            limit
+        );
     }
 
-    public async postSearch(query: string, page: number, limit: number) {
-        return await this.postService.postSearch(query, page, limit);
+    public async postSearch(
+        user: User,
+        query: string,
+        page: number,
+        limit: number
+    ) {
+        return await this.postService.postSearch(user, query, page, limit);
     }
 }

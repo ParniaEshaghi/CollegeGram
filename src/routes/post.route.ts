@@ -133,7 +133,7 @@ export const makePostRouter = (
         const limit = parseInt(req.query.limit as string) || 5;
 
         handleExpress(res, () =>
-            postHandler.getPostSearchSuggestion(query, limit)
+            postHandler.getPostSearchSuggestion(req.user, query, limit)
         );
     });
 

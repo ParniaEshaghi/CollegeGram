@@ -230,7 +230,12 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         const limit = parseInt(req.query.limit as string) || 5;
 
         handleExpress(res, () =>
-            userHandler.getUserSearchSuggestion(query, req.base_url, limit)
+            userHandler.getUserSearchSuggestion(
+                req.user,
+                query,
+                req.base_url,
+                limit
+            )
         );
     });
 
@@ -253,7 +258,7 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         );
     });
 
-        app.get("/messages", auth(userHandler), (req, res) => {
+    app.get("/messages", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
 

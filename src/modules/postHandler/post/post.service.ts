@@ -17,12 +17,14 @@ import { UpdatePostDto } from "./dto/updatePost.dto";
 import { UserService } from "../../userHandler/user/user.service";
 import { UserRelation } from "../../userHandler/userRelation/model/userRelation.model";
 import { UserRelationService } from "../../userHandler/userRelation/userRelation.service";
+import { PostSearchHistoryService } from "../postSearchHistory/postSearchHistory.service";
 
 export class PostService {
     constructor(
         private postRepo: PostRepository,
         private userService: UserService,
-        private userRelationService: UserRelationService
+        private userRelationService: UserRelationService,
+        private postSearchHistoryService: PostSearchHistoryService
     ) {}
 
     public async createPost(
@@ -153,7 +155,11 @@ export class PostService {
         return await this.postRepo.getMentionedPosts(username, page, limit);
     }
 
-    public async getPostSearchSuggestion(query: string, limit: number) {
+    public async getPostSearchSuggestion(
+        user: User,
+        query: string,
+        limit: number
+    ) {
         const queryResponse = await this.postRepo.getPostSearchSuggestion(
             query,
             limit
@@ -170,10 +176,25 @@ export class PostService {
             tags.push(...matchingTags);
         }
 
-        return tags;
+        const postSearchHistory =
+            await this.postSearchHistoryService.getPostSearchHistory(
+                user,
+                limit
+            );
+
+        return { tags: tags, history: postSearchHistory };
     }
 
-    public async postSearch(query: string, page: number, limit: number) {
+    public async postSearch(
+        user: User,
+        query: string,
+        page: number,
+        limit: number
+    ) {
+        await this.postSearchHistoryService.createPostSearchHistory(
+            user,
+            query
+        );
         return await this.postRepo.postSearch(query, page, limit);
     }
 }

@@ -589,11 +589,13 @@ export class UserHandler {
     }
 
     public async getUserSearchSuggestion(
+        user: User,
         query: string,
         baseUrl: string,
         limit: number
     ) {
         return await this.userService.getUserSearchSuggestion(
+            user,
             query,
             baseUrl,
             limit
@@ -608,6 +610,7 @@ export class UserHandler {
         limit: number
     ): Promise<userSearchResponse> {
         const { data, total } = await this.userService.userSearch(
+            user,
             query,
             page,
             limit
@@ -720,7 +723,12 @@ export class UserHandler {
         limit: number,
         baseUrl: string
     ) {
-        const posts = await this.postHandler.postSearch(query, page, limit);
+        const posts = await this.postHandler.postSearch(
+            user,
+            query,
+            page,
+            limit
+        );
 
         const shownPosts = [];
         for (const post of posts.data) {
