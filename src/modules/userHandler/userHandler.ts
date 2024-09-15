@@ -91,6 +91,8 @@ export class UserHandler {
         const following_count =
             await this.userRelationService.getFollowingCount(user.username);
         const post_count = await this.postHandler.getPostCount(user.username);
+        const unreadMessages =
+            await this.threadService.getUserUnreadMessagesCount(user);
         return toProfileInfo(
             user,
             posts,
@@ -99,7 +101,8 @@ export class UserHandler {
             unreadUserFollowingNotifications,
             follower_count,
             following_count,
-            post_count
+            post_count,
+            unreadMessages
         );
     }
 
@@ -810,14 +813,8 @@ export class UserHandler {
         );
     }
 
-    public async getThread(
-        user: User,
-        username: string,
-    ) {
-        return await this.threadService.getThread(
-            user,
-            username,
-        );
+    public async getThread(user: User, username: string) {
+        return await this.threadService.getThread(user, username);
     }
 
     public async getThreadHistory(

@@ -22,8 +22,31 @@ export class MessageService {
         return toShownMessage(newMesg, base_url);
     }
 
-    public async getThreadUnreadCount(thread: Thread) {
-        return await this.messageRepo.getThreadUnreadCount(thread);
+    public async getUnreadThreadCount(
+        threadId: string,
+        otherParticipantUsername: string
+    ) {
+        const { data, total } = await this.messageRepo.getUnreadThreadMessages(
+            threadId,
+            otherParticipantUsername
+        );
+
+        return total;
+    }
+
+    public async markThreadAsRead(
+        threadId: string,
+        otherParticipantUsername: string
+    ) {
+        const { data, total } = await this.messageRepo.getUnreadThreadMessages(
+            threadId,
+            otherParticipantUsername
+        );
+
+        data.map(
+            async (message) =>
+                await this.messageRepo.markMessageAsRead(message.id)
+        );
     }
 
     public async getThreadLastMessage(threadId: string) {

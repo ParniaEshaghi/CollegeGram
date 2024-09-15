@@ -45,6 +45,7 @@ export type ProfileInfo = Omit<User, "password"> & {
     unreadNotifications: number;
     unreadUserNotifications: number;
     unreadUserFollowingNotifications: number;
+    unreadMessages: number;
 };
 
 export const toProfileInfo = (
@@ -55,7 +56,8 @@ export const toProfileInfo = (
     unreadUserFollowingNotifications: number,
     follower_count: number,
     following_count: number,
-    post_count: number
+    post_count: number,
+    unreadMessages: number
 ): ProfileInfo => {
     const { password, profilePicture, ...profileInfo } = user;
     return {
@@ -71,6 +73,7 @@ export const toProfileInfo = (
         follower_count,
         following_count,
         post_count,
+        unreadMessages,
     };
 };
 

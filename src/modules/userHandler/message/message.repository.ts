@@ -13,13 +13,6 @@ export class MessageRepository {
         return await this.messageRepo.save(message);
     }
 
-    public async getThreadUnreadCount(thread: Thread): Promise<number> {
-        const threadUnreadCount = await this.messageRepo.count({
-            where: { thread: thread, isRead: false },
-        });
-        return threadUnreadCount;
-    }
-
     public async getThreadLastMessage(
         threadId: string
     ): Promise<MessageEntity> {
@@ -58,5 +51,27 @@ export class MessageRepository {
         });
 
         return { data: response, total: total };
+    }
+
+    public async getUnreadThreadMessages(
+        threadId: string,
+        otherParticipantUsername: string
+    ) {
+        const [response, total] = await this.messageRepo.findAndCount({
+            where: {
+                thread: {
+                    id: threadId,
+                },
+                sender: { username: otherParticipantUsername },
+                isRead: false,
+            },
+            relations: ["thread", "sender"],
+        });
+
+        return { data: response, total: total };
+    }
+
+    public async markMessageAsRead(messageId: string) {
+        await this.messageRepo.update({ id: messageId }, { isRead: true });
     }
 }

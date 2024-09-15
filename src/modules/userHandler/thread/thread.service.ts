@@ -25,15 +25,17 @@ export class ThreadService {
         const threads = await this.threadRepo.getUserThreads(user, page, limit);
         const shownThreads = [];
         for (const thread of threads.data) {
-            const unreadMessages =
-                await this.messageService.getThreadUnreadCount(thread);
             const lastMessage = await this.messageService.getThreadLastMessage(
                 thread.id
             );
             const otherParticipant = thread.participants.filter(
                 (participant) => participant.username !== user.username
             );
-            console.log(lastMessage);
+            const unreadMessages =
+                await this.messageService.getUnreadThreadCount(
+                    thread.id,
+                    otherParticipant[0].username
+                );
             shownThreads.push(
                 toListThread(
                     otherParticipant[0],
@@ -57,10 +59,7 @@ export class ThreadService {
         return response;
     }
 
-    public async getThread(
-        user: User,
-        username: string,
-    ) {
+    public async getThread(user: User, username: string) {
         const otherParticipant = await this.userService.getUserByUsername(
             username
         );
@@ -77,6 +76,10 @@ export class ThreadService {
             ? existingThread
             : await this.addNewThread([user, otherParticipant]);
 
+        await this.messageService.markThreadAsRead(
+            thread.id,
+            otherParticipant.username
+        );
         return thread.id;
     }
 
@@ -114,5 +117,25 @@ export class ThreadService {
             throw new NotFoundError();
         }
         return thread;
+    }
+
+    public async getUserUnreadMessagesCount(user: User) {
+        const threads = await this.threadRepo.getAllUserThreads(user);
+
+        let sum: number = 0;
+
+        for (const thread of threads.data) {
+            const otherParticipant = thread.participants.filter(
+                (participant) => participant.username !== user.username
+            );
+            const unreadMessages =
+                await this.messageService.getUnreadThreadCount(
+                    thread.id,
+                    otherParticipant[0].username
+                );
+            sum += unreadMessages;
+        }
+
+        return sum;
     }
 }

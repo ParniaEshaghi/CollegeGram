@@ -13,21 +13,6 @@ export class ThreadRepository {
         return await this.threadRepo.save(thread);
     }
 
-    // public async getUserThreads(user: User, page: number, limit: number) {
-    //     const query = this.threadRepo
-    //         .createQueryBuilder("thread")
-    //         .leftJoinAndSelect("thread.participants", "participant")
-    //         .where("participant.username = :username", {
-    //             username: user.username,
-    //         })
-    //         .skip((page - 1) * limit)
-    //         .take(limit);
-
-    //     const [threads, total] = await query.getManyAndCount();
-
-    //     return { data: threads, total: total };
-    // }
-
     public async getUserThreads(user: User, page: number, limit: number) {
         const query = this.threadRepo
             .createQueryBuilder("thread")
@@ -46,21 +31,21 @@ export class ThreadRepository {
         return { data: threads, total: total };
     }
 
-    // public async getThreadByParticipants(participants: User[]) {
-    //     const participantsUsernames = participants.map(
-    //         (participant) => participant.username
-    //     );
-    //     return await this.threadRepo.findOne({
-    //         where: [
-    //             {
-    //                 participants: {
-    //                     username: In(participantsUsernames),
-    //                 },
-    //             },
-    //         ],
-    //         relations: ["participants"],
-    //     });
-    // }
+    public async getAllUserThreads(user: User) {
+        const query = this.threadRepo
+            .createQueryBuilder("thread")
+            .leftJoinAndSelect("thread.participants", "participant") // Fetch all participants
+            .leftJoin("thread.participants", "userParticipant") // Join again to filter by the specific user
+            .leftJoin("thread.messages", "message") // Join the messages relation
+            .where("userParticipant.username = :username", {
+                username: user.username,
+            }) // Ensure the user is part of the thread
+            .andWhere("message.id IS NOT NULL"); // Ensure there are messages
+
+        const [threads, total] = await query.getManyAndCount();
+
+        return { data: threads, total: total };
+    }
 
     public async getThreadByParticipants(participants: User[]) {
         const participantsUsernames = participants.map(
