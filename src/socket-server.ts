@@ -131,6 +131,7 @@ export const setupSocketServer = (
                     console.error("Error in newMessage handler:", error);
                     socket.emit("error", {
                         message: "Failed to send message.",
+                        error: error,
                     });
                 }
             }
