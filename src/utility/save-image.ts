@@ -3,7 +3,7 @@ import path from "path";
 
 export const saveImage = async (imageBuffer: Buffer): Promise<string> => {
     // Define the path where the image will be saved
-    const uploadsDir = "/home/parnia/repos/cgram-back/images/messages";
+    const uploadsDir = "../images/messages";
     const fileName = `image_${Date.now()}.png`;
     const filePath = path.join(uploadsDir, fileName);
 
