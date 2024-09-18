@@ -14,9 +14,10 @@ export const socketAuth = (userHandler: UserHandler) => {
                 ? parseCookies(socket.handshake.headers.cookie)
                 : {},
             headers: {
-                authorization: socket.handshake.headers.authorization,
+                authorization: socket.handshake.headers.authorization || socket.handshake.auth?.token,
             },
-        } as Request;
+            auth: socket.handshake.auth,
+        } as unknown as Request;
 
         // Create a fake Express response object
         const res = {

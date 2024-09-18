@@ -16,6 +16,10 @@ const getToken = (req: Request): string | undefined => {
         return req.headers["authorization"].split(" ")[1];
     }
 
+    if (req.auth && req.auth.token) {
+        return req.auth.token;
+    }
+
     return undefined;
 };
 
