@@ -7,8 +7,7 @@
         "start": "ts-node ./src/main.ts",
         "typeorm:migrate": "npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d ./src/data-source.ts",
         "test": "jest --testMatch **/tests/unit/**/*.spec.ts",
-        "test:e2e": "jest --testMatch **/tests/e2e/**/*.spec.ts",
-        "build": "tsc"
+        "test:e2e": "jest --testMatch **/tests/e2e/**/*.spec.ts"
     },
     "keywords": [],
     "author": "",
