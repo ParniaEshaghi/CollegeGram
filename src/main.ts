@@ -1,3 +1,4 @@
+import { string } from "zod";
 import { makeApp } from "./api";
 import { AppDataSource } from "./data-source";
 import { User } from "./modules/userHandler/user/model/user.model";
@@ -11,6 +12,7 @@ declare global {
             user: User;
             token: string;
             base_url: string;
+            auth: { token: string };
         }
     }
 }
@@ -20,6 +22,7 @@ declare module "http" {
         user: User;
         token: string;
         base_url: string;
+        auth: { token: string };
     }
 }
 
