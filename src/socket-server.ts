@@ -33,7 +33,7 @@ export const setupSocketServer = (
     io.on("connection", (socket) => {
         let roomId: string;
 
-        socket.on("joinThread", async (username) => {
+        socket.on("join", async (username) => {
             try {
                 const threadId = await userHandler.getThread(
                     socket.request.user,
@@ -69,7 +69,7 @@ export const setupSocketServer = (
             }
         });
 
-        socket.on("threadHistory", async (page = 1, limit = 10) => {
+        socket.on("history", async (page = 1, limit = 10) => {
             try {
                 const data = await userHandler.getThreadHistory(
                     roomId,
@@ -131,7 +131,7 @@ export const setupSocketServer = (
                     console.error("Error in newMessage handler:", error);
                     socket.emit("error", {
                         message: "Failed to send message.",
-                        error: error,
+                        // error: error,
                     });
                 }
             }
