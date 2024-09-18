@@ -33,7 +33,7 @@ build:
 
     - echo "Deploying the Docker image..."
     # Login to Docker registry
-    - docker login -u mrmahdifardi -p 9gdU9jib42RjAGVxA1! registry.hamdocker.ir
+    - docker login -u $HAMDOCKER_USERNAME -p $HAMDOCKER_PASSWORD registry.hamdocker.ir
     # Tag the built image for the registry
     - docker tag back-v1:${CI_COMMIT_SHA} registry.hamdocker.ir/mrmahdifardi/back-v1:latest
     # Push the image to the Docker registry
@@ -47,7 +47,7 @@ deploy:
     # Use SSH to run commands on the server
     - ssh -v ubuntu@37.32.6.230 "
       cd /home/ubuntu/back-dockerized/cgram-back &&
-      docker login -u mrmahdifardi -p 9gdU9jib42RjAGVxA1! registry.hamdocker.ir &&
+      docker login -u $HAMDOCKER_USERNAME -p $HAMDOCKER_PASSWORD registry.hamdocker.ir &&
       docker-compose down &&
       docker-compose pull &&
       docker-compose up -d
