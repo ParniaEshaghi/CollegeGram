@@ -78,8 +78,8 @@ export class PostService {
     }
 
     private extractTags(caption: string): string[] {
-        const tags = caption.match(/#\w+/g);
-        return tags ? tags.map((tag) => tag.toLocaleLowerCase()) : [];
+        const tags = caption.match(/#([\p{L}\p{N}_]+)/gu);
+        return tags ? tags.map((tag) => tag.slice(1).toLocaleLowerCase()) : [];
     }
 
     public async updatePost(
