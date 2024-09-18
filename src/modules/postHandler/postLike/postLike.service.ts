@@ -1,8 +1,4 @@
-import {
-    BadRequestError,
-    NotFoundError,
-    UnauthorizedError,
-} from "../../../utility/http-errors";
+import { BadRequestError } from "../../../utility/http-errors";
 import { User } from "../../userHandler/user/model/user.model";
 import { PostService } from "../post/post.service";
 import { PostLikeRepository } from "./postLike.repository";
@@ -29,6 +25,7 @@ export class PostLikeService {
         }
 
         await this.postLikeRepo.create(user, post);
+        await this.getPostLikeCount(post.id);
         return { message: "Post liked" };
     }
 
@@ -41,10 +38,12 @@ export class PostLikeService {
         }
 
         await this.postLikeRepo.delete(user, post);
+        await this.getPostLikeCount(post.id);
         return { message: "Post unliked" };
     }
 
-    public async getPostLikeCount(postId: string): Promise<number> {
-        return await this.postLikeRepo.getPostLikeCount(postId);
+    private async getPostLikeCount(postId: string) {
+        const count = await this.postLikeRepo.getPostLikeCount(postId);
+        await this.postService.setLikeCount(postId, count);
     }
 }

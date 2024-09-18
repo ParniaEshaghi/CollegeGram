@@ -61,6 +61,8 @@ export class UserRelationService {
                 followStatus: "followed",
             };
             await this.userRelationRepo.createFollow(relation);
+            await this.getFollowerFollowingCount(user.username);
+            await this.getFollowerFollowingCount(following.username);
             return { message: "User followed" };
         } else {
             const relation: UserRelation = {
@@ -98,6 +100,8 @@ export class UserRelationService {
                 followStatus: "unfollowed",
             };
             await this.userRelationRepo.deleteFollow(relation);
+            await this.getFollowerFollowingCount(user.username);
+            await this.getFollowerFollowingCount(following.username);
             return { message: "User unfollowed" };
         } else {
             const relation: UserRelation = {
@@ -106,7 +110,6 @@ export class UserRelationService {
                 followStatus: "request rescinded",
             };
             await this.userRelationRepo.deleteFollowRequest(relation);
-
             return { message: "Follow request rescinded" };
         }
     }
@@ -131,6 +134,8 @@ export class UserRelationService {
             followStatus: "follower deleted",
         };
         await this.userRelationRepo.deleteFollow(relation);
+        await this.getFollowerFollowingCount(user.username);
+        await this.getFollowerFollowingCount(follower.username);
         return { message: "Follower deleted" };
     }
 
@@ -154,6 +159,8 @@ export class UserRelationService {
             followStatus: "request accepted",
         };
         await this.userRelationRepo.createFollowAccepted(relation);
+        await this.getFollowerFollowingCount(user.username);
+        await this.getFollowerFollowingCount(follower.username);
         return { message: "Follow request accepted" };
     }
 
@@ -199,6 +206,8 @@ export class UserRelationService {
             await this.userRelationRepo.deleteLastReverseRelation(relation);
         }
         await this.userRelationRepo.createBlocked(relation);
+        await this.getFollowerFollowingCount(user.username);
+        await this.getFollowerFollowingCount(following.username);
         return { message: "User blocked" };
     }
 
@@ -297,20 +306,12 @@ export class UserRelationService {
                 followStatus,
                 reverse_followStatus
             );
-            const follower_count = await this.getFollowerCount(
-                follower.username
-            );
-            const following_count = await this.getFollowingCount(
-                follower.username
-            );
 
             followerListData.push(
                 toFollowerFollowingListUser(
                     follower,
                     baseUrl,
-                    profileFollowStatus,
-                    follower_count,
-                    following_count
+                    profileFollowStatus
                 )
             );
         }
@@ -355,19 +356,11 @@ export class UserRelationService {
                 followStatus,
                 reverse_followStatus
             );
-            const follower_count = await this.getFollowerCount(
-                following.username
-            );
-            const following_count = await this.getFollowingCount(
-                following.username
-            );
             followingListData.push(
                 toFollowerFollowingListUser(
                     following,
                     baseUrl,
-                    profileFollowStatus,
-                    follower_count,
-                    following_count
+                    profileFollowStatus
                 )
             );
         }
@@ -418,18 +411,8 @@ export class UserRelationService {
                 followStatus,
                 reverse_followStatus
             );
-            const follower_count = await this.getFollowerCount(close.username);
-            const following_count = await this.getFollowingCount(
-                close.username
-            );
             closeListData.push(
-                toFollowerFollowingListUser(
-                    close,
-                    baseUrl,
-                    profileFollowStatus,
-                    follower_count,
-                    following_count
-                )
+                toFollowerFollowingListUser(close, baseUrl, profileFollowStatus)
             );
         }
 
@@ -471,18 +454,8 @@ export class UserRelationService {
                 followStatus,
                 reverse_followStatus
             );
-            const follower_count = await this.getFollowerCount(block.username);
-            const following_count = await this.getFollowingCount(
-                block.username
-            );
             blockListData.push(
-                toFollowerFollowingListUser(
-                    block,
-                    baseUrl,
-                    profileFollowStatus,
-                    follower_count,
-                    following_count
-                )
+                toFollowerFollowingListUser(block, baseUrl, profileFollowStatus)
             );
         }
 
@@ -501,11 +474,17 @@ export class UserRelationService {
         return await this.userRelationRepo.getAllBlockList(user);
     }
 
-    public async getFollowerCount(username: string): Promise<number> {
-        return await this.userRelationRepo.getFollowerCount(username);
-    }
-
-    public async getFollowingCount(username: string): Promise<number> {
-        return await this.userRelationRepo.getFollowingCount(username);
+    private async getFollowerFollowingCount(username: string) {
+        const follower_count = await this.userRelationRepo.getFollowerCount(
+            username
+        );
+        const following_count = await this.userRelationRepo.getFollowingCount(
+            username
+        );
+        await this.userService.setFollowerFollowingCount(
+            username,
+            follower_count,
+            following_count
+        );
     }
 }

@@ -8,6 +8,9 @@ export interface Post {
     tags: string[];
     mentions: string[];
     close_status: "close" | "normal";
+    like_count: number;
+    comment_count: number;
+    saved_count: number;
 }
 
 export const toPostWithImage = (post: Post, baseUrl: string): Post => {
@@ -20,9 +23,15 @@ export const toPostWithImage = (post: Post, baseUrl: string): Post => {
     };
 };
 
-export type CreatePost = Omit<Post, "id">;
+export type CreatePost = Omit<
+    Post,
+    "id" | "like_count" | "comment_count" | "saved_count"
+>;
 
-export type UpdatePost = Post;
+export type UpdatePost = Omit<
+    Post,
+    "like_count" | "comment_count" | "saved_count"
+>;
 
 export type PostWithUsername = Omit<Post, "user"> & {
     username: string;
@@ -35,9 +44,6 @@ export type PostPage = PostWithUsername & {
     follower_count: number;
     like_status: boolean;
     save_status: boolean;
-    like_count: number;
-    saved_count: number;
-    comment_count: number;
 };
 
 export const toPostWithUsername = (
@@ -64,12 +70,8 @@ export const toPostPage = (
     post_user: User,
     post: Post,
     baseUrl: string,
-    follower_count: number,
     like_status: boolean,
-    save_status: boolean,
-    like_count: number,
-    saved_count: number,
-    comment_count: number
+    save_status: boolean
 ): PostPage => {
     const { user, images, ...postDetails } = post;
     return {
@@ -77,7 +79,7 @@ export const toPostPage = (
         username: post_user.username,
         firstname: post_user.firstname,
         lastname: post_user.lastname,
-        follower_count,
+        follower_count: post_user.follower_count,
         profilePicture: post_user.profilePicture
             ? `${baseUrl}/api/images/profiles/${post_user.profilePicture}`
             : "",
@@ -86,8 +88,8 @@ export const toPostPage = (
         ),
         like_status,
         save_status,
-        like_count,
-        saved_count,
-        comment_count,
+        like_count: post.like_count,
+        saved_count: post.saved_count,
+        comment_count: post.comment_count,
     };
 };

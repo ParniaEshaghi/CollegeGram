@@ -192,4 +192,20 @@ export class UserService {
         );
         return await this.userRepo.userSearch(query, page, limit);
     }
+
+    public async setPostCount(username: string, post_count: number) {
+        return await this.userRepo.setPostCount(username, post_count);
+    }
+
+    public async setFollowerFollowingCount(
+        username: string,
+        follower_count: number,
+        following_count: number
+    ) {
+        return await this.userRepo.setFollowerFollowingCount(
+            username,
+            follower_count,
+            following_count
+        );
+    }
 }

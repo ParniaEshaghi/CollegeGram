@@ -25,6 +25,7 @@ export class CommentLikeService {
         }
 
         await this.commentLikeRepo.create(user, comment);
+        await this.getCommentLikeCount(comment.id);
         return { message: "Comment liked" };
     }
 
@@ -37,10 +38,12 @@ export class CommentLikeService {
         }
 
         await this.commentLikeRepo.delete(user, comment);
+        await this.getCommentLikeCount(comment.id);
         return { message: "Comment unliked" };
     }
 
-    public async getCommentLikeCount(commentId: string) {
-        return await this.commentLikeRepo.getCommentLikeCount(commentId);
+    private async getCommentLikeCount(commentId: string) {
+        const count = await this.commentLikeRepo.getCommentLikeCount(commentId);
+        await this.commentService.setLikeCount(commentId, count);
     }
 }

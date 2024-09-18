@@ -81,16 +81,7 @@ export class UserHandler {
                 user
             );
 
-        // const unreadNotifications =
-        //     unreadUserNotifications + unreadUserFollowingNotifications;
-
         const posts = await this.getUserPosts(user.username, baseUrl);
-        const follower_count = await this.userRelationService.getFollowerCount(
-            user.username
-        );
-        const following_count =
-            await this.userRelationService.getFollowingCount(user.username);
-        const post_count = await this.postHandler.getPostCount(user.username);
         const unreadMessages =
             await this.threadService.getUserUnreadMessagesCount(user);
         return toProfileInfo(
@@ -99,9 +90,6 @@ export class UserHandler {
             baseUrl,
             unreadUserNotifications,
             unreadUserFollowingNotifications,
-            follower_count,
-            following_count,
-            post_count,
             unreadMessages
         );
     }
@@ -120,27 +108,13 @@ export class UserHandler {
                 post.id
             );
 
-            const follower_count =
-                await this.userRelationService.getFollowerCount(user.username);
-            const like_count = await this.postHandler.getPostLikeCount(post.id);
-            const saved_count = await this.postHandler.getSavedPostCount(
-                post.id
-            );
-            const comment_count = await this.postHandler.getCommentCount(
-                post.id
-            );
-
             profilePosts.push(
                 toPostPage(
                     user,
                     post,
                     baseUrl,
-                    follower_count,
                     like_status,
                     save_status,
-                    like_count,
-                    saved_count,
-                    comment_count
                 )
             );
         }
@@ -205,13 +179,6 @@ export class UserHandler {
             reverse_followStatus
         );
 
-        const follower_count = await this.userRelationService.getFollowerCount(
-            user.username
-        );
-        const following_count =
-            await this.userRelationService.getFollowingCount(user.username);
-        const post_count = await this.postHandler.getPostCount(user.username);
-
         if (
             profileFollowStatus.followStatus === "blocked" ||
             profileFollowStatus.reverseFollowStatus === "blocked" ||
@@ -223,9 +190,6 @@ export class UserHandler {
                 profileFollowStatus,
                 [],
                 baseUrl,
-                follower_count,
-                following_count,
-                post_count
             );
         }
 
@@ -240,9 +204,6 @@ export class UserHandler {
                 profileFollowStatus,
                 normalPosts,
                 baseUrl,
-                follower_count,
-                following_count,
-                post_count
             );
         } else if (followStatus === "close") {
             return toProfile(
@@ -250,9 +211,6 @@ export class UserHandler {
                 profileFollowStatus,
                 posts,
                 baseUrl,
-                follower_count,
-                following_count,
-                post_count
             );
         }
         return toProfile(
@@ -260,9 +218,6 @@ export class UserHandler {
             profileFollowStatus,
             normalPosts,
             baseUrl,
-            follower_count,
-            following_count,
-            post_count
         );
     }
 
@@ -634,11 +589,6 @@ export class UserHandler {
                 reverse_followStatus
             );
 
-            const follower_count =
-                await this.userRelationService.getFollowerCount(
-                    userSearch.username
-                );
-
             const searchUser: userSearchUser = {
                 username: userSearch.username,
                 firstname: userSearch.firstname,
@@ -649,7 +599,7 @@ export class UserHandler {
                 profilePicture: userSearch.profilePicture
                     ? `${baseUrl}/api/images/profiles/${userSearch.profilePicture}`
                     : "",
-                follower_count: follower_count,
+                follower_count: userSearch.follower_count,
             };
             userSearchUserList.push(searchUser);
         }
@@ -838,23 +788,12 @@ export class UserHandler {
             post.id
         );
 
-        const follower_count = await this.userRelationService.getFollowerCount(
-            post.user.username
-        );
-        const like_count = await this.postHandler.getPostLikeCount(post.id);
-        const saved_count = await this.postHandler.getSavedPostCount(post.id);
-        const comment_count = await this.postHandler.getCommentCount(post.id);
-
         return toPostPage(
             post.user,
             post,
             baseUrl,
-            follower_count,
             like_status,
             save_status,
-            like_count,
-            saved_count,
-            comment_count
         );
     }
 }

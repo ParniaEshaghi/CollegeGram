@@ -102,7 +102,7 @@ export class PostRepository {
                 "LOWER(ARRAY_TO_STRING(post.tags, ',')) LIKE LOWER(:query)",
                 { query: `%${query}%` }
             )
-            .orderBy("post.createdAt", "DESC")
+            .orderBy("post.like_count", "DESC")
             .take(limit)
             .getMany();
 
@@ -118,7 +118,7 @@ export class PostRepository {
                 "LOWER(ARRAY_TO_STRING(post.tags, ',')) LIKE LOWER(:query)",
                 { query: `%${query}%` }
             )
-            .orderBy("post.createdAt", "DESC")
+            .orderBy("post.like_count", "DESC")
             .skip((page - 1) * limit)
             .take(limit)
             .getManyAndCount();
@@ -127,5 +127,26 @@ export class PostRepository {
             data: response[0],
             total: response[1],
         };
+    }
+
+    public async setLikeCount(
+        postId: string,
+        like_count: number
+    ): Promise<void> {
+        await this.postRepo.update({ id: postId }, { like_count });
+    }
+
+    public async setSavedCount(
+        postId: string,
+        saved_count: number
+    ): Promise<void> {
+        await this.postRepo.update({ id: postId }, { saved_count });
+    }
+
+    public async setCommentCount(
+        postId: string,
+        comment_count: number
+    ): Promise<void> {
+        await this.postRepo.update({ id: postId }, { comment_count });
     }
 }

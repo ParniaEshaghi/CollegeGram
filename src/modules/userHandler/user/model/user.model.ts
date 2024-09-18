@@ -13,6 +13,9 @@ export interface User {
     lastname: string;
     profileStatus: "public" | "private";
     bio: string;
+    follower_count: number;
+    following_count: number;
+    post_count: number;
 }
 
 export interface CreateUser {
@@ -38,9 +41,6 @@ export const toUserWithoutPassword = (user: User): UserWithoutPassword => {
 };
 
 export type ProfileInfo = Omit<User, "password"> & {
-    follower_count: number;
-    following_count: number;
-    post_count: number;
     posts: any[];
     unreadNotifications: number;
     unreadUserNotifications: number;
@@ -54,9 +54,6 @@ export const toProfileInfo = (
     baseUrl: string,
     unreadUserNotifications: number,
     unreadUserFollowingNotifications: number,
-    follower_count: number,
-    following_count: number,
-    post_count: number,
     unreadMessages: number
 ): ProfileInfo => {
     const { password, profilePicture, ...profileInfo } = user;
@@ -70,9 +67,9 @@ export const toProfileInfo = (
             unreadUserNotifications + unreadUserFollowingNotifications,
         unreadUserNotifications: unreadUserNotifications,
         unreadUserFollowingNotifications: unreadUserFollowingNotifications,
-        follower_count,
-        following_count,
-        post_count,
+        follower_count: user.follower_count,
+        following_count: user.following_count,
+        post_count: user.post_count,
         unreadMessages,
     };
 };
@@ -101,7 +98,13 @@ export const toEditProfileInfo = (
 
 export type UserSearchSuggestion = Omit<
     User,
-    "password" | "email" | "profileStatus" | "bio"
+    | "password"
+    | "email"
+    | "profileStatus"
+    | "bio"
+    | "follower_count"
+    | "following_count"
+    | "post_count"
 >;
 
 export const toUserSuggestion = (
@@ -118,10 +121,12 @@ export const toUserSuggestion = (
             : "",
     };
 };
-export type userSearchUser = Omit<User, "password" | "email" | "bio"> & {
+export type userSearchUser = Omit<
+    User,
+    "password" | "email" | "bio" | "post_count" | "following_count"
+> & {
     followStatus: PFollowStatus;
     reverseFollowStatus: PFollowStatus;
-    follower_count: number;
 };
 
 export type userSearchResponse = {
