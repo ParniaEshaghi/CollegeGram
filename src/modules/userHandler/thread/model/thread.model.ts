@@ -39,6 +39,8 @@ export const toListThread = (
         updatedAt: lastMessage.createdAt,
         lastMessageSenderUsername: lastMessage.sender.username,
         lastMessageType: lastMessage.image ? "image" : "text",
-        lastMessageText: lastMessage.text ? lastMessage.text : undefined,
+        lastMessageText: lastMessage.text
+            ? lastMessage.text
+            : "یک عکس فرستاده شده است",
     };
 };
