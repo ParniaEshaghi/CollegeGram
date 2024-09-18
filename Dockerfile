@@ -31,4 +31,4 @@ COPY --from=build /src/app/node_modules ./node_modules
 EXPOSE 3000
 
 # Run the application
-CMD ["node", "./dist/src/main.js"]
+CMD ["node", "./dist/main.js"]
