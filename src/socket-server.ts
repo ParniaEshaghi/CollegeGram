@@ -51,8 +51,7 @@ export const setupSocketServer = (
                 socket.join(roomId);
 
                 io.to(roomId).emit("connection", {
-                    message: `Joined thread with ${username}`,
-                    status: 200,
+                    username: username,
                 });
             } catch (error) {
                 if (error instanceof NotFoundError) {
