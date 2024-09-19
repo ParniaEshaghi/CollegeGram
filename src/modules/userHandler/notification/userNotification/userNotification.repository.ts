@@ -7,6 +7,7 @@ import {
 import { User } from "../../user/model/user.model";
 import { Notification } from "../model/notification.model";
 import { UserRelationEntity } from "../../userRelation/entity/userRelation.entity";
+import { response } from "express";
 
 export class UserNotificationRepository {
     private userNotificationRepo: Repository<UserNotificationEntity>;
@@ -71,19 +72,24 @@ export class UserNotificationRepository {
         return response;
     }
 
-    public async getUserNotifUnreadCount(user: User): Promise<number> {
-        const [reponse, total] = await this.userNotificationRepo.findAndCount({
+    public async getUserNotifUnreadCount(user: User) {
+        const [response, total] = await this.userNotificationRepo.findAndCount({
             where: { user: { username: user.username }, isRead: false },
-            relations: ["user"],
+            relations: [
+                "user",
+                "notification",
+                "notification.sender",
+                "notification.recipient",
+            ],
         });
 
-        return total;
+        return { response, total };
     }
 
     public async getUserFollowingsNotifUnreadCount(
         followings: UserRelationEntity[]
-    ): Promise<number> {
-        const [reponse, total] = await this.userNotificationRepo.findAndCount({
+    ) {
+        const [response, total] = await this.userNotificationRepo.findAndCount({
             where: {
                 user: {
                     username: In(
@@ -93,10 +99,16 @@ export class UserNotificationRepository {
                     ),
                 },
                 isRead: false,
+                notification: { type: In(["like", "comment", "followed"]) },
             },
-            relations: ["user"],
+            relations: [
+                "user",
+                "notification",
+                "notification.sender",
+                "notification.recipient",
+            ],
         });
 
-        return total;
+        return { response, total };
     }
 }
