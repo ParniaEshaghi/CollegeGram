@@ -100,6 +100,7 @@ export class ThreadService {
 
         const response = {
             data: threadMessages.data,
+            threadId: thread.id,
             meta: {
                 page: page,
                 limit: limit,

@@ -1,4 +1,4 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import { UserNotificationEntity } from "./entity/userNotification.entity";
 import {
     CreateUserNotification,
@@ -6,6 +6,7 @@ import {
 } from "./model/userNotification.model";
 import { User } from "../../user/model/user.model";
 import { Notification } from "../model/notification.model";
+import { UserRelationEntity } from "../../userRelation/entity/userRelation.entity";
 
 export class UserNotificationRepository {
     private userNotificationRepo: Repository<UserNotificationEntity>;
@@ -68,5 +69,34 @@ export class UserNotificationRepository {
         });
 
         return response;
+    }
+
+    public async getUserNotifUnreadCount(user: User): Promise<number> {
+        const [reponse, total] = await this.userNotificationRepo.findAndCount({
+            where: { user: { username: user.username }, isRead: false },
+            relations: ["user"],
+        });
+
+        return total;
+    }
+
+    public async getUserFollowingsNotifUnreadCount(
+        followings: UserRelationEntity[]
+    ): Promise<number> {
+        const [reponse, total] = await this.userNotificationRepo.findAndCount({
+            where: {
+                user: {
+                    username: In(
+                        followings.map(
+                            (following) => following.following.username
+                        )
+                    ),
+                },
+                isRead: false,
+            },
+            relations: ["user"],
+        });
+
+        return total;
     }
 }

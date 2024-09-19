@@ -19,9 +19,9 @@ export class UserRelationService {
     ) {}
 
     async getFollowStatus(user: User, following_username: string) {
-        if (user.username === following_username) {
-            throw new HttpError(403, "Can't have a relation with self")
-        }
+        // if (user.username === following_username) {
+        //     throw new HttpError(403, "Can't have a relation with self")
+        // }
         const following = await this.userService.getUserByUsername(
             following_username
         );

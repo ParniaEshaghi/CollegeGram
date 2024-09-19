@@ -13,6 +13,7 @@ export interface Message {
 export type CreateMessage = Omit<Message, "isRead">;
 
 export interface ShownMessage {
+    messageId: string;
     senderUsername: string;
     senderFirstname: string;
     senderLastname: string;
@@ -28,6 +29,7 @@ export const toShownMessage = (
     baseUrl: string
 ): ShownMessage => {
     return {
+        messageId: message.id,
         senderUsername: message.sender.username,
         senderFirstname: message.sender.firstname,
         senderLastname: message.sender.lastname,
