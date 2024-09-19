@@ -11,6 +11,7 @@ export interface Thread {
 export type CreateThread = Omit<Thread, "messages" | "id">;
 
 export interface ListThread {
+    threadId: string;
     username: string;
     firstname: string;
     lastname: string;
@@ -23,12 +24,14 @@ export interface ListThread {
 }
 
 export const toListThread = (
+    thread: Thread,
     user: User,
     unreadMessages: number,
     lastMessage: MessageEntity,
     baseUrl: string
 ): ListThread => {
     return {
+        threadId: thread.id,
         username: user.username,
         firstname: user.firstname,
         lastname: user.lastname,
