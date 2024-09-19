@@ -206,7 +206,6 @@ export class NotificationService {
             (fData) =>
                 fData.recipient.username != user.username &&
                 (fData.type === "comment" ||
-                    fData.type === "mention" ||
                     fData.type === "followed" ||
                     fData.type === "like")
         );
@@ -340,7 +339,6 @@ export class NotificationService {
                     if (
                         notif.isRead == false &&
                         (fData.type === "comment" ||
-                            fData.type === "mention" ||
                             fData.type === "followed" ||
                             fData.type === "like")
                     ) {
