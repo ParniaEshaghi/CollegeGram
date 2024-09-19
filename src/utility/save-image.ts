@@ -3,7 +3,8 @@ import path from "path";
 
 export const saveImage = async (imageBuffer: Buffer): Promise<string> => {
     // Define the path where the image will be saved
-    const uploadsDir = "/src/app/images/messages";
+    const uploadsDir =
+        process.env.IMG_MSG_PATH || "/src/app/dist/images/messages";
     const fileName = `image_${Date.now()}.png`;
     const filePath = path.join(uploadsDir, fileName);
 

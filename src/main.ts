@@ -1,10 +1,8 @@
-import { string } from "zod";
+require("dotenv").config();
 import { makeApp } from "./api";
 import { AppDataSource } from "./data-source";
 import { User } from "./modules/userHandler/user/model/user.model";
 import { ServiceFactory } from "./utility/service-factory";
-
-const PORT = 3000;
 
 declare global {
     namespace Express {
@@ -27,6 +25,8 @@ declare module "http" {
 }
 
 const run = async () => {
+    const PORT = Number(process.env.APP_PORT) || 3000;
+
     const dataSource = await AppDataSource.initialize();
     const serviceFactory = new ServiceFactory(dataSource);
 
