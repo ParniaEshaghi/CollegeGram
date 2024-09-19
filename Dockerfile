@@ -26,6 +26,7 @@ WORKDIR /src/app
 COPY --from=build /src/app/package.json ./
 COPY --from=build /src/app/dist ./dist
 COPY --from=build /src/app/node_modules ./node_modules
+COPY --from=build /src/app/src/modules/userHandler/forgetPassword/email-template ./dist/src/modules/userHandler/forgetPassword
 
 # Expose the application port
 EXPOSE 3000
