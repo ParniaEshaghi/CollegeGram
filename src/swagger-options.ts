@@ -10,17 +10,11 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: "http://localhost:3000",
-            },
-            {
-                url: "http://37.32.6.230",
-            },
-            {
-                url: "https://minus-one.dev1403.rahnemacollege.ir",
+                url: process.env.SWAGGER_SERVER,
             },
         ],
     },
-    apis: ["./src/docs/*.ts"],
+    apis: [process.env.SWAGGER_PATH],
 };
 
 export default swaggerJsDoc(swaggerOptions);
