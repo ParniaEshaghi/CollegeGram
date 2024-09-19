@@ -51,7 +51,8 @@ export const setupSocketServer = (
                 socket.join(roomId);
 
                 io.to(roomId).emit("connection", {
-                    username: username,
+                    message: "User has joined the thread",
+                    // status: 200,
                 });
             } catch (error) {
                 if (error instanceof NotFoundError) {
@@ -124,6 +125,7 @@ export const setupSocketServer = (
                         socket.emit("error", {
                             message:
                                 "Invalid message format. Must contain either text or image.",
+                            status: 500,
                         });
                     }
                 } catch (error) {
@@ -131,6 +133,7 @@ export const setupSocketServer = (
                     socket.emit("error", {
                         message: "Failed to send message.",
                         // error: error,
+                        status: 500,
                     });
                 }
             }
@@ -141,6 +144,7 @@ export const setupSocketServer = (
                 socket.leave(roomId);
                 io.to(roomId).emit("userDisconnected", {
                     message: "User has left the thread",
+                    // status: 200,
                 });
             }
         });
