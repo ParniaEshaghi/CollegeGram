@@ -68,14 +68,42 @@ export class UserNotificationService {
     }
 
     public async getUserNotifUnreadCount(user: User) {
-        return await this.userNotificationRepo.getUserNotifUnreadCount(user);
+        const { response, total } =
+            await this.userNotificationRepo.getUserNotifUnreadCount(user);
+
+        let count = 0;
+        count = total;
+        for (const notif of response) {
+            if (
+                notif.user.username === notif.notification.sender.username ||
+                notif.user.username !== notif.notification.recipient.username
+            ) {
+                count -= 1;
+            }
+        }
+
+        return count;
     }
 
     public async getUserFollowingsNotifUnreadCount(
         followings: UserRelationEntity[]
     ) {
-        return await this.userNotificationRepo.getUserFollowingsNotifUnreadCount(
-            followings
-        );
+        const { response, total } =
+            await this.userNotificationRepo.getUserFollowingsNotifUnreadCount(
+                followings
+            );
+
+        let count = 0;
+        count = total;
+        for (const notif of response) {
+            if (
+                notif.user.username === notif.notification.sender.username ||
+                notif.user.username === notif.notification.recipient.username
+            ) {
+                count -= 1;
+            }
+        }
+
+        return count;
     }
 }

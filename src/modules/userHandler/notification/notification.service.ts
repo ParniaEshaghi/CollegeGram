@@ -284,16 +284,11 @@ export class NotificationService {
 
     //     let totalUserUnreadNotifications = 0;
 
-    //     const userAllNotifs = await this.notificationRepo.getUserAllNotifs(
+    //     const userAllNotifs = await this.userNotificationsService.getUserNotifUnread(
     //         user
     //     );
 
     //     for (const userNotif of userAllNotifs) {
-    //         const notif =
-    //             await this.userNotificationsService.findByUserAndNotification(
-    //                 userNotif.recipient,
-    //                 userNotif
-    //             );
 
     //         if (notif) {
     //             if (notif.isRead == false) {
