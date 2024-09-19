@@ -277,89 +277,97 @@ export class NotificationService {
         return response;
     }
 
-    // public async getAllUserUnreadNotifications(user: User): Promise<number> {
-    //     if (!user) {
-    //         throw new UnauthorizedError();
-    //     }
-
-    //     let totalUserUnreadNotifications = 0;
-
-    //     const userAllNotifs = await this.userNotificationsService.getUserNotifUnread(
-    //         user
-    //     );
-
-    //     for (const userNotif of userAllNotifs) {
-
-    //         if (notif) {
-    //             if (notif.isRead == false) {
-    //                 totalUserUnreadNotifications += 1;
-    //             }
-    //         }
-    //     }
-
-    //     return totalUserUnreadNotifications;
-    // }
-
-    // public async getAllUserFollowingsUnreadNotifications(
-    //     user: User
-    // ): Promise<number> {
-    //     if (!user) {
-    //         throw new UnauthorizedError();
-    //     }
-
-    //     let totalUserFollowingsUnreadNotifications = 0;
-
-    //     const userFollowings = await this.userRelationService.allFolloweingList(
-    //         user.username
-    //     );
-    //     const userNotifs =
-    //         await this.notificationRepo.getAllUserFollowingsNotifs(
-    //             userFollowings
-    //         );
-
-    //     const filteredData = this.filterFollowingnotif(
-    //         userFollowings,
-    //         userNotifs
-    //     );
-
-    //     for (const fData of filteredData) {
-    //         if (fData.recipient.username != user.username) {
-    //             const notif =
-    //                 await this.userNotificationsService.findByUserAndNotification(
-    //                     user,
-    //                     fData
-    //                 );
-
-    //             if (notif) {
-    //                 if (
-    //                     notif.isRead == false &&
-    //                     (fData.type === "comment" ||
-    //                         fData.type === "followed" ||
-    //                         fData.type === "like")
-    //                 ) {
-    //                     totalUserFollowingsUnreadNotifications += 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     return totalUserFollowingsUnreadNotifications;
-    // }
-
     public async getAllUserUnreadNotifications(user: User): Promise<number> {
-        return await this.userNotificationsService.getUserNotifUnreadCount(
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+
+        let totalUserUnreadNotifications = 0;
+
+        const userAllNotifs = await this.notificationRepo.getUserAllNotifs(
             user
         );
+
+        for (const userNotif of userAllNotifs) {
+            const notif =
+                await this.userNotificationsService.findByUserAndNotification(
+                    user,
+                    userNotif
+                );
+
+            if (notif) {
+                if (notif.isRead == false) {
+                    totalUserUnreadNotifications += 1;
+                }
+            }
+        }
+
+        return totalUserUnreadNotifications;
     }
 
     public async getAllUserFollowingsUnreadNotifications(
         user: User
     ): Promise<number> {
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+
+        let totalUserFollowingsUnreadNotifications = 0;
+
         const userFollowings = await this.userRelationService.allFolloweingList(
             user.username
         );
-        return await this.userNotificationsService.getUserFollowingsNotifUnreadCount(
-            userFollowings
+        const userNotifs =
+            await this.notificationRepo.getAllUserFollowingsNotifs(
+                userFollowings
+            );
+
+        const filteredData = this.filterFollowingnotif(
+            userFollowings,
+            userNotifs
         );
+
+        for (const fData of filteredData) {
+            if (
+                fData.recipient.username !== user.username &&
+                fData.sender.username !== user.username
+            ) {
+                const notif =
+                    await this.userNotificationsService.findByUserAndNotification(
+                        user,
+                        fData
+                    );
+
+                if (notif) {
+                    if (
+                        notif.isRead == false &&
+                        (fData.type === "comment" ||
+                            fData.type === "followed" ||
+                            fData.type === "like")
+                    ) {
+                        totalUserFollowingsUnreadNotifications += 1;
+                    }
+                }
+            }
+        }
+
+        return totalUserFollowingsUnreadNotifications;
     }
+
+    // public async getAllUserUnreadNotifications(user: User): Promise<number> {
+    //     return await this.userNotificationsService.getUserNotifUnreadCount(
+    //         user
+    //     );
+    // }
+
+    // public async getAllUserFollowingsUnreadNotifications(
+    //     user: User
+    // ): Promise<number> {
+    //     const userFollowings = await this.userRelationService.allFolloweingList(
+    //         user.username
+    //     );
+    //     return await this.userNotificationsService.getUserFollowingsNotifUnreadCount(
+    //         userFollowings
+    //     );
+    // }
 }
