@@ -1,5 +1,5 @@
 # Stage 1: Build Stage
-FROM docker.arvancloud.ir/node:20 AS build
+FROM docker.arvancloud.ir/node:20-slim AS build
 
 # Set working directory
 WORKDIR /src/app

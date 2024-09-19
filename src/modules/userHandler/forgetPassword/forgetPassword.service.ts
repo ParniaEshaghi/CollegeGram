@@ -64,7 +64,7 @@ export class ForgetPasswordService {
             "utf-8"
         );
 
-        const resetLink = `http://37.32.6.230/reset-password/${id}~${token}`;
+        const resetLink = `${process.env.RESET_PASS_LINK}/reset-password/${id}~${token}`;
         const htmlContent = htmlTemplate.replace("{{resetLink}}", resetLink);
 
         const mailContent = {

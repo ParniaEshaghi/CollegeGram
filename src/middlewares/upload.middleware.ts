@@ -6,7 +6,7 @@ import { RequestHandler } from "express";
 
 // Storage engine for profile pictures
 const profileStorage: StorageEngine = multer.diskStorage({
-    destination: "./images/profiles/",
+    destination: process.env.PROFILE_PATH,
     filename: (req, file, cb) => {
         const username = req.user.username;
         cb(
@@ -18,7 +18,7 @@ const profileStorage: StorageEngine = multer.diskStorage({
 
 // Storage engine for post pictures
 const postStorage: StorageEngine = multer.diskStorage({
-    destination: "./images/posts/",
+    destination: process.env.POST_PATH,
     filename: (req, file, cb) => {
         const username = req.user.username;
         cb(

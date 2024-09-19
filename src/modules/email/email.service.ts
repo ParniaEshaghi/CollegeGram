@@ -7,8 +7,8 @@ export class EmailService {
         host: "smtp.gmail.com",
         port: 587,
         auth: {
-            user: "cgramcgram421@gmail.com",
-            pass: "astjstwkacpkhtsq ",
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
         },
         logger: false,
         debug: false,
