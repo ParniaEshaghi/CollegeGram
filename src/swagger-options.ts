@@ -14,7 +14,7 @@ const swaggerOptions = {
             },
         ],
     },
-    apis: [process.env.SWAGGER_PATH],
+    apis: [process.env.SWAGGER_PATH || "./src/docs/*.ts"],
 };
 
 export default swaggerJsDoc(swaggerOptions);
