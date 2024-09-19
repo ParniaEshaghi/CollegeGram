@@ -1,6 +1,7 @@
 import { BadRequestError } from "../../../../utility/http-errors";
 import { User } from "../../user/model/user.model";
 import { UserService } from "../../user/user.service";
+import { UserRelationEntity } from "../../userRelation/entity/userRelation.entity";
 import { UserRelationService } from "../../userRelation/userRelation.service";
 import { Notification } from "../model/notification.model";
 import { CreateUserNotification } from "./model/userNotification.model";
@@ -64,5 +65,17 @@ export class UserNotificationService {
             throw BadRequestError;
         }
         return notif.isRead;
+    }
+
+    public async getUserNotifUnreadCount(user: User) {
+        return await this.userNotificationRepo.getUserNotifUnreadCount(user);
+    }
+
+    public async getUserFollowingsNotifUnreadCount(
+        followings: UserRelationEntity[]
+    ) {
+        return await this.userNotificationRepo.getUserFollowingsNotifUnreadCount(
+            followings
+        );
     }
 }
