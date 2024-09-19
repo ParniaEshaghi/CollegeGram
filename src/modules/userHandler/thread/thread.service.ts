@@ -38,6 +38,7 @@ export class ThreadService {
                 );
             shownThreads.push(
                 toListThread(
+                    thread,
                     otherParticipant[0],
                     unreadMessages,
                     lastMessage,
