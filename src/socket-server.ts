@@ -31,7 +31,7 @@ export const setupSocketServer = (
     io.use(socketSetBaseUrl);
 
     io.on("connection", (socket) => {
-        let roomId: string;
+        // let roomId: string;
 
         socket.on("join", async (username) => {
             try {
@@ -47,11 +47,12 @@ export const setupSocketServer = (
                     }
                 });
 
-                roomId = threadId;
-                socket.join(roomId);
+                //roomId = threadId;
+                socket.join(threadId);
 
-                io.to(roomId).emit("connection", {
+                io.to(threadId).emit("connection", {
                     message: "User has joined the thread",
+                    id: threadId,
                     // status: 200,
                 });
             } catch (error) {
@@ -69,10 +70,10 @@ export const setupSocketServer = (
             }
         });
 
-        socket.on("history", async (page = 1, limit = 10) => {
+        socket.on("history", async (threadId, page = 1, limit = 10) => {
             try {
                 const data = await userHandler.getThreadHistory(
-                    roomId,
+                    threadId,
                     page,
                     limit,
                     socket.request.base_url
@@ -96,7 +97,11 @@ export const setupSocketServer = (
 
         socket.on(
             "newMessage",
-            async (data: { text?: string; image?: string }) => {
+            async (data: {
+                id: string;
+                text?: string;
+                image?: string;
+            }) => {
                 try {
                     if (data.image) {
                         const imageBuffer = Buffer.from(data.image, "base64");
@@ -104,23 +109,29 @@ export const setupSocketServer = (
 
                         const newImageMessage = await userHandler.newMessage(
                             socket.request.user,
-                            roomId,
+                            data.id,
                             socket.request.base_url,
                             undefined,
                             image
                         );
 
-                        io.to(roomId).emit("newMessage", newImageMessage);
+                        io.to(data.id).emit(
+                            "newMessage",
+                            newImageMessage
+                        );
                     } else if (data.text) {
                         const newMessageResponse = await userHandler.newMessage(
                             socket.request.user,
-                            roomId,
+                            data.id,
                             socket.request.base_url,
                             data.text,
                             undefined
                         );
 
-                        io.to(roomId).emit("newMessage", newMessageResponse);
+                        io.to(data.id).emit(
+                            "newMessage",
+                            newMessageResponse
+                        );
                     } else {
                         socket.emit("error", {
                             message:
@@ -139,10 +150,10 @@ export const setupSocketServer = (
             }
         );
 
-        socket.on("disconnect", (reason) => {
-            if (roomId) {
-                socket.leave(roomId);
-                io.to(roomId).emit("userDisconnected", {
+        socket.on("disconnect", (threadId) => {
+            if (threadId) {
+                socket.leave(threadId);
+                io.to(threadId).emit("userDisconnected", {
                     message: "User has left the thread",
                     // status: 200,
                 });
