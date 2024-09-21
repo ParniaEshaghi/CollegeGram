@@ -72,7 +72,6 @@ export class PostLikeSubscriber
 
         const notificationRepo =
             event.manager.getRepository(NotificationEntity);
-        console.log(entity);
 
         const notif = await notificationRepo.findOne({
             where: {
@@ -83,7 +82,6 @@ export class PostLikeSubscriber
             relations: ["userNotifications", "post", "sender"],
         });
 
-        console.log(notif);
         if (notif) {
             await notificationRepo.softRemove(notif);
         }
