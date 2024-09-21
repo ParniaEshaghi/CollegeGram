@@ -81,15 +81,15 @@ export const setupSocketServer = (
                         message: "Thread Id must be provided",
                         status: 400,
                     });
+                } else {
+                    const data = await userHandler.getThreadHistory(
+                        threadId,
+                        page,
+                        limit,
+                        socket.request.base_url
+                    );
+                    socket.emit("history", data);
                 }
-                const data = await userHandler.getThreadHistory(
-                    threadId,
-                    page,
-                    limit,
-                    socket.request.base_url
-                );
-
-                socket.emit("history", data);
             } catch (error) {
                 if (error instanceof NotFoundError) {
                     socket.emit("error", {
@@ -120,8 +120,7 @@ export const setupSocketServer = (
                             message: "Thread Id must be provided",
                             status: 400,
                         });
-                    }
-                    if (data.image) {
+                    } else if (data.image) {
                         const imageBuffer = Buffer.from(data.image, "base64");
                         const image = await saveImage(imageBuffer);
 
