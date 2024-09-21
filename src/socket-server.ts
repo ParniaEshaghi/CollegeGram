@@ -32,6 +32,7 @@ export const setupSocketServer = (
 
     io.on("connection", (socket) => {
         // let roomId: string;
+        const onlineUsers: string[] = [];
 
         socket.on("join", async (username) => {
             try {
@@ -49,10 +50,7 @@ export const setupSocketServer = (
 
                 //roomId = threadId;
                 socket.join(threadId);
-
-                socket.to(threadId).emit("online", {
-                    username: socket.request.user.username,
-                });
+                onlineUsers.push(socket.request.user.username);
 
                 io.to(threadId).emit("connection", {
                     message: "User has joined the thread",
@@ -161,6 +159,27 @@ export const setupSocketServer = (
             }
         );
 
+        socket.on("onlineUsers", (threadId) => {
+            try {
+                if (!threadId) {
+                    socket.emit("error", {
+                        message: "Thread Id must be provided",
+                        status: 400,
+                    });
+                }
+                socket
+                    .to(threadId)
+                    .emit("onlineUsers", {
+                        onlineUsers,
+                    });
+            } catch (error) {
+                socket.emit("error", {
+                    message: "An unexpected error occurred",
+                    status: 500,
+                });
+            }
+        });
+
         socket.on("typing", (threadId) => {
             try {
                 if (!threadId) {
@@ -183,9 +202,8 @@ export const setupSocketServer = (
         socket.on("disconnect", (threadId) => {
             if (threadId) {
                 socket.leave(threadId);
-                io.to(threadId).emit("offline", {
-                    username: socket.request.user.username,
-                });
+                const index = onlineUsers.indexOf(socket.request.user.username)
+                onlineUsers.splice(index, 1)
             }
         });
     });

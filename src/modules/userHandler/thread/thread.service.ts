@@ -100,7 +100,7 @@ export class ThreadService {
         );
 
         const response = {
-            data: threadMessages.data,
+            data: threadMessages.data.reverse(),
             threadId: thread.id,
             meta: {
                 page: page,
