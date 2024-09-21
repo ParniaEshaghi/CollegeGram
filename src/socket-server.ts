@@ -55,16 +55,16 @@ export const setupSocketServer = (
                 io.to(threadId).emit("connection", {
                     message: "User has joined the thread",
                     id: threadId,
-                    // status: 200,
+                    status: 200,
                 });
             } catch (error) {
                 if (error instanceof NotFoundError) {
-                    socket.emit("error", {
+                    socket.emit("connection", {
                         message: "User not found",
                         status: 404,
                     });
                 } else {
-                    socket.emit("error", {
+                    socket.emit("connection", {
                         message: "An unexpected error occurred",
                         status: 500,
                     });
