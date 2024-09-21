@@ -1,3 +1,4 @@
+import { BadRequestError } from "../../../utility/http-errors";
 import { Thread } from "../thread/model/thread.model";
 import { User } from "../user/model/user.model";
 import { MessageRepository } from "./message.repository";
@@ -51,6 +52,14 @@ export class MessageService {
 
     public async getThreadLastMessage(threadId: string) {
         return await this.messageRepo.getThreadLastMessage(threadId);
+    }
+
+    public async deleteMessage(messageId: string) {
+        const message = await this.messageRepo.getMessageById(messageId);
+        if (!message) {
+            throw new BadRequestError()
+        }
+        await this.messageRepo.delete(messageId);
     }
 
     public async getThreadMessages(

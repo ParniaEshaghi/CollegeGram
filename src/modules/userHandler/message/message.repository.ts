@@ -13,6 +13,14 @@ export class MessageRepository {
         return await this.messageRepo.save(message);
     }
 
+    public async delete(messageId: string) {
+        await this.messageRepo.softDelete({ id: messageId });
+    }
+
+    public async getMessageById(messageId:string){
+        return await this.messageRepo.findOne({where: {id: messageId}})
+    }
+
     public async getThreadLastMessage(
         threadId: string
     ): Promise<MessageEntity> {

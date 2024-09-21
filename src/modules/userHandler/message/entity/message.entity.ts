@@ -1,6 +1,7 @@
 import {
     Column,
     CreateDateColumn,
+    DeleteDateColumn,
     Entity,
     ManyToOne,
     PrimaryGeneratedColumn,
@@ -32,4 +33,7 @@ export class MessageEntity {
 
     @CreateDateColumn()
     createdAt!: Date;
+
+    @DeleteDateColumn()
+    deletedAt!: Date;
 }
