@@ -75,7 +75,7 @@ export class PostLikeSubscriber
 
         const notif = await notificationRepo.findOne({
             where: {
-                sender: entity.user,
+                sender: {username: entity.user.username},
                 type: "like",
             },
             relations: ["userNotifications"],
