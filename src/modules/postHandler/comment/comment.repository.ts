@@ -56,4 +56,11 @@ export class CommentRepository {
         });
         return commentCount;
     }
+
+    public async setLikeCount(
+        commentId: string,
+        like_count: number
+    ): Promise<void> {
+        await this.commentRepo.update({ id: commentId }, { like_count });
+    }
 }

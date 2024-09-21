@@ -38,11 +38,20 @@ export class PostEntity {
     @OneToMany(() => PostLikeEntity, (postLike) => postLike.post)
     likes!: PostLikeEntity[];
 
+    @Column({ default: 0 })
+    like_count!: number;
+
     @OneToMany(() => CommentEntity, (comment) => comment.post)
     comments!: CommentEntity[];
 
+    @Column({ default: 0 })
+    comment_count!: number;
+
     @OneToMany(() => SavedPostsEntity, (savedPost) => savedPost.post)
     saves!: SavedPostsEntity[];
+
+    @Column({ default: 0 })
+    saved_count!: number;
 
     @OneToMany(() => NotificationEntity, (notification) => notification.post)
     notifications!: NotificationEntity[];

@@ -29,6 +29,7 @@ export class SavedPostService {
         }
 
         await this.savedPostRepo.create(user, post);
+        await this.getSavedPostCount(post.id);
         return { message: "Post saved" };
     }
 
@@ -41,11 +42,13 @@ export class SavedPostService {
         }
 
         await this.savedPostRepo.delete(user, post);
+        await this.getSavedPostCount(post.id);
         return { message: "Post unsaved" };
     }
 
-    public async getSavedPostCount(postId: string) {
-        return await this.savedPostRepo.getPostSavedCount(postId);
+    private async getSavedPostCount(postId: string) {
+        const count = await this.savedPostRepo.getPostSavedCount(postId);
+        await this.postService.setSavedCount(postId, count);
     }
 
     public async getSavedPosts(username: string, page: number, limit: number) {
