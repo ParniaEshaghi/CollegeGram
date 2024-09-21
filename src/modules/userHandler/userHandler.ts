@@ -84,7 +84,7 @@ export class UserHandler {
         // const unreadNotifications =
         //     unreadUserNotifications + unreadUserFollowingNotifications;
 
-        const posts = await this.getUserPosts(user.username, baseUrl);
+        const posts = await this.getUserPosts(user, user.username, baseUrl);
         const follower_count = await this.userRelationService.getFollowerCount(
             user.username
         );
@@ -106,17 +106,17 @@ export class UserHandler {
         );
     }
 
-    public async getUserPosts(username: string, baseUrl: string) {
+    public async getUserPosts(session_user: User, username: string, baseUrl: string) {
         const user = await this.userService.getUserByUsername(username);
         const posts = await this.userService.getUserPosts(username, baseUrl);
         const profilePosts: PostWithUsername[] = [];
         for (const post of posts) {
             const like_status = await this.postHandler.getPostLikeStatus(
-                user,
+                session_user,
                 post.id
             );
             const save_status = await this.postHandler.getPostSaveStatus(
-                user,
+                session_user,
                 post.id
             );
 
@@ -229,7 +229,7 @@ export class UserHandler {
             );
         }
 
-        const posts = await this.getUserPosts(username, baseUrl);
+        const posts = await this.getUserPosts(session_user, username, baseUrl);
         const normalPosts = posts.filter(
             (post) => post.close_status === "normal"
         );
