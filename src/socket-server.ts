@@ -120,8 +120,7 @@ export const setupSocketServer = (
                             message: "Thread Id must be provided",
                             status: 400,
                         });
-                    }
-                    if (data.image) {
+                    } else if (data.image) {
                         const imageBuffer = Buffer.from(data.image, "base64");
                         const image = await saveImage(imageBuffer);
 
