@@ -45,6 +45,7 @@ export class PostService {
         };
 
         const createdPost = await this.postRepo.create(newPost);
+        await this.getPostCount(user.username);
         return toPostWithUsername(user, createdPost, baseUrl);
     }
 
@@ -143,8 +144,9 @@ export class PostService {
         return await this.postRepo.getExplorePosts(followings, page, limit);
     }
 
-    public async getPostCount(username: string) {
-        return await this.postRepo.getPostCount(username);
+    private async getPostCount(username: string) {
+        const count = await this.postRepo.getPostCount(username);
+        await this.userService.setPostCount(username, count);
     }
 
     public async getMentionedPosts(
@@ -202,5 +204,17 @@ export class PostService {
             query
         );
         return await this.postRepo.postSearch(query, page, limit);
+    }
+
+    public async setLikeCount(postId: string, like_count: number) {
+        return await this.postRepo.setLikeCount(postId, like_count);
+    }
+
+    public async setSavedCount(postId: string, saved_count: number) {
+        return await this.postRepo.setSavedCount(postId, saved_count);
+    }
+
+    public async setCommentCount(postId: string, comment_count: number) {
+        return await this.postRepo.setCommentCount(postId, comment_count);
     }
 }

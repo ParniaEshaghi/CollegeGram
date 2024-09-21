@@ -56,11 +56,20 @@ export class UserEntity {
     @OneToMany(() => PostEntity, (post) => post.user)
     posts!: PostEntity[];
 
+    @Column({ default: 0 })
+    post_count!: number;
+
     @OneToMany(() => UserRelationEntity, (relation) => relation.follower)
     followers!: UserRelationEntity[];
 
+    @Column({ default: 0 })
+    follower_count!: number;
+
     @OneToMany(() => UserRelationEntity, (relation) => relation.following)
     followings!: UserRelationEntity[];
+
+    @Column({ default: 0 })
+    following_count!: number;
 
     @OneToMany(() => CommentEntity, (relation) => relation.user)
     comments!: CommentEntity[];

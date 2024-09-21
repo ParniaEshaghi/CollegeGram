@@ -25,6 +25,8 @@ export class CommentService {
             parent: comment,
         });
 
+        await this.getCommentCount(post.id);
+
         return toCommentWithUsername(createdComment);
     }
 
@@ -40,7 +42,12 @@ export class CommentService {
         return await this.commentRepo.getComments(postId, page, limit);
     }
 
-    public async getCommentCount(postId: string) {
-        return await this.commentRepo.getCommentCount(postId);
+    private async getCommentCount(postId: string) {
+        const count = await this.commentRepo.getCommentCount(postId);
+        await this.postService.setCommentCount(postId, count);
+    }
+
+    public async setLikeCount(commentId: string, like_count: number) {
+        return await this.commentRepo.setLikeCount(commentId, like_count);
     }
 }

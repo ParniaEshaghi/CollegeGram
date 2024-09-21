@@ -59,23 +59,13 @@ export class PostHandler {
         const post = await this.postService.getPost(postId);
         const like_status = await this.getPostLikeStatus(user, post.id);
         const save_status = await this.getPostSaveStatus(user, post.id);
-        const follower_count = await this.userRelationService.getFollowerCount(
-            post.user.username
-        );
-        const like_count = await this.getPostLikeCount(post.id);
-        const saved_count = await this.getSavedPostCount(post.id);
-        const comment_count = await this.getCommentCount(post.id);
 
         return toPostPage(
             post.user,
             post,
             baseUrl,
-            follower_count,
             like_status,
             save_status,
-            like_count,
-            saved_count,
-            comment_count
         );
     }
 
@@ -160,15 +150,11 @@ export class PostHandler {
                     user,
                     comment.id
                 );
-                const like_count =
-                    await this.commentLikeService.getCommentLikeCount(
-                        comment.id
-                    );
+
                 const transformedComment = toPostCommentList(
                     comment,
                     likeStatus,
                     baseUrl,
-                    like_count
                 );
 
                 if (comment.children && comment.children.length > 0) {
@@ -198,26 +184,6 @@ export class PostHandler {
         limit: number
     ) {
         return await this.postService.getExplorePosts(followings, page, limit);
-    }
-
-    public async getPostCount(username: string) {
-        return await this.postService.getPostCount(username);
-    }
-
-    public async getSavedPostCount(userId: string) {
-        return await this.savedPostService.getSavedPostCount(userId);
-    }
-
-    public async getCommentCount(postId: string) {
-        return await this.commentService.getCommentCount(postId);
-    }
-
-    public async getPostLikeCount(postId: string): Promise<number> {
-        return await this.postLikeService.getPostLikeCount(postId);
-    }
-
-    public async getCommentLikeCount(postId: string) {
-        return await this.commentLikeService.getCommentLikeCount(postId);
     }
 
     public async getMentionedPosts(

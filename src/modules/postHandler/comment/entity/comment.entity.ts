@@ -33,6 +33,9 @@ export class CommentEntity {
     @OneToMany(() => CommentLikeEntity, (commentLike) => commentLike.comment)
     likes!: CommentLike[];
 
+    @Column({ default: 0 })
+    like_count!: number;
+
     @OneToMany(() => CommentEntity, (comment) => comment.parent)
     children!: Comment[];
 

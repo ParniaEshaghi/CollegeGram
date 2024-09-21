@@ -65,7 +65,12 @@ export class PostSubscriber implements EntitySubscriberInterface<PostEntity> {
 
     async afterUpdate(event: UpdateEvent<PostEntity>): Promise<void> {
         const entity = event.entity;
-        if (entity) {
+        if (
+            entity &&
+            event.updatedColumns.some(
+                (column) => column.propertyName === "mentions"
+            )
+        ) {
             const notificationRepo =
                 event.manager.getRepository(NotificationEntity);
             const userNotificationRepo = event.manager.getRepository(

@@ -102,7 +102,7 @@ export class UserRepository {
                 { lastname: Like(`%${query}%`) },
             ],
             order: {
-                createdAt: "DESC",
+                follower_count: "DESC",
             },
         });
 
@@ -119,10 +119,28 @@ export class UserRepository {
                 { lastname: Like(`%${query}%`) },
             ],
             order: {
-                createdAt: "DESC",
+                follower_count: "DESC",
             },
         });
 
         return { data: response, total: total };
+    }
+
+    public async setPostCount(
+        username: string,
+        post_count: number
+    ): Promise<void> {
+        await this.userRepo.update({ username }, { post_count });
+    }
+
+    public async setFollowerFollowingCount(
+        username: string,
+        follower_count: number,
+        following_count: number
+    ): Promise<void> {
+        await this.userRepo.update(
+            { username },
+            { follower_count, following_count }
+        );
     }
 }

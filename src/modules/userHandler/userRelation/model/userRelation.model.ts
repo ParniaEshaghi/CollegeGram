@@ -105,10 +105,7 @@ export const toProfile = (
     user: User,
     followStatus: ProfileFollowStatus,
     posts: PostWithUsername[],
-    baseUrl: string,
-    follower_count: number,
-    following_count: number,
-    post_count: number
+    baseUrl: string
 ): UserProfile => {
     const { password, email, profilePicture, ...profileInfo } = user;
     return {
@@ -119,9 +116,9 @@ export const toProfile = (
         posts,
         followStatus: followStatus.followStatus,
         reverseFollowStatus: followStatus.reverseFollowStatus,
-        follower_count,
-        following_count,
-        post_count,
+        follower_count: user.follower_count,
+        following_count: user.following_count,
+        post_count: user.post_count,
     };
 };
 
@@ -133,16 +130,12 @@ export type UserList = Omit<
 export type followerFollowingListUser = UserList & {
     followStatus: PFollowStatus;
     reverseFollowStatus: PFollowStatus;
-    follower_count: number;
-    following_count: number;
 };
 
 export const toFollowerFollowingListUser = (
     user: User,
     baseUrl: string,
-    followStatus: ProfileFollowStatus,
-    follower_count: number,
-    following_count: number
+    followStatus: ProfileFollowStatus
 ): followerFollowingListUser => {
     return {
         username: user.username,
@@ -151,8 +144,8 @@ export const toFollowerFollowingListUser = (
             : "",
         firstname: user.firstname,
         lastname: user.lastname,
-        follower_count,
-        following_count,
+        follower_count: user.follower_count,
+        following_count: user.following_count,
         followStatus: followStatus.followStatus,
         reverseFollowStatus: followStatus.reverseFollowStatus,
     };
@@ -166,6 +159,8 @@ export const toUserList = (user: User, baseUrl: string): UserList => {
             : "",
         firstname: user.firstname,
         lastname: user.lastname,
+        follower_count: user.follower_count,
+        following_count: user.follower_count
     };
 };
 
