@@ -97,11 +97,13 @@ export const setupSocketServer = (
 
         socket.on(
             "newMessage",
-            async (data: {
-                id: string;
-                text?: string;
-                image?: string;
-            }) => {
+            async (
+                threadId: string,
+                data: {
+                    text?: string;
+                    image?: string;
+                }
+            ) => {
                 try {
                     if (data.image) {
                         const imageBuffer = Buffer.from(data.image, "base64");
@@ -109,29 +111,23 @@ export const setupSocketServer = (
 
                         const newImageMessage = await userHandler.newMessage(
                             socket.request.user,
-                            data.id,
+                            threadId,
                             socket.request.base_url,
                             undefined,
                             image
                         );
 
-                        io.to(data.id).emit(
-                            "newMessage",
-                            newImageMessage
-                        );
+                        io.to(threadId).emit("newMessage", newImageMessage);
                     } else if (data.text) {
                         const newMessageResponse = await userHandler.newMessage(
                             socket.request.user,
-                            data.id,
+                            threadId,
                             socket.request.base_url,
                             data.text,
                             undefined
                         );
 
-                        io.to(data.id).emit(
-                            "newMessage",
-                            newMessageResponse
-                        );
+                        io.to(threadId).emit("newMessage", newMessageResponse);
                     } else {
                         socket.emit("error", {
                             message:
