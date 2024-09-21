@@ -2,7 +2,7 @@ import { Server as SocketIOServer, Socket } from "socket.io";
 import { UserHandler } from "./modules/userHandler/userHandler";
 import { socketAuth } from "./middlewares/socketAuth.middleware";
 import http from "http";
-import { NotFoundError } from "./utility/http-errors";
+import { BadRequestError, NotFoundError } from "./utility/http-errors";
 import { saveImage } from "./utility/save-image";
 import { socketSetBaseUrl } from "./middlewares/socketSetBaseUrl.middleware";
 
@@ -158,6 +158,36 @@ export const setupSocketServer = (
                 }
             }
         );
+
+        socket.on("deleteMessage", async (threadId, messageId) => {
+            try {
+                if (!threadId) {
+                    socket.emit("error", {
+                        message: "Thread Id must be provided",
+                        status: 400,
+                    });
+                }
+                await userHandler.deleteMessage(messageId)
+                socket
+                    .to(threadId)
+                    .emit("deleteMessage", {
+                        message: "Message deleted",
+                        status: 200
+                    });
+            } catch (error) {
+                if (error instanceof BadRequestError) {
+                    socket.emit("error", {
+                        message: "Invalid messageId",
+                        status: 400,
+                    });
+                } else {
+                    socket.emit("error", {
+                        message: "An unexpected error occurred",
+                        status: 500,
+                    });
+                }
+            }
+        });
 
         socket.on("onlineUsers", (threadId) => {
             try {

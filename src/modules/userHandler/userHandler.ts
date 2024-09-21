@@ -857,4 +857,8 @@ export class UserHandler {
             comment_count
         );
     }
+
+    public async deleteMessage(messageId: string) {
+        await this.messageService.deleteMessage(messageId);
+    }
 }
