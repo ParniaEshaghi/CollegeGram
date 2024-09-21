@@ -1,7 +1,7 @@
-image: docker:latest
+image: hub.hamdocker.ir/docker:latest
 
 services:
-  - name: docker:dind
+  - name: hub.hamdocker.ir/docker:dind
     alias: docker
 
 variables:
