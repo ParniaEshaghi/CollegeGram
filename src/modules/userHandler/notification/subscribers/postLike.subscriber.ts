@@ -72,15 +72,18 @@ export class PostLikeSubscriber
 
         const notificationRepo =
             event.manager.getRepository(NotificationEntity);
+        console.log(entity);
 
         const notif = await notificationRepo.findOne({
             where: {
-                sender: {username: entity.user.username},
+                sender: { username: entity.user.username },
+                post: { id: entity.post.id },
                 type: "like",
             },
-            relations: ["userNotifications"],
+            relations: ["userNotifications", "post", "sender"],
         });
 
+        console.log(notif);
         if (notif) {
             await notificationRepo.softRemove(notif);
         }
