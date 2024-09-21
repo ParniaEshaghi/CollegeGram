@@ -21,7 +21,7 @@ export class PostLikeRepository {
                 user: { username: user.username },
                 post: { id: post.id },
             },
-            relations: ["user"],
+            relations: ["user", "post"],
         });
 
         if (postLike) {
