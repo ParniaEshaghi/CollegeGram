@@ -50,6 +50,10 @@ export const setupSocketServer = (
                 //roomId = threadId;
                 socket.join(threadId);
 
+                socket.to(threadId).emit("online", {
+                    username: socket.request.user.username,
+                });
+
                 io.to(threadId).emit("connection", {
                     message: "User has joined the thread",
                     id: threadId,
@@ -72,6 +76,12 @@ export const setupSocketServer = (
 
         socket.on("history", async (threadId, page = 1, limit = 10) => {
             try {
+                if (!threadId) {
+                    socket.emit("error", {
+                        message: "Thread Id must be provided",
+                        status: 400,
+                    });
+                }
                 const data = await userHandler.getThreadHistory(
                     threadId,
                     page,
@@ -105,6 +115,12 @@ export const setupSocketServer = (
                 }
             ) => {
                 try {
+                    if (!threadId) {
+                        socket.emit("error", {
+                            message: "Thread Id must be provided",
+                            status: 400,
+                        });
+                    }
                     if (data.image) {
                         const imageBuffer = Buffer.from(data.image, "base64");
                         const image = await saveImage(imageBuffer);
@@ -146,12 +162,30 @@ export const setupSocketServer = (
             }
         );
 
+        socket.on("typing", (threadId) => {
+            try {
+                if (!threadId) {
+                    socket.emit("error", {
+                        message: "Thread Id must be provided",
+                        status: 400,
+                    });
+                }
+                socket
+                    .to(threadId)
+                    .emit("typing", { username: socket.request.user.username });
+            } catch (error) {
+                socket.emit("error", {
+                    message: "An unexpected error occurred",
+                    status: 500,
+                });
+            }
+        });
+
         socket.on("disconnect", (threadId) => {
             if (threadId) {
                 socket.leave(threadId);
-                io.to(threadId).emit("userDisconnected", {
-                    message: "User has left the thread",
-                    // status: 200,
+                io.to(threadId).emit("offline", {
+                    username: socket.request.user.username,
                 });
             }
         });
