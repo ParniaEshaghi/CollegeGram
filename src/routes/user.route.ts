@@ -20,8 +20,8 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         handleExpress(
             res,
             async () => {
-                const { message, token } = await userHandler.login(dto, req.base_url);
-                return { message, token };
+                const loginResponse = await userHandler.login(dto, req.base_url);
+                return loginResponse;
             },
             ({ token }) => {
                 res.cookie("token", token);
