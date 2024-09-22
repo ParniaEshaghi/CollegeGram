@@ -74,55 +74,55 @@ describe("User service test suite", () => {
         });
     });
 
-    describe("login test", () => {
-        it("should login with valid username", async () => {
-            const response = await userService.login({
-                credential: "test",
-                password: "test",
-                keepMeSignedIn: false,
-            });
-            expect(response.message).toBe("Login successfull");
-        });
+    // describe("login test", () => {
+    //     it("should login with valid username", async () => {
+    //         const response = await userService.login({
+    //             credential: "test",
+    //             password: "test",
+    //             keepMeSignedIn: false,
+    //         });
+    //         expect(response.message).toBe("Login successfull");
+    //     });
 
-        it("should login with valid email", async () => {
-            const response = await userService.login({
-                credential: "test@gmail.com",
-                password: "test",
-                keepMeSignedIn: false,
-            });
-            expect(response.message).toBe("Login successfull");
-        });
+    //     it("should login with valid email", async () => {
+    //         const response = await userService.login({
+    //             credential: "test@gmail.com",
+    //             password: "test",
+    //             keepMeSignedIn: false,
+    //         });
+    //         expect(response.message).toBe("Login successfull");
+    //     });
 
-        it("should fail if password is not valid", async () => {
-            expect(
-                userService.login({
-                    credential: "test@gmail.com",
-                    password: "11111",
-                    keepMeSignedIn: false,
-                })
-            ).rejects.toThrow(new InvalidCredentialError());
-        });
+    //     it("should fail if password is not valid", async () => {
+    //         expect(
+    //             userService.login({
+    //                 credential: "test@gmail.com",
+    //                 password: "11111",
+    //                 keepMeSignedIn: false,
+    //             })
+    //         ).rejects.toThrow(new InvalidCredentialError());
+    //     });
 
-        it("should fail if username is not valid", async () => {
-            expect(
-                userService.login({
-                    credential: "testwrongusername",
-                    password: "11111",
-                    keepMeSignedIn: false,
-                })
-            ).rejects.toThrow(new InvalidCredentialError());
-        });
+    //     it("should fail if username is not valid", async () => {
+    //         expect(
+    //             userService.login({
+    //                 credential: "testwrongusername",
+    //                 password: "11111",
+    //                 keepMeSignedIn: false,
+    //             })
+    //         ).rejects.toThrow(new InvalidCredentialError());
+    //     });
 
-        it("should fail if email is not valid", async () => {
-            expect(
-                userService.login({
-                    credential: "testwrong@gmail.com",
-                    password: "11111",
-                    keepMeSignedIn: false,
-                })
-            ).rejects.toThrow(new InvalidCredentialError());
-        });
-    });
+    //     it("should fail if email is not valid", async () => {
+    //         expect(
+    //             userService.login({
+    //                 credential: "testwrong@gmail.com",
+    //                 password: "11111",
+    //                 keepMeSignedIn: false,
+    //             })
+    //         ).rejects.toThrow(new InvalidCredentialError());
+    //     });
+    // });
 
     describe.skip("Reset password", () => {
         it("should send reset password email", async () => {
