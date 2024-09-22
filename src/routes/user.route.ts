@@ -22,10 +22,10 @@ export const makeUserRouter = (userHandler: UserHandler) => {
             async () => {
                 const loginResponse = await userHandler.login(dto, req.base_url);
                 return loginResponse;
-            },
-            ({ token }) => {
-                res.cookie("token", token);
             }
+            // ({ token }) => {
+            //     res.cookie("token", token);
+            // }
         );
     });
 
