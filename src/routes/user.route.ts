@@ -1,4 +1,4 @@
-import { query, Router } from "express";
+import { Router } from "express";
 import { signUpDto } from "../modules/userHandler/user/dto/signup.dto";
 import { handleExpress } from "../utility/handle-express";
 import { loginDto } from "../modules/userHandler/user/dto/login.dto";
@@ -20,7 +20,7 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         handleExpress(
             res,
             async () => {
-                const { message, token } = await userHandler.login(dto);
+                const { message, token } = await userHandler.login(dto, req.base_url);
                 return { message, token };
             },
             ({ token }) => {

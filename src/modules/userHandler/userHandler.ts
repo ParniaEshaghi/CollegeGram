@@ -43,8 +43,8 @@ export class UserHandler {
         return this.userService.createUser(dto);
     }
 
-    public async login(dto: LoginDto) {
-        return this.userService.login(dto);
+    public async login(dto: LoginDto, baseUrl: string) {
+        return this.userService.login(dto, baseUrl);
     }
 
     public async forgetPassword(credential: string) {
