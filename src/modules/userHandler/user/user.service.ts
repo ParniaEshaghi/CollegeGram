@@ -77,6 +77,7 @@ export class UserService {
             profilePicture: user.profilePicture
                 ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
                 : "",
+            username: user.username
         };
     }
 
