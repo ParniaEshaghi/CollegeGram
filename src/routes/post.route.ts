@@ -140,7 +140,7 @@ export const makePostRouter = (
     app.get("/postsearch/:query", auth(userHandler), (req, res) => {
         const query = req.params.query;
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const limit = parseInt(req.query.limit as string) || 24;
 
         handleExpress(res, () =>
             userHandler.postSearch(req.user, query, page, limit, req.base_url)

@@ -72,7 +72,7 @@ export const setupSocketServer = (
             }
         });
 
-        socket.on("history", async (threadId, page = 1, limit = 10) => {
+        socket.on("history", async (threadId, page = 1, limit = 100) => {
             try {
                 if (!threadId) {
                     socket.emit("error", {

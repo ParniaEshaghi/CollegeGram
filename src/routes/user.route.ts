@@ -171,7 +171,7 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.get("/notifications", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const limit = parseInt(req.query.limit as string) || 20;
 
         handleExpress(res, () =>
             userHandler.getUserNotifications(
@@ -185,7 +185,7 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.get("/followingsnotifications", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const limit = parseInt(req.query.limit as string) || 20;
 
         handleExpress(res, () =>
             userHandler.getUserFollowingsNotifications(
@@ -199,7 +199,7 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.get("/explore", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const limit = parseInt(req.query.limit as string) || 24;
 
         handleExpress(res, () =>
             userHandler.explore(req.user, page, limit, req.base_url)
@@ -218,7 +218,7 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.get("/mentions", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const limit = parseInt(req.query.limit as string) || 24;
 
         handleExpress(res, () =>
             userHandler.getMentionedPosts(req.user, page, limit, req.base_url)
@@ -269,7 +269,7 @@ export const makeUserRouter = (userHandler: UserHandler) => {
         const user = req.query.user as string;
         const post = req.query.post as string;
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 12;
+        const limit = parseInt(req.query.limit as string) || 24;
 
         handleExpress(res, () =>
             userHandler.searchHandler(
@@ -285,7 +285,7 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.get("/savedposts", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const limit = parseInt(req.query.limit as string) || 24;
 
         handleExpress(res, () =>
             userHandler.getSavedPosts(req.user, page, limit, req.base_url)
@@ -294,7 +294,7 @@ export const makeUserRouter = (userHandler: UserHandler) => {
 
     app.get("/messages", auth(userHandler), (req, res) => {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const limit = parseInt(req.query.limit as string) || 15;
 
         handleExpress(res, () =>
             userHandler.getUserThreads(req.user, page, limit, req.base_url)
