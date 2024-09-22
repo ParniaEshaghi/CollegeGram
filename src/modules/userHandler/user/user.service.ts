@@ -182,7 +182,7 @@ export class UserService {
             : [];
 
         return {
-            suggest: suggestions,
+            suggest: suggestions.filter((sr) => sr.username != user.username),
             history: history,
         };
     }
