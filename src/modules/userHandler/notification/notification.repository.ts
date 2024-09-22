@@ -86,12 +86,15 @@ export class NotificationRepository {
             take: limit,
             where: {
                 sender: {
-                    id: In(
-                        followings.map((following) => following.following.id)
+                    username: In(
+                        followings.map((following) => following.following.username)
                     ),
                 },
             },
             relations: ["recipient", "sender", "post", "comment"],
+            order: {
+                createdAt: "DESC",
+            },
         });
 
         return { data: response, total: total };
@@ -103,12 +106,15 @@ export class NotificationRepository {
         const response = await this.notificationRepo.find({
             where: {
                 sender: {
-                    id: In(
-                        followings.map((following) => following.following.id)
+                    username: In(
+                        followings.map((following) => following.following.username)
                     ),
                 },
             },
             relations: ["recipient", "sender", "post", "comment"],
+            order: {
+                createdAt: "DESC",
+            },
         });
 
         return response;
