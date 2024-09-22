@@ -77,7 +77,7 @@ export class UserService {
             profilePicture: user.profilePicture
                 ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
                 : "",
-            username: user.username
+            username: user.username,
         };
     }
 
@@ -197,7 +197,17 @@ export class UserService {
             user,
             query
         );
-        return await this.userRepo.userSearch(query, page, limit);
+        const searchResults = await this.userRepo.userSearch(
+            query,
+            page,
+            limit
+        );
+        return {
+            data: searchResults.data.filter(
+                (sr) => sr.username != user.username
+            ),
+            total: searchResults.total,
+        };
     }
 
     public async setPostCount(username: string, post_count: number) {
