@@ -49,7 +49,7 @@ export class UserService {
         return toUserWithoutPassword(user);
     }
 
-    public async login(dto: LoginDto) {
+    public async login(dto: LoginDto, baseUrl: string) {
         const { success, error } = z.string().email().safeParse(dto.credential);
 
         let user;
@@ -71,7 +71,13 @@ export class UserService {
             expiresIn: expiry,
         });
 
-        return { message: "Login successfull", token: token };
+        return {
+            message: "Login successfull",
+            token: token,
+            profilePicture: user.profilePicture
+                ? `${baseUrl}/api/images/profiles/${user.profilePicture}`
+                : "",
+        };
     }
 
     public async getUserByUsername(username: string) {
